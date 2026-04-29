@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs ls *)",
+      "Bash(npx degit *)"
+    ],
+    "additionalDirectories": [
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\restaurant\\entity",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\tourism\\entity",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\restaurant\\dto",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\tourism\\dto",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\restaurant\\mapper",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\tourism\\mapper",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\resources\\mapper\\restaurant",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\resources\\mapper\\tourism",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\restaurant\\service",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\tourism\\service",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\common\\config",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\restaurant\\controller",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\tourism\\controller",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\common\\init",
+      "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform"
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "沁湖驿站云服务平台",
+  "appid": "__UNI__QINHU01",
+  "description": "沁湖景区智慧旅游服务平台",
+  "versionName": "0.1.0",
+  "versionCode": "1",
+  "transformPx": false,
+  "uniStatistics": {
+    "enable": false
+  },
+  "vueVersion": "3",
+  "h5": {
+    "devServer": {
+      "port": 3000,
+      "disableHostCheck": true,
+      "proxy": {
+        "/api": {
+          "target": "http://10.220.119.171:8080",
+          "changeOrigin": true
+        }
+      }
+    },
+    "router": {
+      "mode": "hash"
+    }
+  }
+}
