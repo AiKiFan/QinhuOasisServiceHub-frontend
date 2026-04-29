@@ -5,6 +5,7 @@
  */
 
 import { getToken } from '@/utils/auth'
+import { getLanguage } from '@/utils/i18n'
 
 /** API 基础路径（H5 模式通过 devServer proxy 转发） */
 const BASE_URL = '/api'
@@ -28,6 +29,7 @@ function request(url, method = 'GET', data = {}, header = {}) {
       data,
       header: {
         'Content-Type': 'application/json',
+        'Accept-Language': getLanguage(),
         ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
         ...header,
       },

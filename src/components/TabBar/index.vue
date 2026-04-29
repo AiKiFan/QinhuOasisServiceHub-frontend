@@ -4,6 +4,9 @@
   @author AiKiFan
 -->
 <script setup>
+import { computed } from 'vue'
+import { t } from '@/utils/i18n'
+
 /** 当前激活的 tab key */
 defineProps({
   active: {
@@ -12,11 +15,11 @@ defineProps({
   },
 })
 
-/** Tab 配置列表 */
-const TABS = [
-  { key: 'rank', label: '排行榜', icon: '🏆', path: '/pages/rank/index' },
-  { key: 'profile', label: '我的', icon: '👤', path: '/pages/profile/index' },
-]
+/** Tab 配置列表（key 不变，label 使用翻译） */
+const TABS = computed(() => [
+  { key: 'rank', label: t('tab.rank'), icon: '🏆', path: '/pages/rank/index' },
+  { key: 'profile', label: t('tab.profile'), icon: '👤', path: '/pages/profile/index' },
+])
 
 /**
  * 切换 Tab（使用 reLaunch 避免页面栈堆积）

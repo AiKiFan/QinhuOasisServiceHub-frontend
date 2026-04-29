@@ -36,6 +36,97 @@
         "navigationBarTextStyle": "white",
         "backgroundColor": "#FFF8F0"
       }
+    },
+    {
+      "path": "pages/restaurant/detail",
+      "style": {
+        "navigationBarTitleText": "餐厅详情",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/interpreter/list",
+      "style": {
+        "navigationBarTitleText": "译员服务",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/interpreter/detail",
+      "style": {
+        "navigationBarTitleText": "译员详情",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/interpreter/booking",
+      "style": {
+        "navigationBarTitleText": "预约译员",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/interpreter/apply",
+      "style": {
+        "navigationBarTitleText": "申请成为译员",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/admin/interpreter-review",
+      "style": {
+        "navigationBarTitleText": "译员审核",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/admin/feedback-list",
+      "style": {
+        "navigationBarTitleText": "投诉建议",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/interpreter-orders/list",
+      "style": {
+        "navigationBarTitleText": "我的订单",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/feedback/submit",
+      "style": {
+        "navigationBarTitleText": "投诉建议",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/profile/edit",
+      "style": {
+        "navigationBarTitleText": "编辑资料",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
     }
   ],
   "globalStyle": {

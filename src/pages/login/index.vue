@@ -6,6 +6,7 @@
 import { ref } from 'vue'
 import { login } from '@/api/auth'
 import { saveToken, saveUser } from '@/utils/auth'
+import { t } from '@/utils/i18n'
 
 /** 表单字段 */
 const username = ref('')
@@ -65,22 +66,22 @@ function goRegister() {
     <!-- 表单卡片 -->
     <view class="login-card">
       <view class="login-field">
-        <text class="login-field__label">用户名</text>
+        <text class="login-field__label">{{ t('auth.username') }}</text>
         <input
           v-model="username"
           class="login-field__input"
-          placeholder="请输入用户名"
+          :placeholder="t('auth.usernamePlaceholder')"
           placeholder-style="color:#B0A090"
           maxlength="32"
         />
       </view>
 
       <view class="login-field">
-        <text class="login-field__label">密码</text>
+        <text class="login-field__label">{{ t('auth.password') }}</text>
         <input
           v-model="password"
           class="login-field__input"
-          placeholder="请输入密码"
+          :placeholder="t('auth.passwordPlaceholder')"
           placeholder-style="color:#B0A090"
           password
           maxlength="64"
@@ -92,12 +93,12 @@ function goRegister() {
         :disabled="submitting"
         @tap="handleLogin"
       >
-        {{ submitting ? '登录中...' : '登 录' }}
+        {{ submitting ? t('auth.loggingIn') : t('auth.loginBtn') }}
       </button>
 
       <view class="login-footer">
-        <text class="login-footer__text">还没有账号？</text>
-        <text class="login-footer__link" @tap="goRegister">立即注册</text>
+        <text class="login-footer__text">{{ t('auth.noAccount') }}</text>
+        <text class="login-footer__link" @tap="goRegister">{{ t('auth.registerBtn') }}</text>
       </view>
     </view>
   </view>

@@ -5,7 +5,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getRestaurantRank } from '@/api/restaurant'
+import { t } from '@/utils/i18n'
 import TabBar from '@/components/TabBar/index.vue'
+import SafeImage from '@/components/SafeImage/index.vue'
 
 /** 排行榜数据列表 */
 const rankList = ref([])
@@ -31,6 +33,14 @@ const RANK_BADGE_DEFAULT_COLOR = '#E8956D'
  */
 function getRankBadgeColor(rank) {
   return RANK_BADGE_COLORS[rank] ?? RANK_BADGE_DEFAULT_COLOR
+}
+
+/**
+ * 跳转餐厅详情页
+ * @param {number} id
+ */
+function goToDetail(id) {
+  uni.navigateTo({ url: `/pages/restaurant/detail?id=${id}` })
 }
 
 /**
@@ -60,19 +70,19 @@ onMounted(loadRankList)
   <view class="rank-page">
     <!-- 页面头部横幅 -->
     <view class="rank-header">
-      <text class="rank-header__title">人气餐厅榜</text>
-      <text class="rank-header__subtitle">实时热度 · 真实好评</text>
+      <text class="rank-header__title">{{ t('rank.title') }}</text>
+      <text class="rank-header__subtitle">{{ t('common.all') }}</text>
     </view>
 
     <!-- 加载中状态 -->
     <view v-if="loading" class="rank-status">
-      <text class="rank-status__text">加载中...</text>
+      <text class="rank-status__text">{{ t('common.loading') }}</text>
     </view>
 
     <!-- 加载失败状态 -->
     <view v-else-if="hasError" class="rank-status">
-      <text class="rank-status__text">加载失败，请重试</text>
-      <button class="rank-status__retry-btn" @tap="loadRankList">重新加载</button>
+      <text class="rank-status__text">{{ t('common.loadFailed') }}</text>
+      <button class="rank-status__retry-btn" @tap="loadRankList">{{ t('common.retry') }}</button>
     </view>
 
     <!-- 排行榜列表 -->
@@ -82,6 +92,7 @@ onMounted(loadRankList)
         :key="item.id"
         class="rank-card"
         :class="{ 'rank-card--top3': item.rank <= 3 }"
+        @tap="goToDetail(item.id)"
       >
         <!-- 排名徽章 -->
         <view
@@ -92,11 +103,11 @@ onMounted(loadRankList)
         </view>
 
         <!-- 封面图 -->
-        <image
+        <SafeImage
           class="rank-card__cover"
           :src="item.coverImg"
           mode="aspectFill"
-          lazy-load
+          :lazy-load="true"
         />
 
         <!-- 文字信息区 -->
@@ -105,11 +116,11 @@ onMounted(loadRankList)
 
           <view class="rank-card__meta">
             <text class="rank-card__category">{{ item.category }}</text>
-            <text class="rank-card__reviews">{{ item.reviewCount }} 条评价</text>
+            <text class="rank-card__reviews">{{ item.reviewCount }} {{ t('rank.reviewCount') }}</text>
           </view>
 
           <view class="rank-card__bottom">
-            <text class="rank-card__score">热度 {{ item.sortScore.toFixed(1) }}</text>
+            <text class="rank-card__score">{{ item.sortScore.toFixed(1) }}</text>
             <view class="rank-card__rating">
               <text class="rank-card__star">★</text>
               <text class="rank-card__rating-val">{{ item.rating }}</text>

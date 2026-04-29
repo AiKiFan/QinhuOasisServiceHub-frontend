@@ -5,6 +5,7 @@
 <script setup>
 import { ref } from 'vue'
 import { register } from '@/api/auth'
+import { t } from '@/utils/i18n'
 
 /** 表单字段 */
 const username = ref('')
@@ -49,30 +50,30 @@ async function handleRegister() {
   <view class="register-page">
     <view class="register-brand">
       <text class="register-brand__logo">🏯</text>
-      <text class="register-brand__title">创建账号</text>
-      <text class="register-brand__sub">加入沁湖驿站云服务平台</text>
+      <text class="register-brand__title">{{ t('auth.registerTitle') }}</text>
+      <text class="register-brand__sub">{{ t('auth.registerSub') }}</text>
     </view>
 
     <view class="register-card">
       <view class="register-field">
         <text class="register-field__label">
-          用户名 <text class="register-field__required">*</text>
+          {{ t('auth.username') }} <text class="register-field__required">*</text>
         </text>
         <input
           v-model="username"
           class="register-field__input"
-          placeholder="3-32 位字母/数字"
+          :placeholder="t('auth.usernamePlaceholder')"
           placeholder-style="color:#B0A090"
           maxlength="32"
         />
       </view>
 
       <view class="register-field">
-        <text class="register-field__label">昵称（可选）</text>
+        <text class="register-field__label">{{ t('auth.nickname') }} {{ t('common.optional') }}</text>
         <input
           v-model="nickname"
           class="register-field__input"
-          placeholder="留空则默认使用用户名"
+          :placeholder="t('auth.nicknameDefault')"
           placeholder-style="color:#B0A090"
           maxlength="20"
         />
@@ -80,12 +81,12 @@ async function handleRegister() {
 
       <view class="register-field">
         <text class="register-field__label">
-          密码 <text class="register-field__required">*</text>
+          {{ t('auth.password') }} <text class="register-field__required">*</text>
         </text>
         <input
           v-model="password"
           class="register-field__input"
-          placeholder="至少 6 位"
+          :placeholder="t('auth.passwordPlaceholder')"
           placeholder-style="color:#B0A090"
           password
           maxlength="64"
@@ -94,12 +95,12 @@ async function handleRegister() {
 
       <view class="register-field">
         <text class="register-field__label">
-          确认密码 <text class="register-field__required">*</text>
+          {{ t('auth.confirmPassword') }} <text class="register-field__required">*</text>
         </text>
         <input
           v-model="confirmPwd"
           class="register-field__input"
-          placeholder="再次输入密码"
+          :placeholder="t('auth.confirmPasswordPlaceholder')"
           placeholder-style="color:#B0A090"
           password
           maxlength="64"
@@ -111,7 +112,7 @@ async function handleRegister() {
         :disabled="submitting"
         @tap="handleRegister"
       >
-        {{ submitting ? '注册中...' : '注 册' }}
+        {{ submitting ? t('auth.registering') : t('auth.registerBtn') }}
       </button>
     </view>
   </view>
