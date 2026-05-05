@@ -25,12 +25,3 @@ export function getMyProfile() {
 export function updateMyProfile(data) {
   return post('/users/me', data)
 }
-
-/**
- * 获取用户订单统计
- * 接口：GET /api/users/order-stats
- * @returns {Promise<Object>}
- */
-export function getOrderStats() {
-  return get('/users/order-stats')
-}

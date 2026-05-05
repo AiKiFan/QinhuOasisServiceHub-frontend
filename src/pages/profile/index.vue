@@ -6,7 +6,7 @@
 import { ref, onMounted } from 'vue'
 import TabBar from '@/components/TabBar/index.vue'
 import { isLoggedIn, getUser, saveUser, logout, isAdmin as checkIsAdmin } from '@/utils/auth'
-import { getMyProfile, getOrderStats } from '@/api/user'
+import { getMyProfile } from '@/api/user'
 import { getLanguage, toggleLanguage as toggleLang, t } from '@/utils/i18n'
 import { getTheme, toggleTheme as toggleMode } from '@/utils/theme'
 import SafeImage from '@/components/SafeImage/index.vue'
@@ -21,9 +21,6 @@ const currentLang = ref('zh-CN')
 const isAdmin = ref(false)
 /** 当前主题 */
 const currentTheme = ref('light')
-
-/** 订单统计 */
-const orderStats = ref(null)
 
 /** 角色名称映射（支持国际化） */
 const getRoleLabels = () => ({
@@ -56,17 +53,6 @@ async function init() {
     saveUser(fresh)
   } catch {
     // 网络失败时降级使用缓存，不弹错误
-  }
-  // 加载订单统计
-  loadOrderStats()
-}
-
-/** 加载订单统计 */
-async function loadOrderStats() {
-  try {
-    orderStats.value = await getOrderStats()
-  } catch {
-    // 加载失败时不影响其他功能
   }
 }
 
@@ -235,24 +221,6 @@ onMounted(init)
           <text class="menu-item__icon">📋</text>
           <text class="menu-item__text">{{ t('profile.myOrders') }}</text>
           <text class="menu-item__arrow">›</text>
-        </view>
-
-        <!-- 订单统计卡片 -->
-        <view v-if="orderStats" class="order-stats-card">
-          <view class="order-stat-item">
-            <text class="order-stat-item__value">{{ orderStats.totalOrders || 0 }}</text>
-            <text class="order-stat-item__label">总订单</text>
-          </view>
-          <view class="order-stat-divider"></view>
-          <view class="order-stat-item">
-            <text class="order-stat-item__value">{{ orderStats.completedOrders || 0 }}</text>
-            <text class="order-stat-item__label">已完成</text>
-          </view>
-          <view class="order-stat-divider"></view>
-          <view class="order-stat-item">
-            <text class="order-stat-item__value">{{ orderStats.pendingOrders || 0 }}</text>
-            <text class="order-stat-item__label">进行中</text>
-          </view>
         </view>
 
         <!-- 接单管理（仅译员可见） -->

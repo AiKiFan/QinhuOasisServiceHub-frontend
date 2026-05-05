@@ -5,7 +5,7 @@
 -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { searchRestaurants, searchInterpreters, searchScenicSpots } from '@/api/search'
+import { searchRestaurants, searchInterpreters } from '@/api/search'
 import { t } from '@/utils/i18n'
 import TabBar from '@/components/TabBar/index.vue'
 import SafeImage from '@/components/SafeImage/index.vue'
@@ -15,7 +15,6 @@ const SEARCH_TYPES = {
   ALL: 'all',
   RESTAURANT: 'restaurant',
   INTERPRETER: 'interpreter',
-  SCENIC: 'scenic',
 }
 
 /** 当前搜索类型 */
@@ -25,7 +24,7 @@ const keyword = ref('')
 /** 搜索历史 */
 const searchHistory = ref([])
 /** 热门搜索关键词 */
-const hotSearchKeywords = ref(['云谷飞瀑', '明月湖', '中餐', '西餐', '个人译员', '青云栈道', '咖啡', '西点'])
+const hotSearchKeywords = ref(['中餐', '西餐', '个人译员', '咖啡', '甜品'])
 /** 搜索建议 */
 const suggestions = ref([])
 /** 是否显示搜索建议 */
@@ -52,8 +51,22 @@ const typeLabels = computed(() => [
   { key: SEARCH_TYPES.ALL, label: t('search.type.all') },
   { key: SEARCH_TYPES.RESTAURANT, label: t('search.type.restaurant') },
   { key: SEARCH_TYPES.INTERPRETER, label: t('search.type.interpreter') },
-  { key: SEARCH_TYPES.SCENIC, label: '景点' },
 ])
+
+/** 验证餐厅结果是否匹配关键词 */
+function isValidRestaurantResult(item, keyword) {
+  const kw = keyword.toLowerCase()
+  return (item.category && item.category.toLowerCase().includes(kw)) ||
+         (item.displayName && item.displayName.toLowerCase().includes(kw))
+}
+
+/** 验证译员结果是否匹配关键词 */
+function isValidInterpreterResult(item, keyword) {
+  const kw = keyword.toLowerCase()
+  return (item.realName && item.realName.toLowerCase().includes(kw)) ||
+         (item.nickname && item.nickname.toLowerCase().includes(kw)) ||
+         (item.school && item.school.toLowerCase().includes(kw))
+}
 
 /** 加载搜索历史 */
 function loadSearchHistory() {
@@ -96,28 +109,32 @@ async function performSearch(refresh = true) {
   try {
     let result
     if (searchType.value === SEARCH_TYPES.RESTAURANT) {
-      result = await searchRestaurants(word, currentPage.value, PAGE_SIZE)
-      result.list = (result.list || []).map(item => ({ ...item, type: SEARCH_TYPES.RESTAURANT }))
+      const res = await searchRestaurants(word, currentPage.value, PAGE_SIZE)
+      const filtered = (res.list || [])
+        .filter(item => isValidRestaurantResult(item, word))
+        .map(item => ({ ...item, type: SEARCH_TYPES.RESTAURANT }))
+      result = { list: filtered, total: filtered.length }
     } else if (searchType.value === SEARCH_TYPES.INTERPRETER) {
-      result = await searchInterpreters(word, currentPage.value, PAGE_SIZE)
-      result.list = (result.list || []).map(item => ({ ...item, type: SEARCH_TYPES.INTERPRETER }))
-    } else if (searchType.value === SEARCH_TYPES.SCENIC) {
-      result = await searchScenicSpots(word, currentPage.value, PAGE_SIZE)
-      result.list = (result.list || []).map(item => ({ ...item, type: SEARCH_TYPES.SCENIC }))
+      const res = await searchInterpreters(word, currentPage.value, PAGE_SIZE)
+      const filtered = (res.list || [])
+        .filter(item => isValidInterpreterResult(item, word))
+        .map(item => ({ ...item, type: SEARCH_TYPES.INTERPRETER }))
+      result = { list: filtered, total: filtered.length }
     } else {
-      const [rRes, iRes, sRes] = await Promise.all([
+      const [rRes, iRes] = await Promise.all([
         searchRestaurants(word, currentPage.value, PAGE_SIZE),
         searchInterpreters(word, currentPage.value, PAGE_SIZE),
-        searchScenicSpots(word, currentPage.value, PAGE_SIZE),
       ])
-      const items = [
-        ...(rRes.list || []).map(i => ({ ...i, type: SEARCH_TYPES.RESTAURANT })),
-        ...(iRes.list || []).map(i => ({ ...i, type: SEARCH_TYPES.INTERPRETER })),
-        ...(sRes.list || []).map(i => ({ ...i, type: SEARCH_TYPES.SCENIC })),
-      ]
-      result = { list: items, total: (rRes.total || 0) + (iRes.total || 0) + (sRes.total || 0) }
+      const rItems = (rRes.list || [])
+        .filter(item => isValidRestaurantResult(item, word))
+        .map(i => ({ ...i, type: SEARCH_TYPES.RESTAURANT }))
+      const iItems = (iRes.list || [])
+        .filter(item => isValidInterpreterResult(item, word))
+        .map(i => ({ ...i, type: SEARCH_TYPES.INTERPRETER }))
+      const items = [...rItems, ...iItems]
+      result = { list: items, total: items.length }
     }
-    
+
     searchTotal.value = result.total
     searchResults.value = refresh ? result.list : [...searchResults.value, ...result.list]
     if (word) saveSearchHistory(word)
@@ -151,8 +168,6 @@ function goToDetail(item) {
     uni.navigateTo({ url: `/pages/restaurant/detail?id=${item.id}` })
   } else if (item.type === SEARCH_TYPES.INTERPRETER) {
     uni.navigateTo({ url: `/pages/interpreter/detail?id=${item.id}` })
-  } else if (item.type === SEARCH_TYPES.SCENIC) {
-    uni.navigateTo({ url: `/pages/scenic/detail?id=${item.id}` })
   }
 }
 
@@ -164,7 +179,9 @@ function updateSuggestions(value) {
     return
   }
   const allKeywords = [...hotSearchKeywords.value, ...searchHistory.value]
-  const filtered = allKeywords.filter(k => k.toLowerCase().includes(value.toLowerCase())).slice(0, 6)
+  // 去重：使用 Set 去除重复词汇
+  const uniqueKeywords = Array.from(new Set(allKeywords))
+  const filtered = uniqueKeywords.filter(k => k.toLowerCase().includes(value.toLowerCase())).slice(0, 6)
   suggestions.value = filtered
   showSuggestions.value = filtered.length > 0
 }
