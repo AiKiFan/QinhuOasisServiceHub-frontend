@@ -103,25 +103,11 @@ async function uploadAvatar(filePath) {
 }
 
 /**
- * 删除头像
- */
-function removeAvatar() {
-  uni.showModal({
-    title: t('common.confirm'),
-    content: t('profile.edit.removeAvatarConfirm'),
-    success(res) {
-      if (res.confirm) {
-        form.value.avatar = ''
-      }
-    },
-  })
-}
-
-/**
  * 预览头像
  */
 function previewAvatar() {
   if (!form.value.avatar) return
+  // 阻止触发父元素的 chooseAvatar
   uni.previewImage({ urls: [form.value.avatar], current: form.value.avatar })
 }
 
@@ -183,29 +169,23 @@ onMounted(() => {
     <!-- 编辑表单 -->
     <view v-else class="edit-form">
       <!-- 头像编辑 -->
-      <view class="avatar-section">
-        <view class="avatar-container" @tap="chooseAvatar">
+      <view class="avatar-section" @tap="chooseAvatar">
+        <view class="avatar-container">
           <SafeImage
             v-if="form.avatar"
             class="avatar"
             :src="form.avatar"
             mode="aspectFill"
-            :previewable="true"
+            :previewable="false"
+            @tap.stop="previewAvatar"
           />
           <view v-else class="avatar-placeholder">
             <text class="avatar-placeholder__icon">📷</text>
             <text class="avatar-placeholder__text">{{ t('profile.edit.uploadAvatar') }}</text>
           </view>
-          <view v-if="form.avatar" class="avatar-actions">
-            <view class="avatar-actions__btn" @tap.stop="previewAvatar">
-              <text class="avatar-actions__icon">🔍</text>
-            </view>
-            <view class="avatar-actions__btn" @tap.stop="removeAvatar">
-              <text class="avatar-actions__icon">🗑</text>
-            </view>
-          </view>
         </view>
-        <text class="avatar-hint">{{ t('profile.edit.avatarHint') }}</text>
+        <text class="avatar-section__nickname">{{ form.nickname || user.nickname || t('profile.edit.nickname') }}</text>
+        <text class="avatar-section__arrow">›</text>
       </view>
 
       <!-- 用户名（只读） -->
@@ -317,28 +297,49 @@ onMounted(() => {
 /* ── 头像编辑 ── */
 .avatar-section {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 48rpx 0;
+  padding: 24rpx;
   background-color: $color-bg-card;
   border-radius: 20rpx;
-  padding-bottom: 24rpx;
   margin-bottom: 20rpx;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:active {
+    background-color: $color-bg-page;
+  }
+
+  &__nickname {
+    flex: 1;
+    margin-left: 24rpx;
+    font-size: 28rpx;
+    color: $color-text-primary;
+    font-weight: 500;
+  }
+
+  &__arrow {
+    margin-left: 12rpx;
+    font-size: 80rpx;
+    color: $color-text-hint;
+    font-weight: 300;
+    line-height: 1;
+  }
 }
 
 .avatar-container {
-  position: relative;
-  width: 200rpx;
-  height: 200rpx;
+  width: 120rpx;
+  height: 120rpx;
   border-radius: 50%;
   overflow: hidden;
-  border: 4rpx solid $color-primary-light;
+  border: 2rpx solid $color-divider;
   background-color: $color-bg-page;
+  flex-shrink: 0;
 }
 
 .avatar {
   width: 100%;
   height: 100%;
+  cursor: pointer;
 }
 
 .avatar-placeholder {
@@ -348,55 +349,16 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8rpx;
+  gap: 4rpx;
 
   &__icon {
-    font-size: 56rpx;
+    font-size: 40rpx;
   }
 
   &__text {
-    font-size: 22rpx;
+    font-size: 20rpx;
     color: $color-text-hint;
   }
-}
-
-.avatar-actions {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  gap: 12rpx;
-  padding: 12rpx;
-  background-color: rgba(0, 0, 0, 0.5);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.avatar-container:hover .avatar-actions,
-.avatar-container:active .avatar-actions {
-  opacity: 1;
-}
-
-.avatar-actions__btn {
-  flex: 1;
-  height: 56rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 28rpx;
-}
-
-.avatar-actions__icon {
-  font-size: 28rpx;
-}
-
-.avatar-hint {
-  font-size: 22rpx;
-  color: $color-text-hint;
-  margin-top: 16rpx;
-  text-align: center;
 }
 
 /* ── 表单项 ── */

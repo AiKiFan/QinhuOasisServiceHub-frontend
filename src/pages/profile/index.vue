@@ -8,7 +8,6 @@ import TabBar from '@/components/TabBar/index.vue'
 import { isLoggedIn, getUser, saveUser, logout, isAdmin as checkIsAdmin } from '@/utils/auth'
 import { getMyProfile } from '@/api/user'
 import { getLanguage, toggleLanguage as toggleLang, t } from '@/utils/i18n'
-import { getTheme, toggleTheme as toggleMode } from '@/utils/theme'
 import SafeImage from '@/components/SafeImage/index.vue'
 
 /** 是否已登录 */
@@ -19,8 +18,6 @@ const userInfo = ref(null)
 const currentLang = ref('zh-CN')
 /** 是否管理员 */
 const isAdmin = ref(false)
-/** 当前主题 */
-const currentTheme = ref('light')
 /** 是否显示退出确认弹窗 */
 const showLogoutConfirm = ref(false)
 
@@ -90,12 +87,6 @@ function handleToggleLanguage() {
     title: next === 'en-US' ? 'English mode enabled' : '已切换为中文',
     icon: 'success',
   })
-}
-
-/** 切换主题 */
-function handleToggleTheme() {
-  const next = toggleMode()
-  currentTheme.value = next
 }
 
 /** 跳转译员申请页 */
@@ -243,15 +234,6 @@ onMounted(init)
           <text class="menu-item__icon">📣</text>
           <text class="menu-item__text">{{ t('feedback.submit.title') }}</text>
           <text class="menu-item__arrow">›</text>
-        </view>
-
-        <!-- 主题切换 -->
-        <view class="menu-item" @tap="handleToggleTheme">
-          <text class="menu-item__icon">{{ currentTheme === 'dark' ? '🌙' : '☀️' }}</text>
-          <text class="menu-item__text">
-            {{ currentTheme === 'dark' ? t('profile.themeDark') : t('profile.themeLight') }}
-          </text>
-          <text class="menu-item__arrow">{{ currentTheme === 'dark' ? '🌙' : '☀️' }}</text>
         </view>
 
         <!-- 语言切换（关键功能：英语全界面切换） -->

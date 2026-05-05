@@ -58,18 +58,23 @@ async function loadImage() {
 /**
  * 图片加载失败回调：尝试从本地缓存加载
  */
-function onError() {
+async function onError() {
   console.log('[SafeImage] MinIO load failed, trying cache:', props.src)
 
-  // 尝试从本地缓存加载
-  const cachedPath = loadImageCache(props.src)
+  // 尝试从本地缓存加载（现在是异步函数）
+  try {
+    const cachedPath = await loadImageCache(props.src)
 
-  if (cachedPath) {
-    displaySrc.value = cachedPath
-    console.log('[SafeImage] Using cached image:', cachedPath)
-  } else {
+    if (cachedPath) {
+      displaySrc.value = cachedPath
+      console.log('[SafeImage] Using cached image:', cachedPath)
+    } else {
+      failed.value = true
+      console.log('[SafeImage] No cache available, showing placeholder')
+    }
+  } catch (err) {
+    console.error('[SafeImage] Cache load error:', err)
     failed.value = true
-    console.log('[SafeImage] No cache available, showing placeholder')
   }
 }
 
