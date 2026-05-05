@@ -53,6 +53,7 @@ const ZH = {
   'search.type.interpreter': '译员',
   'search.type.scenic': '景点',
   'search.history': '搜索历史',
+  'search.clearAll': '清空',
   'search.noResults': '未找到相关内容',
 
   // ── 收藏 ──
@@ -404,6 +405,7 @@ const EN = {
   'search.type.interpreter': 'Interpreters',
   'search.type.scenic': 'Scenic Spots',
   'search.history': 'Search History',
+  'search.clearAll': 'Clear All',
   'search.noResults': 'No results found',
 
   // ── 收藏 ──

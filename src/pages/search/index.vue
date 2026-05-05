@@ -194,6 +194,28 @@ function selectSuggestion(word) {
   performSearch(true)
 }
 
+/** 是否显示清空确认弹窗 */
+const showClearConfirm = ref(false)
+
+/** 删除单条搜索历史 */
+function removeHistoryWord(word) {
+  const history = searchHistory.value.filter(h => h !== word)
+  uni.setStorageSync('search_history', history)
+  searchHistory.value = history
+}
+
+/** 清空全部搜索历史 */
+function clearAllHistory() {
+  showClearConfirm.value = true
+}
+
+/** 确认清空 */
+function confirmClearHistory() {
+  uni.removeStorageSync('search_history')
+  searchHistory.value = []
+  showClearConfirm.value = false
+}
+
 /** 搜索按钮点击 */
 function handleSearch() {
   suggestions.value = []
@@ -283,11 +305,14 @@ onMounted(loadSearchHistory)
 
     <!-- 搜索历史 -->
     <view v-if="!keyword && searchHistory.length > 0 && searchResults.length === 0 && !showSuggestions" class="history-section">
-      <text class="history-title">{{ t('search.history') }}</text>
+      <view class="history-header">
+        <text class="history-title">{{ t('search.history') }}</text>
+        <text class="history-clear" @tap="clearAllHistory">{{ t('search.clearAll') }}</text>
+      </view>
       <view class="history-list">
-        <view v-for="word in searchHistory" :key="word" class="history-item" @tap="searchHistoryWord(word)">
-          <text class="history-item__text">{{ word }}</text>
-          <text class="history-item__icon">⏎</text>
+        <view v-for="word in searchHistory" :key="word" class="history-item">
+          <text class="history-item__text" @tap="searchHistoryWord(word)">{{ word }}</text>
+          <text class="history-item__delete" @tap.stop="removeHistoryWord(word)">✕</text>
         </view>
       </view>
     </view>
@@ -355,6 +380,22 @@ onMounted(loadSearchHistory)
     </view>
 
     <TabBar active="search" />
+
+    <!-- 自定义清空确认弹窗 -->
+    <view v-if="showClearConfirm" class="confirm-mask" @tap.self="showClearConfirm = false">
+      <view class="confirm-dialog">
+        <text class="confirm-dialog__title">清空历史</text>
+        <text class="confirm-dialog__content">确定要清空全部搜索历史吗？</text>
+        <view class="confirm-dialog__actions">
+          <view class="confirm-dialog__btn confirm-dialog__btn--cancel" @tap="showClearConfirm = false">
+            <text>取消</text>
+          </view>
+          <view class="confirm-dialog__btn confirm-dialog__btn--confirm" @tap="confirmClearHistory">
+            <text>清空</text>
+          </view>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -477,11 +518,23 @@ onMounted(loadSearchHistory)
 
 /* ── 搜索历史 ── */
 .history-section { padding: 32rpx; }
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
 .history-title {
-  display: block;
   font-size: 24rpx;
   color: $color-text-hint;
-  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+.history-clear {
+  font-size: 22rpx;
+  color: $color-text-hint;
+  padding: 4rpx 12rpx;
+  border: 1rpx solid $color-divider;
+  border-radius: 20rpx;
 }
 .history-list { display: flex; flex-wrap: wrap; gap: 12rpx; }
 .history-item {
@@ -491,9 +544,70 @@ onMounted(loadSearchHistory)
   padding: 12rpx 20rpx;
   background-color: $color-bg-card;
   border-radius: 32rpx;
+  border: 2rpx solid $color-divider;
 
   &__text { font-size: 26rpx; color: $color-text-secondary; }
-  &__icon { font-size: 24rpx; color: $color-primary; }
+  &__delete { font-size: 20rpx; color: $color-text-hint; padding-left: 4rpx; }
+}
+
+/* ── 自定义确认弹窗 ── */
+.confirm-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.confirm-dialog {
+  width: 560rpx;
+  background-color: $color-bg-card;
+  border-radius: 24rpx;
+  overflow: hidden;
+
+  &__title {
+    display: block;
+    text-align: center;
+    font-size: 32rpx;
+    font-weight: 600;
+    color: $color-text-primary;
+    padding: 48rpx 40rpx 16rpx;
+  }
+
+  &__content {
+    display: block;
+    text-align: center;
+    font-size: 26rpx;
+    color: $color-text-secondary;
+    padding: 0 40rpx 48rpx;
+    line-height: 1.6;
+  }
+
+  &__actions {
+    display: flex;
+    border-top: 2rpx solid $color-divider;
+  }
+
+  &__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 96rpx;
+    font-size: 30rpx;
+
+    &--cancel {
+      color: $color-text-secondary;
+      border-right: 2rpx solid $color-divider;
+    }
+
+    &--confirm {
+      color: #E05252;
+      font-weight: 600;
+    }
+  }
 }
 
 /* ── 搜索结果 ── */
