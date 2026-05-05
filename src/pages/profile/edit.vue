@@ -7,6 +7,7 @@ import { ref, onMounted } from 'vue'
 import { getMyProfile, updateMyProfile } from '@/api/user'
 import { getUser, saveUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
+import { saveImageCache } from '@/utils/image-cache'
 import SafeImage from '@/components/SafeImage/index.vue'
 
 /** 用户信息 */
@@ -66,7 +67,7 @@ async function uploadAvatar(filePath) {
   try {
     const uploadRes = await new Promise((resolve, reject) => {
       uni.uploadFile({
-        url: '/api/upload',
+        url: '/api/files/upload',
         filePath,
         name: 'file',
         header: {
@@ -89,7 +90,11 @@ async function uploadAvatar(filePath) {
         },
       })
     })
+    // 保存 MinIO URL
     form.value.avatar = uploadRes.url
+
+    // 同时保存到本地缓存（MinIO 关闭后仍可显示）
+    await saveImageCache(uploadRes.url, filePath)
   } catch (e) {
     uni.showToast({ title: e.message || t('profile.edit.uploadFailed'), icon: 'none' })
   } finally {
@@ -364,26 +369,34 @@ onMounted(() => {
   gap: 12rpx;
   padding: 12rpx;
   background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
 
-  &__btn {
-    flex: 1;
-    height: 56rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 28rpx;
-  }
+.avatar-container:hover .avatar-actions,
+.avatar-container:active .avatar-actions {
+  opacity: 1;
+}
 
-  &__icon {
-    font-size: 28rpx;
-  }
+.avatar-actions__btn {
+  flex: 1;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 28rpx;
+}
+
+.avatar-actions__icon {
+  font-size: 28rpx;
 }
 
 .avatar-hint {
   font-size: 22rpx;
   color: $color-text-hint;
   margin-top: 16rpx;
+  text-align: center;
 }
 
 /* ── 表单项 ── */

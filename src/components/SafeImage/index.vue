@@ -2,17 +2,18 @@
   带错误占位的安全图片组件
   图片加载失败时自动显示内置 SVG 占位图
   支持点击预览大图功能
-  @author AiKiFan
+  支持本地缓存降级加载（开发环境）
 
   用法：
     <SafeImage src="xxx.jpg" mode="aspectFill" class="cover" />
     <SafeImage src="xxx.jpg" mode="aspectFill" :previewable="true" />
 -->
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { loadImageCache } from '@/utils/image-cache'
 
 const props = defineProps({
-  /** 图片地址 */
+  /** 图片地址（MinIO URL） */
   src: {
     type: String,
     default: '',
@@ -34,28 +35,62 @@ const props = defineProps({
   },
 })
 
+/** 当前实际显示的图片路径 */
+const displaySrc = ref('')
 /** 是否加载失败 */
 const failed = ref(false)
 
+/**
+ * 加载图片：先尝试 MinIO URL，失败后降级到本地缓存
+ */
+async function loadImage() {
+  if (!props.src) {
+    displaySrc.value = ''
+    failed.value = true
+    return
+  }
+
+  // 先尝试加载 MinIO URL
+  displaySrc.value = props.src
+  failed.value = false
+}
+
+/**
+ * 图片加载失败回调：尝试从本地缓存加载
+ */
 function onError() {
-  failed.value = true
+  console.log('[SafeImage] MinIO load failed, trying cache:', props.src)
+
+  // 尝试从本地缓存加载
+  const cachedPath = loadImageCache(props.src)
+
+  if (cachedPath) {
+    displaySrc.value = cachedPath
+    console.log('[SafeImage] Using cached image:', cachedPath)
+  } else {
+    failed.value = true
+    console.log('[SafeImage] No cache available, showing placeholder')
+  }
 }
 
 /**
  * 点击图片时预览大图
  */
 function handleTap() {
-  if (props.previewable && props.src && !failed.value) {
-    uni.previewImage({ urls: [props.src], current: props.src })
+  if (props.previewable && displaySrc.value && !failed.value) {
+    uni.previewImage({ urls: [displaySrc.value], current: displaySrc.value })
   }
 }
+
+// 监听 src 变化重新加载
+watch(() => props.src, loadImage, { immediate: true })
 </script>
 
 <template>
   <!-- 正常图片 -->
   <image
-    v-if="!failed && src"
-    :src="src"
+    v-if="!failed && displaySrc"
+    :src="displaySrc"
     :mode="mode"
     :lazy-load="lazyLoad"
     @error="onError"

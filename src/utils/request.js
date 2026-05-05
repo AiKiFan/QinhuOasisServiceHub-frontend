@@ -80,3 +80,13 @@ export function get(url, params = {}) {
 export function post(url, body = {}) {
   return request(url, 'POST', body)
 }
+
+/**
+ * PUT 请求简写
+ * @param {string} url
+ * @param {object} [body={}]
+ * @returns {Promise<any>}
+ */
+export function put(url, body = {}) {
+  return request(url, 'PUT', body)
+}

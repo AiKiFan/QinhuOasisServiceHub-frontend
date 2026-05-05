@@ -2,7 +2,7 @@
  * 用户相关接口
  * @author AiKiFan
  */
-import { get, post } from '@/utils/request'
+import { get, put } from '@/utils/request'
 
 /**
  * 获取当前登录用户信息（需要 Token）
@@ -23,5 +23,5 @@ export function getMyProfile() {
  * @returns {Promise<Object>}
  */
 export function updateMyProfile(data) {
-  return post('/users/me', data)
+  return put('/users/me', data)
 }
