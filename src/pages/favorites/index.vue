@@ -265,14 +265,34 @@ onMounted(loadFavorites)
 
 .favorite-card {
   display: flex;
+  align-items: flex-start;
   background-color: $color-bg-card;
   border-radius: 20rpx;
   margin-bottom: 20rpx;
   padding: 20rpx;
   box-shadow: 0 2rpx 16rpx rgba(232, 149, 109, 0.08);
-  position: relative;
 
-  &__info {
+  /* 左侧图片/头像 */
+  .favorite-card__cover,
+  .favorite-card__avatar {
+    flex-shrink: 0;
+    border-radius: 12rpx;
+    margin-right: 16rpx;
+  }
+
+  .favorite-card__cover {
+    width: 140rpx;
+    height: 100rpx;
+  }
+
+  .favorite-card__avatar {
+    width: 80rpx;
+    height: 80rpx;
+    border-radius: 50%;
+  }
+
+  /* 中间信息区 */
+  .favorite-card__info {
     flex: 1;
     min-width: 0;
     display: flex;
@@ -280,7 +300,7 @@ onMounted(loadFavorites)
     gap: 8rpx;
   }
 
-  &__name {
+  .favorite-card__name {
     font-size: 30rpx;
     font-weight: 600;
     color: $color-text-primary;
@@ -289,58 +309,40 @@ onMounted(loadFavorites)
     text-overflow: ellipsis;
   }
 
-  &__category,
-  &__school {
+  .favorite-card__category,
+  .favorite-card__school {
     font-size: 22rpx;
     color: $color-text-hint;
   }
 
-  &__meta {
+  .favorite-card__meta {
     display: flex;
     gap: 16rpx;
+    align-items: center;
   }
 
-  &__rating {
+  .favorite-card__rating {
     font-size: 24rpx;
     color: $color-rank-gold;
   }
 
-  &__price {
+  .favorite-card__price {
     font-size: 22rpx;
     color: $color-primary;
     font-weight: 500;
   }
 
-  &__actions {
+  /* 右侧删除按钮 */
+  .favorite-card__actions {
     flex-shrink: 0;
     margin-left: 12rpx;
+    display: flex;
+    align-items: center;
   }
 
-  &__delete {
+  .favorite-card__delete {
     font-size: 40rpx;
     color: $color-text-hint;
-  }
-}
-
-/* 餐厅卡片样式 */
-.favorite-card.restaurant-card {
-  &__cover {
-    flex-shrink: 0;
-    width: 140rpx;
-    height: 100rpx;
-    border-radius: 12rpx;
-    margin-right: 16rpx;
-  }
-}
-
-/* 译员卡片样式 */
-.favorite-card.interpreter-card {
-  &__avatar {
-    flex-shrink: 0;
-    width: 80rpx;
-    height: 80rpx;
-    border-radius: 50%;
-    margin-right: 16rpx;
   }
 }
 
