@@ -7,8 +7,8 @@
 import { getToken } from '@/utils/auth'
 import { getLanguage } from '@/utils/i18n'
 
-/** API 基础路径（H5 模式通过 devServer proxy 转发） */
-const BASE_URL = '/api'
+/** API 基础路径 - 直接请求后端地址（开发环境） */
+const BASE_URL = 'http://localhost:8080/api'
 
 /** 业务成功状态码 */
 const HTTP_SUCCESS_CODE = 200
@@ -19,14 +19,20 @@ const HTTP_SUCCESS_CODE = 200
  * @param {'GET'|'POST'|'PUT'|'DELETE'} method - HTTP 方法
  * @param {object} data - 请求参数或请求体
  * @param {object} [header={}] - 自定义请求头
+ * @param {object} [options={}] - 额外选项
+ * @param {boolean} [options.silent=false] - 是否静默失败（不显示错误提示）
+ * @param {number} [options.timeout=30000] - 请求超时时间（毫秒）
  * @returns {Promise<any>} 解析后的 data 字段
  */
-function request(url, method = 'GET', data = {}, header = {}) {
+function request(url, method = 'GET', data = {}, header = {}, options = {}) {
+  const { silent = false, timeout = 30000 } = options
+  
   return new Promise((resolve, reject) => {
     uni.request({
       url: BASE_URL + url,
       method,
       data,
+      timeout,
       header: {
         'Content-Type': 'application/json',
         'Accept-Language': getLanguage(),
@@ -39,12 +45,16 @@ function request(url, method = 'GET', data = {}, header = {}) {
           resolve(body.data)
         } else {
           const msg = (body && body.message) || '请求失败'
-          uni.showToast({ title: msg, icon: 'none' })
+          if (!silent) {
+            uni.showToast({ title: msg, icon: 'none' })
+          }
           reject(new Error(msg))
         }
       },
       fail(err) {
-        uni.showToast({ title: '网络异常，请稍后重试', icon: 'none' })
+        if (!silent) {
+          uni.showToast({ title: '网络异常，请稍后重试', icon: 'none' })
+        }
         reject(err)
       },
     })

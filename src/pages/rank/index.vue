@@ -82,7 +82,7 @@ onMounted(loadRankList)
     <!-- 加载失败状态 -->
     <view v-else-if="hasError" class="rank-status">
       <text class="rank-status__text">{{ t('common.loadFailed') }}</text>
-      <button class="rank-status__retry-btn" @tap="loadRankList">{{ t('common.retry') }}</button>
+      <view class="rank-status__retry-btn" @tap="loadRankList">{{ t('common.retry') }}</view>
     </view>
 
     <!-- 排行榜列表 -->

@@ -17,7 +17,9 @@ defineProps({
 
 /** Tab 配置列表（key 不变，label 使用翻译） */
 const TABS = computed(() => [
-  { key: 'rank', label: t('tab.rank'), icon: '🏆', path: '/pages/rank/index' },
+  { key: 'home', label: t('tab.home'), icon: '🏠', path: '/pages/index/index' },
+  { key: 'search', label: t('tab.search'), icon: '🔍', path: '/pages/search/index' },
+  { key: 'favorites', label: t('tab.favorites'), icon: '⭐', path: '/pages/favorites/index' },
   { key: 'profile', label: t('tab.profile'), icon: '👤', path: '/pages/profile/index' },
 ])
 

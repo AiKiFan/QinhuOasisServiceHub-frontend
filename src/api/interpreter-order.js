@@ -50,3 +50,46 @@ export function acceptInterpreterOrder(id) {
 export function cancelInterpreterOrder(id) {
   return post(`/interpreter-orders/${id}/cancel`)
 }
+
+/**
+ * 获取翻译订单详情
+ * 接口：GET /api/interpreter-orders/{id}
+ * @param {number|string} id - 订单 ID
+ * @returns {Promise<Object>}
+ */
+export function getInterpreterOrderDetail(id) {
+  return get(`/interpreter-orders/${id}`)
+}
+
+/**
+ * 获取译员收到的订单列表（译员端）
+ * 接口：GET /api/interpreter-orders/received?status=&page=1&size=10
+ * @param {Object} [params={}] - 查询参数
+ * @param {number} [params.status] - 状态筛选：0=待接单 1=已接单 2=服务中 3=已完成 4=已取消
+ * @param {number} [params.page=1] - 页码
+ * @param {number} [params.size=10] - 每页条数
+ * @returns {Promise<{total:number, list:Array}>}
+ */
+export function getReceivedOrders(params = {}) {
+  return get('/interpreter-orders/received', params)
+}
+
+/**
+ * 译员拒绝订单
+ * 接口：POST /api/interpreter-orders/{id}/reject
+ * @param {number|string} id - 订单 ID
+ * @returns {Promise<null>}
+ */
+export function rejectInterpreterOrder(id) {
+  return post(`/interpreter-orders/${id}/reject`)
+}
+
+/**
+ * 译员完成服务
+ * 接口：POST /api/interpreter-orders/{id}/complete
+ * @param {number|string} id - 订单 ID
+ * @returns {Promise<null>}
+ */
+export function completeInterpreterOrder(id) {
+  return post(`/interpreter-orders/${id}/complete`)
+}

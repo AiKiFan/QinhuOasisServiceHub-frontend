@@ -1,6 +1,43 @@
 {
   "pages": [
     {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "沁湖驿站",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/search/index",
+      "style": {
+        "navigationBarTitleText": "搜索",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/favorites/index",
+      "style": {
+        "navigationBarTitleText": "我的收藏",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/favorites/folders",
+      "style": {
+        "navigationBarTitleText": "收藏夹管理",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
       "path": "pages/rank/index",
       "style": {
         "navigationBarTitleText": "人气餐厅榜",
@@ -35,6 +72,16 @@
         "navigationBarBackgroundColor": "#E8956D",
         "navigationBarTextStyle": "white",
         "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/restaurant/list",
+      "style": {
+        "navigationBarTitleText": "餐厅列表",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0",
+        "enablePullDownRefresh": true
       }
     },
     {
@@ -120,9 +167,47 @@
       }
     },
     {
+      "path": "pages/interpreter-orders/detail",
+      "style": {
+        "navigationBarTitleText": "订单详情",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/interpreter-orders/received",
+      "style": {
+        "navigationBarTitleText": "接单管理",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
       "path": "pages/profile/edit",
       "style": {
         "navigationBarTitleText": "编辑资料",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/parking/list",
+      "style": {
+        "navigationBarTitleText": "停车场",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/parking/detail",
+      "style": {
+        "navigationBarTitleText": "停车场详情",
         "navigationBarBackgroundColor": "#E8956D",
         "navigationBarTextStyle": "white",
         "backgroundColor": "#FFF8F0"
@@ -132,6 +217,7 @@
   "globalStyle": {
     "navigationBarTextStyle": "white",
     "navigationBarBackgroundColor": "#E8956D",
-    "backgroundColor": "#FFF8F0"
+    "backgroundColor": "#FFF8F0",
+    "animationType": "slide-in-right"
   }
 }

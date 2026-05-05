@@ -39,12 +39,36 @@ export function toggleLanguage() {
 /** 中文翻译字典 */
 const ZH = {
   // ── TabBar ──
+  'tab.home': '首页',
+  'tab.search': '搜索',
+  'tab.favorites': '收藏',
   'tab.rank': '人气餐厅榜',
   'tab.interpreter': '译员服务',
   'tab.profile': '我的',
 
+  // ── 搜索 ──
+  'search.placeholder': '搜索餐厅、译员或景点...',
+  'search.type.all': '全部',
+  'search.type.restaurant': '餐厅',
+  'search.type.interpreter': '译员',
+  'search.type.scenic': '景点',
+  'search.history': '搜索历史',
+  'search.noResults': '未找到相关内容',
+
+  // ── 收藏 ──
+  'favorites.filter.all': '全部',
+  'favorites.filter.restaurant': '餐厅',
+  'favorites.filter.interpreter': '译员',
+  'favorites.empty': '还没有收藏的内容',
+  'favorites.goBrowse': '去逛逛',
+  'favorites.added': '已收藏',
+  'favorites.removed': '已取消收藏',
+  'favorites.deleteConfirmTitle': '取消收藏',
+  'favorites.deleteConfirmContent': '确定要取消收藏吗？',
+
   // ── 通用 ──
   'common.loading': '加载中...',
+  'common.hello': '你好',
   'common.loadFailed': '加载失败，请重试',
   'common.retry': '重新加载',
   'common.noData': '暂无数据',
@@ -106,6 +130,9 @@ const ZH = {
   'profile.role.guest': '游客',
   'profile.role.interpreter': '学生讲解员',
   'profile.role.admin': '管理员',
+  'profile.theme': '主题切换',
+  'profile.themeDark': '深色模式',
+  'profile.themeLight': '浅色模式',
 
   // ── 个人信息编辑 ──
   'profile.edit.title': '编辑资料',
@@ -340,14 +367,55 @@ const ZH = {
   'admin.feedback.statusLabel': '状态',
   'admin.feedback.typeLabel': '类型',
   'admin.feedback.replyRequired': '请输入回复内容',
+
+  // ── 景点 ──
+  'scenic.name': '景点名称',
+  'scenic.desc': '景点介绍',
+  'scenic.tags': '标签',
+  'scenic.rating': '评分',
+  'scenic.reviewCount': '条评价',
+  'scenic.openHours': '开放时间',
+  'scenic.ticket': '门票价格',
+  'scenic.location': '位置',
+  'scenic.locationTitle': '景点位置',
+  'scenic.navigate': '导航',
+  'scenic.previewImage': '查看大图',
+  'scenic.noImages': '暂无图片',
+  'scenic.noData': '暂无景点信息',
+  'scenic.goScenicList': '查看所有景点',
+  'scenic.loadMore': '加载更多',
+  'scenic.noMore': '没有更多了~',
 }
 
 /** 英文翻译字典 */
 const EN = {
   // ── TabBar ──
+  'tab.home': 'Home',
+  'tab.search': 'Search',
+  'tab.favorites': 'Favorites',
   'tab.rank': 'Restaurant Ranking',
   'tab.interpreter': 'Interpreter',
   'tab.profile': 'Profile',
+
+  // ── 搜索 ──
+  'search.placeholder': 'Search restaurants, interpreters or scenic spots...',
+  'search.type.all': 'All',
+  'search.type.restaurant': 'Restaurants',
+  'search.type.interpreter': 'Interpreters',
+  'search.type.scenic': 'Scenic Spots',
+  'search.history': 'Search History',
+  'search.noResults': 'No results found',
+
+  // ── 收藏 ──
+  'favorites.filter.all': 'All',
+  'favorites.filter.restaurant': 'Restaurants',
+  'favorites.filter.interpreter': 'Interpreters',
+  'favorites.empty': 'No favorites yet',
+  'favorites.goBrowse': 'Go Browse',
+  'favorites.added': 'Added to favorites',
+  'favorites.removed': 'Removed from favorites',
+  'favorites.deleteConfirmTitle': 'Remove from Favorites',
+  'favorites.deleteConfirmContent': 'Are you sure you want to remove this item?',
 
   // ── 通用 ──
   'common.loading': 'Loading...',
@@ -412,6 +480,9 @@ const EN = {
   'profile.role.guest': 'Guest',
   'profile.role.interpreter': 'Student Interpreter',
   'profile.role.admin': 'Admin',
+  'profile.theme': 'Theme Switch',
+  'profile.themeDark': 'Dark Mode',
+  'profile.themeLight': 'Light Mode',
 
   // ── 个人信息编辑 ──
   'profile.edit.title': 'Edit Profile',
@@ -673,6 +744,24 @@ const EN = {
   'admin.feedback.statusLabel': 'Status',
   'admin.feedback.typeLabel': 'Type',
   'admin.feedback.replyRequired': 'Please enter a reply',
+
+  // ── 景点 (英文) ──
+  'scenic.name': 'Spot Name',
+  'scenic.desc': 'Description',
+  'scenic.tags': 'Tags',
+  'scenic.rating': 'Rating',
+  'scenic.reviewCount': 'reviews',
+  'scenic.openHours': 'Opening Hours',
+  'scenic.ticket': 'Ticket Price',
+  'scenic.location': 'Location',
+  'scenic.locationTitle': 'Spot Location',
+  'scenic.navigate': 'Navigate',
+  'scenic.previewImage': 'View Full Size',
+  'scenic.noImages': 'No images',
+  'scenic.noData': 'No spot information',
+  'scenic.goScenicList': 'View All Spots',
+  'scenic.loadMore': 'Load More',
+  'scenic.noMore': 'No more~',
 }
 
 

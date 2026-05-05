@@ -22,10 +22,10 @@ const props = defineProps({
     type: String,
     default: 'aspectFill',
   },
-  /** 是否开启懒加载 */
+  /** 是否开启懒加载（默认开启，提升列表页性能） */
   lazyLoad: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   /** 是否可点击预览 */
   previewable: {

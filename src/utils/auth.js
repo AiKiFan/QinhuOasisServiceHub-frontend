@@ -1,56 +1,149 @@
 /**
- * 认证工具函数 —— Token 与用户信息本地存取
+ * 权限拦截工具
+ * 处理登录态验证、路由拦截、权限校验
  * @author AiKiFan
  */
 
-/** Token 在 Storage 中的键名 */
-const STORAGE_KEY_TOKEN = 'qinhu_token'
-/** 用户信息在 Storage 中的键名 */
-const STORAGE_KEY_USER = 'qinhu_user'
+const TOKEN_KEY = 'token'
+const USER_KEY = 'user'
 
-/** 持久化 Token */
-export function saveToken(token) {
-  uni.setStorageSync(STORAGE_KEY_TOKEN, token)
-}
-
-/** 读取 Token；未登录返回空字符串 */
-export function getToken() {
-  return uni.getStorageSync(STORAGE_KEY_TOKEN) || ''
-}
-
-/** 删除 Token */
-export function removeToken() {
-  uni.removeStorageSync(STORAGE_KEY_TOKEN)
-}
-
-/** 是否已登录 */
-export function isLoggedIn() {
-  return Boolean(getToken())
+/**
+ * 获取 token
+ */
+function getToken() {
+  return uni.getStorageSync(TOKEN_KEY)
 }
 
 /**
- * 持久化用户信息
- * @param {{ userId:number, username:string, nickname:string, role:number, avatar:string }} user
+ * 获取当前用户信息
  */
-export function saveUser(user) {
-  uni.setStorageSync(STORAGE_KEY_USER, user)
+function getUser() {
+  try {
+    const u = uni.getStorageSync(USER_KEY)
+    return u ? JSON.parse(u) : null
+  } catch {
+    return null
+  }
 }
 
 /**
- * 读取缓存的用户信息；未登录返回 null
- * @returns {{ userId:number, username:string, nickname:string, role:number, avatar:string }|null}
+ * 检查用户登录状态
+ * @returns {boolean}
  */
-export function getUser() {
-  return uni.getStorageSync(STORAGE_KEY_USER) || null
+function isLoggedIn() {
+  return !!getToken()
 }
 
-/** 清除用户信息缓存 */
-export function removeUser() {
-  uni.removeStorageSync(STORAGE_KEY_USER)
+/**
+ * 登出 - 清除本地存储
+ */
+function logout() {
+  uni.removeStorageSync(TOKEN_KEY)
+  uni.removeStorageSync(USER_KEY)
 }
 
-/** 完整登出：同时清除 Token 和用户信息 */
-export function logout() {
-  removeToken()
-  removeUser()
+/**
+ * 保存 token（单独保存）
+ * @param {string} token
+ */
+function saveToken(token) {
+  uni.setStorageSync(TOKEN_KEY, token)
+}
+
+/**
+ * 保存登录信息
+ * @param {string} token
+ * @param {Object} user
+ */
+function saveLogin(token, user) {
+  uni.setStorageSync(TOKEN_KEY, token)
+  uni.setStorageSync(USER_KEY, JSON.stringify(user))
+}
+
+/**
+ * 保存用户信息（不更新 token）
+ * @param {Object} user
+ */
+function saveUser(user) {
+  uni.setStorageSync(USER_KEY, JSON.stringify(user))
+}
+
+/**
+ * 检查用户角色
+ * 后端 role 字段：0=普通用户 1=译员 2=管理员（数字）
+ * @param {string} role - admin | interpreter
+ * @returns {boolean}
+ */
+function hasRole(role) {
+  const user = getUser()
+  if (!user) return false
+  const userRole = user.role
+  // 兼容数字（后端）与字符串两种格式
+  if (role === 'admin') return userRole === 'admin' || userRole === 2
+  if (role === 'interpreter') return userRole === 'interpreter' || userRole === 1 || userRole === 'admin' || userRole === 2
+  return false
+}
+
+/**
+ * 是否是认证讲解员（role=1）
+ */
+function isInterpreter() {
+  const user = getUser()
+  return user?.role === 1 || user?.role === 'interpreter'
+}
+
+/**
+ * 是否是管理员（role=2）
+ */
+function isAdmin() {
+  const user = getUser()
+  return user?.role === 2 || user?.role === 'admin'
+}
+
+/**
+ * 需要登录时跳转到登录页
+ */
+function requireLogin() {
+  if (!isLoggedIn()) {
+    uni.showModal({
+      title: '提示',
+      content: '请先登录',
+      confirmText: '去登录',
+      success(res) {
+        if (res.confirm) {
+          uni.navigateTo({ url: '/pages/login/index' })
+        }
+      }
+    })
+    return false
+  }
+  return true
+}
+
+export {
+  getToken,
+  getUser,
+  isLoggedIn,
+  logout,
+  saveToken,
+  saveLogin,
+  saveUser,
+  hasRole,
+  isInterpreter,
+  isAdmin,
+  requireLogin
+}
+
+export default {
+  getToken,
+  getUser,
+  isLoggedIn,
+  logout,
+  saveToken,
+  saveLogin,
+  saveUser,
+  hasRole,
+  isInterpreter,
+  isAdmin,
+  requireLogin
 }

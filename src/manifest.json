@@ -15,7 +15,7 @@
       "disableHostCheck": true,
       "proxy": {
         "/api": {
-          "target": "http://10.220.119.171:8080",
+          "target": "http://localhost:8080",  // 后端 Spring Boot 地址
           "changeOrigin": true
         }
       }

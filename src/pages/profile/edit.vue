@@ -35,6 +35,8 @@ async function loadUser() {
       email: data.email || '',
       avatar: data.avatar || '',
     }
+  } catch {
+    // 错误已在 request.js 中统一提示
   } finally {
     loading.value = false
   }

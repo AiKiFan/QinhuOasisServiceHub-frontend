@@ -3,15 +3,17 @@
   @author AiKiFan
 -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
 import { getRestaurantDetail } from '@/api/restaurant'
 import { getCommentList, postComment, COMMENT_TARGET_TYPE } from '@/api/comment'
 import { isLoggedIn, getUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
+import { isFavorited as checkIsFavorited, addFavorite, removeFavorite, FAVORITE_TYPE } from '@/utils/favorites'
 import SafeImage from '@/components/SafeImage/index.vue'
 
-/** 页面参数（餐厅 ID） */
-const pageOptions = ref(uni.getStorageSync('pageOptions') || {})
+/** 页面参数（餐厅 ID），由 onLoad 注入，不再依赖 Storage 脏数据 */
+const pageOptions = ref({})
 
 /** 餐厅详情数据 */
 const detail = ref(null)
@@ -51,9 +53,40 @@ const isUserLoggedIn = computed(() => isLoggedIn())
 /** 当前用户 */
 const currentUser = computed(() => getUser())
 
+/** 是否已收藏 */
+const isFavorited = ref(false)
+
+/**
+ * 切换收藏状态
+ */
+function toggleFavorite() {
+  const restaurant = detail.value
+  if (!restaurant) return
+  if (isFavorited.value) {
+    removeFavorite(restaurant.id, FAVORITE_TYPE.RESTAURANT)
+    isFavorited.value = false
+    uni.showToast({ title: t('favorites.removed'), icon: 'success' })
+  } else {
+    addFavorite({
+      id: restaurant.id,
+      type: FAVORITE_TYPE.RESTAURANT,
+      data: {
+        displayName: restaurant.displayName,
+        coverImg: restaurant.coverImg,
+        category: restaurant.category,
+        rating: restaurant.rating,
+        avgPrice: restaurant.avgPrice,
+      },
+    })
+    isFavorited.value = true
+    uni.showToast({ title: '已收藏', icon: 'success' })
+  }
+}
+
 /**
  * 加载餐厅详情
  */
+
 async function loadDetail() {
   const id = pageOptions.value.id
   if (!id) {
@@ -64,6 +97,7 @@ async function loadDetail() {
   hasError.value = false
   try {
     detail.value = await getRestaurantDetail(id)
+    isFavorited.value = checkIsFavorited(id, FAVORITE_TYPE.RESTAURANT)
     loadComments(true)
   } catch {
     hasError.value = true
@@ -191,13 +225,10 @@ function makePhoneCall() {
   })
 }
 
-onMounted(() => {
-  // 获取页面参数
-  const pages = getCurrentPages()
-  const currentPage = pages[pages.length - 1]
-  const options = currentPage.options || {}
-  pageOptions.value = options
-  uni.setStorageSync('pageOptions', options)
+onLoad((options) => {
+  // uni-app 官方方式：onLoad 回调参数即为 URL query 解析后的对象
+  // 例如 /pages/restaurant/detail?id=1 → options = { id: '1' }
+  pageOptions.value = options || {}
   loadDetail()
 })
 </script>
@@ -212,7 +243,7 @@ onMounted(() => {
     <!-- 加载失败状态 -->
     <view v-else-if="hasError" class="status">
       <text class="status__text">加载失败，请重试</text>
-      <button class="status__retry-btn" @tap="loadDetail">重新加载</button>
+      <view class="status__retry-btn" @tap="loadDetail">重新加载</view>
     </view>
 
     <!-- 详情内容 -->
@@ -232,7 +263,12 @@ onMounted(() => {
 
       <!-- 基本信息 -->
       <view class="info-card">
-        <text class="info-card__title">{{ detail.displayName }}</text>
+        <view class="info-card__header">
+          <text class="info-card__title">{{ detail.displayName }}</text>
+          <view class="favorite-btn" @tap="toggleFavorite">
+            <text class="favorite-btn__icon">{{ isFavorited ? '❤️' : '🤍' }}</text>
+          </view>
+        </view>
         <view class="info-card__meta">
           <view class="meta-item">
             <text class="meta-item__icon">🍽</text>
@@ -429,12 +465,18 @@ onMounted(() => {
   margin-bottom: 24rpx;
   box-shadow: 0 2rpx 16rpx rgba(232, 149, 109, 0.08);
 
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24rpx;
+  }
+
   &__title {
-    display: block;
+    flex: 1;
     font-size: 40rpx;
     font-weight: 700;
     color: $color-text-primary;
-    margin-bottom: 24rpx;
   }
 
   &__meta {
@@ -723,5 +765,14 @@ onMounted(() => {
 
 .bottom-placeholder {
   height: 120rpx;
+}
+
+/* ── 收藏按钮 ── */
+.favorite-btn {
+  padding: 12rpx;
+
+  &__icon {
+    font-size: 48rpx;
+  }
 }
 </style>

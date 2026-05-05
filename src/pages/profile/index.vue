@@ -5,9 +5,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import TabBar from '@/components/TabBar/index.vue'
-import { isLoggedIn, getUser, saveUser, logout } from '@/utils/auth'
-import { getMyProfile } from '@/api/user'
+import { isLoggedIn, getUser, saveUser, logout, isAdmin as checkIsAdmin } from '@/utils/auth'
+import { getMyProfile, getOrderStats } from '@/api/user'
 import { getLanguage, toggleLanguage as toggleLang, t } from '@/utils/i18n'
+import { getTheme, toggleTheme as toggleMode } from '@/utils/theme'
 import SafeImage from '@/components/SafeImage/index.vue'
 
 /** 是否已登录 */
@@ -18,6 +19,11 @@ const userInfo = ref(null)
 const currentLang = ref('zh-CN')
 /** 是否管理员 */
 const isAdmin = ref(false)
+/** 当前主题 */
+const currentTheme = ref('light')
+
+/** 订单统计 */
+const orderStats = ref(null)
 
 /** 角色名称映射（支持国际化） */
 const getRoleLabels = () => ({
@@ -41,14 +47,26 @@ async function init() {
   loggedIn.value = isLoggedIn()
   if (!loggedIn.value) return
   userInfo.value = getUser()
-  isAdmin.value = userInfo.value?.role === 2
+  // 兼容数字 role（后端返回 2）与字符串 role（'admin'）
+  isAdmin.value = checkIsAdmin()
   try {
     const fresh = await getMyProfile()
     userInfo.value = fresh
-    isAdmin.value = fresh.role === 2
+    isAdmin.value = fresh.role === 2 || fresh.role === 'admin'
     saveUser(fresh)
   } catch {
     // 网络失败时降级使用缓存，不弹错误
+  }
+  // 加载订单统计
+  loadOrderStats()
+}
+
+/** 加载订单统计 */
+async function loadOrderStats() {
+  try {
+    orderStats.value = await getOrderStats()
+  } catch {
+    // 加载失败时不影响其他功能
   }
 }
 
@@ -87,6 +105,12 @@ function handleToggleLanguage() {
   })
 }
 
+/** 切换主题 */
+function handleToggleTheme() {
+  const next = toggleMode()
+  currentTheme.value = next
+}
+
 /** 跳转译员申请页 */
 function goApplyInterpreter() {
   uni.navigateTo({ url: '/pages/interpreter/apply' })
@@ -100,6 +124,16 @@ function goMyOrders() {
 /** 跳转投诉建议提交页 */
 function goFeedback() {
   uni.navigateTo({ url: '/pages/feedback/submit' })
+}
+
+/** 跳转我的收藏 */
+function goFavorites() {
+  uni.navigateTo({ url: '/pages/favorites/index' })
+}
+
+/** 跳转接单管理（译员端） */
+function goReceivedOrders() {
+  uni.navigateTo({ url: '/pages/interpreter-orders/received' })
 }
 
 /** 跳转管理端：译员审核 */
@@ -189,10 +223,42 @@ onMounted(init)
       <view class="profile-menu-card">
         <text class="menu-section-title">{{ t('profile.moreFeatures') }}</text>
 
+        <!-- 我的收藏 -->
+        <view class="menu-item" @tap="goFavorites">
+          <text class="menu-item__icon">⭐</text>
+          <text class="menu-item__text">{{ t('tab.favorites') }}</text>
+          <text class="menu-item__arrow">›</text>
+        </view>
+
         <!-- 我的订单 -->
         <view class="menu-item" @tap="goMyOrders">
           <text class="menu-item__icon">📋</text>
           <text class="menu-item__text">{{ t('profile.myOrders') }}</text>
+          <text class="menu-item__arrow">›</text>
+        </view>
+
+        <!-- 订单统计卡片 -->
+        <view v-if="orderStats" class="order-stats-card">
+          <view class="order-stat-item">
+            <text class="order-stat-item__value">{{ orderStats.totalOrders || 0 }}</text>
+            <text class="order-stat-item__label">总订单</text>
+          </view>
+          <view class="order-stat-divider"></view>
+          <view class="order-stat-item">
+            <text class="order-stat-item__value">{{ orderStats.completedOrders || 0 }}</text>
+            <text class="order-stat-item__label">已完成</text>
+          </view>
+          <view class="order-stat-divider"></view>
+          <view class="order-stat-item">
+            <text class="order-stat-item__value">{{ orderStats.pendingOrders || 0 }}</text>
+            <text class="order-stat-item__label">进行中</text>
+          </view>
+        </view>
+
+        <!-- 接单管理（仅译员可见） -->
+        <view v-if="userInfo && userInfo.role === 1" class="menu-item" @tap="goReceivedOrders">
+          <text class="menu-item__icon">🎯</text>
+          <text class="menu-item__text">接单管理</text>
           <text class="menu-item__arrow">›</text>
         </view>
 
@@ -210,8 +276,17 @@ onMounted(init)
           <text class="menu-item__arrow">›</text>
         </view>
 
+        <!-- 主题切换 -->
+        <view class="menu-item" @tap="handleToggleTheme">
+          <text class="menu-item__icon">{{ currentTheme === 'dark' ? '🌙' : '☀️' }}</text>
+          <text class="menu-item__text">
+            {{ currentTheme === 'dark' ? t('profile.themeDark') : t('profile.themeLight') }}
+          </text>
+          <text class="menu-item__arrow">{{ currentTheme === 'dark' ? '🌙' : '☀️' }}</text>
+        </view>
+
         <!-- 语言切换（关键功能：英语全界面切换） -->
-        <view class="menu-item" @tap="handleToggleLanguage">
+        <view class="menu-item menu-item--last" @tap="handleToggleLanguage">
           <text class="menu-item__icon">🌐</text>
           <text class="menu-item__text">
             {{ currentLang === 'zh-CN' ? t('profile.switchLang') : t('profile.switchLangBack') }}
@@ -472,6 +547,41 @@ onMounted(init)
     color: #ffffff;
     font-weight: 600;
   }
+}
+
+/* ── 订单统计卡片 ── */
+.order-stats-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 32rpx 0;
+  margin: 24rpx -32rpx;
+  background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+  border-radius: 16rpx;
+}
+
+.order-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+
+  &__value {
+    font-size: 40rpx;
+    font-weight: 700;
+    color: $color-primary;
+  }
+
+  &__label {
+    font-size: 22rpx;
+    color: $color-text-secondary;
+  }
+}
+
+.order-stat-divider {
+  width: 2rpx;
+  height: 60rpx;
+  background-color: $color-divider;
 }
 
 /* ── 登出按钮 ── */

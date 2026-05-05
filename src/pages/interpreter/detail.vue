@@ -8,6 +8,7 @@ import { getInterpreterDetail } from '@/api/interpreter'
 import { getCommentList, postComment, COMMENT_TARGET_TYPE } from '@/api/comment'
 import { isLoggedIn, getUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
+import { isFavorite, addFavorite, removeFavorite, FAVORITE_TYPE } from '@/utils/favorites'
 import SafeImage from '@/components/SafeImage/index.vue'
 
 // SafeImage 已导入，无需额外操作
@@ -44,6 +45,37 @@ const isUserLoggedIn = ref(isLoggedIn())
 /** 当前用户 */
 const currentUser = ref(getUser())
 
+/** 是否已收藏 */
+const isFavorited = ref(false)
+
+/**
+ * 切换收藏状态
+ */
+function toggleFavorite() {
+  const interpreter = detail.value
+  if (!interpreter) return
+  if (isFavorited.value) {
+    removeFavorite(interpreter.id, FAVORITE_TYPE.INTERPRETER)
+    isFavorited.value = false
+    uni.showToast({ title: t('favorites.removed'), icon: 'success' })
+  } else {
+    addFavorite({
+      id: interpreter.id,
+      type: FAVORITE_TYPE.INTERPRETER,
+      data: {
+        nickname: interpreter.nickname,
+        realName: interpreter.realName,
+        avatar: interpreter.avatar,
+        school: interpreter.school,
+        rating: interpreter.rating,
+        hourlyRate: interpreter.hourlyRate,
+      },
+    })
+    isFavorited.value = true
+    uni.showToast({ title: t('favorites.added'), icon: 'success' })
+  }
+}
+
 /** 英语等级映射（支持国际化） */
 const getEnglishLevelMap = () => ({
   0: { label: t('interpreter.level.cet4'), color: '#9BA3AF' },
@@ -66,6 +98,7 @@ async function loadDetail() {
   hasError.value = false
   try {
     detail.value = await getInterpreterDetail(id)
+    isFavorited.value = isFavorite(id, FAVORITE_TYPE.INTERPRETER)
     loadComments(true)
   } catch {
     hasError.value = true
@@ -221,7 +254,12 @@ onMounted(() => {
             mode="aspectFill"
           />
         </view>
-        <text class="hero-name">{{ detail.realName || detail.nickname }}</text>
+        <view class="hero-header">
+          <text class="hero-name">{{ detail.realName || detail.nickname }}</text>
+          <view class="favorite-btn" @tap="toggleFavorite">
+            <text class="favorite-btn__icon">{{ isFavorited ? '❤️' : '🤍' }}</text>
+          </view>
+        </view>
         <view class="hero-tags">
           <view
             class="level-badge"
@@ -443,11 +481,18 @@ onMounted(() => {
   height: 100%;
 }
 
+.hero-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+  margin-bottom: 16rpx;
+}
+
 .hero-name {
   font-size: 40rpx;
   font-weight: 700;
   color: $color-text-primary;
-  margin-bottom: 16rpx;
 }
 
 .hero-tags {
@@ -837,5 +882,14 @@ onMounted(() => {
 
 .bottom-placeholder {
   height: 120rpx;
+}
+
+/* ── 收藏按钮 ── */
+.favorite-btn {
+  padding: 12rpx;
+
+  &__icon {
+    font-size: 48rpx;
+  }
 }
 </style>

@@ -12,7 +12,7 @@
  * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
  */
 
-/* 颜色变量 */
+/* 需色变量 */
 
 /* 行为相关颜色 */
 $uni-color-primary: #007aff;
@@ -81,7 +81,7 @@ $uni-font-size-paragraph: 15px;
 /* 主色：温暖珊瑚橙 */
 $color-primary: #E8956D;
 /* 主色浅版，用于标签背景 */
-$color-primary-light: rgba(232, 149, 109, 0.12);
+$color-primary-light: rgba(108, 77, 146, 0.12);
 
 /* 排名徽章颜色 */
 $color-rank-gold: #FFB22C;
@@ -97,3 +97,11 @@ $color-text-hint: #B0A090;
 $color-bg-page: #FFF8F0;
 $color-bg-card: #FFFFFF;
 $color-divider: #F0E6DC;
+
+/* ── 深色主题变量 ── */
+$color-dark-bg-page: #1A1A1A;
+$color-dark-bg-card: #2D2D2D;
+$color-dark-text-primary: #FFFFFF;
+$color-dark-text-secondary: #B3B3B3;
+$color-dark-text-hint: #808080;
+$color-dark-divider: #404040;

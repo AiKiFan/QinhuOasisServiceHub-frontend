@@ -43,6 +43,8 @@ async function handleLogin() {
     })
     uni.showToast({ title: '登录成功', icon: 'success' })
     setTimeout(() => uni.reLaunch({ url: '/pages/profile/index' }), 800)
+  } catch (err) {
+    // 错误已在 request.js 中统一提示，无需重复处理
   } finally {
     submitting.value = false
   }

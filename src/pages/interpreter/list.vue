@@ -164,9 +164,17 @@ onMounted(() => loadPage(true))
       </view>
     </view>
 
-    <!-- 加载中状态 -->
-    <view v-if="loading" class="status">
-      <text class="status__text">{{ t('common.loading') }}</text>
+    <!-- 加载中骨架屏 -->
+    <view v-if="loading" class="skeleton-wrap">
+      <view v-for="i in 4" :key="i" class="skeleton-card">
+        <view class="skeleton-card__avatar" />
+        <view class="skeleton-card__lines">
+          <view class="skeleton-card__line skeleton-card__line--name" />
+          <view class="skeleton-card__line skeleton-card__line--school" />
+          <view class="skeleton-card__line skeleton-card__line--stats" />
+          <view class="skeleton-card__line skeleton-card__line--price" />
+        </view>
+      </view>
     </view>
 
     <!-- 加载失败状态 -->
@@ -480,5 +488,67 @@ onMounted(() => loadPage(true))
     font-size: 18rpx;
     color: $color-text-secondary;
   }
+}
+
+/* ── 骨架屏 ── */
+.skeleton-wrap {
+  padding: 24rpx;
+}
+
+.skeleton-card {
+  display: flex;
+  background-color: $color-bg-card;
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 16rpx rgba(232, 149, 109, 0.08);
+}
+
+.skeleton-card__avatar {
+  flex-shrink: 0;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background-color: $color-divider;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+  margin-right: 24rpx;
+}
+
+.skeleton-card__lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.skeleton-card__line {
+  border-radius: 6rpx;
+  background-color: $color-divider;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+
+  &--name {
+    height: 32rpx;
+    width: 50%;
+  }
+
+  &--school {
+    height: 24rpx;
+    width: 70%;
+  }
+
+  &--stats {
+    height: 24rpx;
+    width: 40%;
+  }
+
+  &--price {
+    height: 28rpx;
+    width: 35%;
+  }
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 </style>
