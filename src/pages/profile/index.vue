@@ -21,6 +21,8 @@ const currentLang = ref('zh-CN')
 const isAdmin = ref(false)
 /** 当前主题 */
 const currentTheme = ref('light')
+/** 是否显示退出确认弹窗 */
+const showLogoutConfirm = ref(false)
 
 /** 角色名称映射（支持国际化） */
 const getRoleLabels = () => ({
@@ -68,17 +70,16 @@ function goRegister() {
 
 /** 执行登出 */
 function handleLogout() {
-  uni.showModal({
-    title: t('profile.logoutConfirmTitle'),
-    content: t('profile.logoutConfirmContent'),
-    success(res) {
-      if (!res.confirm) return
-      logout()
-      loggedIn.value = false
-      userInfo.value = null
-      isAdmin.value = false
-    },
-  })
+  showLogoutConfirm.value = true
+}
+
+/** 确认退出 */
+function confirmLogout() {
+  logout()
+  loggedIn.value = false
+  userInfo.value = null
+  isAdmin.value = false
+  showLogoutConfirm.value = false
 }
 
 /** 切换语言 */
@@ -284,6 +285,22 @@ onMounted(init)
 
       <!-- 登出按钮 -->
       <button class="profile-logout-btn" @tap="handleLogout">{{ t('profile.logout') }}</button>
+    </view>
+
+    <!-- 自定义退出确认弹窗 -->
+    <view v-if="showLogoutConfirm" class="confirm-mask" @tap.self="showLogoutConfirm = false">
+      <view class="confirm-dialog">
+        <text class="confirm-dialog__title">{{ t('profile.logoutConfirmTitle') }}</text>
+        <text class="confirm-dialog__content">{{ t('profile.logoutConfirmContent') }}</text>
+        <view class="confirm-dialog__actions">
+          <view class="confirm-dialog__btn confirm-dialog__btn--cancel" @tap="showLogoutConfirm = false">
+            <text>取消</text>
+          </view>
+          <view class="confirm-dialog__btn confirm-dialog__btn--confirm" @tap="confirmLogout">
+            <text>退出</text>
+          </view>
+        </view>
+      </view>
     </view>
 
     <!-- 底部 TabBar -->
@@ -563,5 +580,65 @@ onMounted(init)
   border: none;
   box-shadow: 0 2rpx 16rpx rgba(232, 149, 109, 0.08);
   margin-bottom: 32rpx;
+}
+
+/* ── 自定义确认弹窗 ── */
+.confirm-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.confirm-dialog {
+  width: 560rpx;
+  background-color: $color-bg-card;
+  border-radius: 24rpx;
+  overflow: hidden;
+
+  &__title {
+    display: block;
+    text-align: center;
+    font-size: 32rpx;
+    font-weight: 600;
+    color: $color-text-primary;
+    padding: 48rpx 40rpx 16rpx;
+  }
+
+  &__content {
+    display: block;
+    text-align: center;
+    font-size: 26rpx;
+    color: $color-text-secondary;
+    padding: 0 40rpx 48rpx;
+    line-height: 1.6;
+  }
+
+  &__actions {
+    display: flex;
+    border-top: 2rpx solid $color-divider;
+  }
+
+  &__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 96rpx;
+    font-size: 30rpx;
+
+    &--cancel {
+      color: $color-text-secondary;
+      border-right: 2rpx solid $color-divider;
+    }
+
+    &--confirm {
+      color: #E05252;
+      font-weight: 600;
+    }
+  }
 }
 </style>

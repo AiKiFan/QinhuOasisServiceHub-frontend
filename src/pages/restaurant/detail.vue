@@ -67,16 +67,12 @@ function toggleFavorite() {
     isFavorited.value = false
     uni.showToast({ title: t('favorites.removed'), icon: 'success' })
   } else {
-    addFavorite({
-      id: restaurant.id,
-      type: FAVORITE_TYPE.RESTAURANT,
-      data: {
-        displayName: restaurant.displayName,
-        coverImg: restaurant.coverImg,
-        category: restaurant.category,
-        rating: restaurant.rating,
-        avgPrice: restaurant.avgPrice,
-      },
+    addFavorite(restaurant.id, FAVORITE_TYPE.RESTAURANT, {
+      displayName: restaurant.displayName,
+      coverImg: restaurant.coverImg,
+      category: restaurant.category,
+      rating: restaurant.rating,
+      avgPrice: restaurant.avgPrice,
     })
     isFavorited.value = true
     uni.showToast({ title: '已收藏', icon: 'success' })
