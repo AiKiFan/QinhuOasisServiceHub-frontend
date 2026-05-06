@@ -126,6 +126,7 @@ function previewImages(images) {
 }
 
 onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.feedbackList.title') })
   // 权限检查：非管理员则跳转回首页
   const user = getUser()
   if (!user || user.role !== 2) {

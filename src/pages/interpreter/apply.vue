@@ -3,7 +3,7 @@
   @author AiKiFan
 -->
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { applyInterpreter, uploadInterpreterCert } from '@/api/interpreter'
 import { isLoggedIn } from '@/utils/auth'
 import { t } from '@/utils/i18n'
@@ -157,6 +157,10 @@ async function handleSubmit() {
     submitting.value = false
   }
 }
+
+onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.interpreterApply.title') })
+})
 </script>
 
 <template>

@@ -1,11 +1,11 @@
 <!--
   收藏列表页
-  展示用户收藏的餐厅和译员
+  展示用户收藏的餐厅、译员和景点
   @author AiKiFan
 -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { getAllFavorites, removeFavorite, FAVORITE_TYPE } from '@/utils/favorites'
+import { getAllFavorites, removeFavorite } from '@/api/favorites'
 import { t } from '@/utils/i18n'
 import TabBar from '@/components/TabBar/index.vue'
 import SafeImage from '@/components/SafeImage/index.vue'
@@ -13,8 +13,12 @@ import SafeImage from '@/components/SafeImage/index.vue'
 /** 收藏类型筛选 */
 const filterType = ref('all')
 
-/** 收藏列表 */
-const favorites = ref([])
+/** 餐厅收藏列表 */
+const restaurantFavorites = ref([])
+/** 译员收藏列表 */
+const interpreterFavorites = ref([])
+/** 景点收藏列表 */
+const scenicFavorites = ref([])
 
 /** 加载状态 */
 const loading = ref(false)
@@ -24,29 +28,33 @@ const showDeleteConfirm = ref(false)
 /** 待删除项 */
 const itemToDelete = ref(null)
 
-/** 收藏列表（按类型筛选） */
-const filteredFavorites = computed(() => {
-  if (filterType.value === 'all') {
-    return favorites.value
-  }
-  return favorites.value.filter(item => item.type === filterType.value)
-})
-
 /** 筛选标签 */
 const filterLabels = computed(() => [
   { key: 'all', label: t('favorites.filter.all') },
-  { key: FAVORITE_TYPE.RESTAURANT, label: t('favorites.filter.restaurant') },
-  { key: FAVORITE_TYPE.INTERPRETER, label: t('favorites.filter.interpreter') },
-  { key: FAVORITE_TYPE.SCENIC, label: '景点' },
+  { key: 'restaurant', label: t('favorites.filter.restaurant') },
+  { key: 'interpreter', label: t('favorites.filter.interpreter') },
+  { key: 'scenic', label: t('favorites.filter.scenic') },
 ])
+
+/** 总收藏数（用于判断空状态） */
+const totalCount = computed(() =>
+  restaurantFavorites.value.length +
+  interpreterFavorites.value.length +
+  scenicFavorites.value.length
+)
 
 /**
  * 加载收藏列表
  */
-function loadFavorites() {
+async function loadFavorites() {
   loading.value = true
   try {
-    favorites.value = getAllFavorites()
+    const res = await getAllFavorites()
+    restaurantFavorites.value = res.restaurants || []
+    interpreterFavorites.value = res.interpreters || []
+    scenicFavorites.value = res.scenicSpots || []
+  } catch {
+    uni.showToast({ title: t('common.loadFailed'), icon: 'none' })
   } finally {
     loading.value = false
   }
@@ -78,99 +86,141 @@ function cancelDelete() {
 /**
  * 执行删除
  */
-function handleDelete() {
+async function handleDelete() {
   if (!itemToDelete.value) return
-  removeFavorite(itemToDelete.value.id, itemToDelete.value.type)
-  loadFavorites()
-  cancelDelete()
-  uni.showToast({ title: t('favorites.removed'), icon: 'success' })
+  try {
+    await removeFavorite(itemToDelete.value.type, itemToDelete.value.id)
+    // 删除成功后重新加载
+    await loadFavorites()
+    cancelDelete()
+    uni.showToast({ title: t('favorites.removed'), icon: 'success' })
+  } catch {
+    // 错误已在 request.js 中处理
+  }
 }
 
 /**
  * 跳转详情页
  */
-function goToDetail(item) {
-  if (item.type === FAVORITE_TYPE.RESTAURANT) {
-    uni.navigateTo({ url: `/pages/restaurant/detail?id=${item.id}` })
-  } else if (item.type === FAVORITE_TYPE.INTERPRETER) {
-    uni.navigateTo({ url: `/pages/interpreter/detail?id=${item.id}` })
-  } else if (item.type === FAVORITE_TYPE.SCENIC) {
-    uni.navigateTo({ url: `/pages/scenic/detail?id=${item.id}` })
+function goToDetail(type, id) {
+  if (type === 'restaurant') {
+    uni.navigateTo({ url: `/pages/restaurant/detail?id=${id}` })
+  } else if (type === 'interpreter') {
+    uni.navigateTo({ url: `/pages/interpreter/detail?id=${id}` })
+  } else if (type === 'scenic') {
+    uni.navigateTo({ url: `/pages/scenic/detail?id=${id}` })
   }
 }
 
-onMounted(loadFavorites)
+onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.favorites.title') })
+  loadFavorites()
+})
 </script>
 
 <template>
   <view class="favorites-page">
     <!-- 筛选标签 -->
-    <view class="filter-tabs">
-      <view
-        v-for="tab in filterLabels"
-        :key="tab.key"
-        class="filter-tab"
-        :class="{ 'filter-tab--active': filterType === tab.key }"
-        @tap="switchFilter(tab.key)"
-      >
-        <text class="filter-tab__text">{{ tab.label }}</text>
-      </view>
+    <view class="filter-tabs-wrapper">
+      <scroll-view class="filter-tabs" scroll-x enable-flex scroll-with-animation>
+        <view
+          v-for="tab in filterLabels"
+          :key="tab.key"
+          class="filter-tab"
+          :class="{ 'filter-tab--active': filterType === tab.key }"
+          @tap="switchFilter(tab.key)"
+        >
+          <text class="filter-tab__text">{{ tab.label }}</text>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 加载中 -->
+    <view v-if="loading" class="loading">
+      <text class="loading__text">{{ t('common.loading') }}</text>
     </view>
 
     <!-- 空状态 -->
-    <view v-if="!loading && filteredFavorites.length === 0" class="empty">
+    <view v-else-if="totalCount === 0" class="empty">
       <text class="empty__text">{{ t('favorites.empty') }}</text>
-      <button class="empty__btn" @tap="() => uni.navigateBack()">{{ t('favorites.goBrowse') }}</button>
+      <button class="empty__btn" @tap="() => uni.switchTab({ url: '/pages/index/index' })">
+        {{ t('favorites.goBrowse') }}
+      </button>
     </view>
 
     <!-- 收藏列表 -->
     <view v-else class="favorites-list">
       <!-- 餐厅卡片 -->
       <view
-        v-for="item in filteredFavorites.filter(i => i.type === FAVORITE_TYPE.RESTAURANT)"
-        :key="item.key"
+        v-for="item in (filterType === 'all' || filterType === 'restaurant') ? restaurantFavorites : []"
+        :key="item.id"
         class="favorite-card restaurant-card"
-        @tap="goToDetail(item)"
+        @tap="goToDetail('restaurant', item.id)"
       >
         <SafeImage
           class="favorite-card__cover"
-          :src="item.data.coverImg"
+          :src="item.coverImg"
           mode="aspectFill"
         />
         <view class="favorite-card__info">
-          <text class="favorite-card__name">{{ item.data.displayName }}</text>
-          <text class="favorite-card__category">{{ item.data.category }}</text>
+          <text class="favorite-card__name">{{ item.displayName }}</text>
+          <text class="favorite-card__category">{{ item.category }}</text>
           <view class="favorite-card__meta">
-            <text class="favorite-card__rating">★ {{ item.data.rating }}</text>
-            <text class="favorite-card__price">¥{{ item.data.avgPrice }}/人</text>
+            <text class="favorite-card__rating">★ {{ item.rating }}</text>
+            <text class="favorite-card__price">¥{{ item.avgPrice }}/人</text>
           </view>
         </view>
-        <view class="favorite-card__actions" @tap.stop="confirmDelete(item)">
+        <view class="favorite-card__actions" @tap.stop="confirmDelete({ type: 'restaurant', id: item.id })">
           <text class="favorite-card__delete">🗑</text>
         </view>
       </view>
 
       <!-- 译员卡片 -->
       <view
-        v-for="item in filteredFavorites.filter(i => i.type === FAVORITE_TYPE.INTERPRETER)"
-        :key="item.key"
+        v-for="item in (filterType === 'all' || filterType === 'interpreter') ? interpreterFavorites : []"
+        :key="item.id"
         class="favorite-card interpreter-card"
-        @tap="goToDetail(item)"
+        @tap="goToDetail('interpreter', item.id)"
       >
         <SafeImage
           class="favorite-card__avatar"
-          :src="item.data.avatar"
+          :src="item.avatar"
           mode="aspectFill"
         />
         <view class="favorite-card__info">
-          <text class="favorite-card__name">{{ item.data.realName || item.data.nickname }}</text>
-          <text class="favorite-card__school">{{ item.data.school }}</text>
+          <text class="favorite-card__name">{{ item.realName || item.nickname }}</text>
+          <text class="favorite-card__school">{{ item.school }}</text>
           <view class="favorite-card__meta">
-            <text class="favorite-card__rating">★ {{ item.data.rating }}</text>
-            <text class="favorite-card__price">¥{{ item.data.hourlyRate }}/小时</text>
+            <text class="favorite-card__rating">★ {{ item.rating }}</text>
+            <text class="favorite-card__price">¥{{ item.hourlyRate }}/小时</text>
           </view>
         </view>
-        <view class="favorite-card__actions" @tap.stop="confirmDelete(item)">
+        <view class="favorite-card__actions" @tap.stop="confirmDelete({ type: 'interpreter', id: item.id })">
+          <text class="favorite-card__delete">🗑</text>
+        </view>
+      </view>
+
+      <!-- 景点卡片 -->
+      <view
+        v-for="item in (filterType === 'all' || filterType === 'scenic') ? scenicFavorites : []"
+        :key="item.id"
+        class="favorite-card scenic-card"
+        @tap="goToDetail('scenic', item.id)"
+      >
+        <SafeImage
+          class="favorite-card__cover"
+          :src="item.coverImg"
+          mode="aspectFill"
+        />
+        <view class="favorite-card__info">
+          <text class="favorite-card__name">{{ item.displayName }}</text>
+          <text class="favorite-card__category">{{ item.openingHours || '' }}</text>
+          <view class="favorite-card__meta">
+            <text class="favorite-card__rating">★ {{ item.rating }}</text>
+            <text class="favorite-card__price">{{ item.ticketPrice === 0 ? t('scenic.free') : '¥' + item.ticketPrice }}</text>
+          </view>
+        </view>
+        <view class="favorite-card__actions" @tap.stop="confirmDelete({ type: 'scenic', id: item.id })">
           <text class="favorite-card__delete">🗑</text>
         </view>
       </view>
@@ -206,22 +256,42 @@ onMounted(loadFavorites)
 }
 
 /* ── 筛选标签 ── */
+.filter-tabs-wrapper {
+  background-color: $color-bg-card;
+  border-bottom: 2rpx solid $color-divider;
+  padding: 20rpx 0;
+}
+
 .filter-tabs {
   display: flex;
-  padding: 24rpx 32rpx;
-  gap: 16rpx;
-  border-bottom: 2rpx solid $color-divider;
-  background-color: $color-bg-card;
+  padding: 0 24rpx;
+  white-space: nowrap;
+
+  /* 隐藏滚动条但保持滚动功能 */
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .filter-tab {
-  padding: 16rpx 32rpx;
-  border-radius: 32rpx;
-  border: 2rpx solid transparent;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid transparent;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+
+  &:last-child {
+    margin-right: 0;
+  }
 
   &__text {
-    font-size: 28rpx;
+    font-size: 26rpx;
     color: $color-text-secondary;
+    white-space: nowrap;
+    line-height: 1.4;
   }
 
   &--active {
@@ -232,6 +302,18 @@ onMounted(loadFavorites)
       color: $color-primary;
       font-weight: 600;
     }
+  }
+}
+
+/* ── 加载状态 ── */
+.loading {
+  display: flex;
+  justify-content: center;
+  padding-top: 120rpx;
+
+  &__text {
+    font-size: 28rpx;
+    color: $color-text-hint;
   }
 }
 

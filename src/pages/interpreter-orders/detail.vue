@@ -182,6 +182,7 @@ function calculateDuration(startTime, endTime) {
 }
 
 onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.orderDetail.title') })
   if (!isLoggedIn()) {
     uni.showModal({
       title: t('common.tip'),

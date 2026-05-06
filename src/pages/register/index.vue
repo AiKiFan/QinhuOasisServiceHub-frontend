@@ -3,7 +3,7 @@
   @author AiKiFan
 -->
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { register } from '@/api/auth'
 import { t } from '@/utils/i18n'
 
@@ -46,6 +46,10 @@ async function handleRegister() {
     submitting.value = false
   }
 }
+
+onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.register.title') })
+})
 </script>
 
 <template>

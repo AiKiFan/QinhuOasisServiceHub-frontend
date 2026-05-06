@@ -63,7 +63,10 @@ function onPullDownRefresh() {
   loadRankList().finally(() => uni.stopPullDownRefresh())
 }
 
-onMounted(loadRankList)
+onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.rank.title') })
+  loadRankList()
+})
 </script>
 
 <template>

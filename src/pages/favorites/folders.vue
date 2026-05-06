@@ -18,7 +18,7 @@ import {
   createFavoriteTag,
   deleteFavoriteTag,
 } from '@/api/favorite-folder'
-import { getAllFavorites, removeFavorite } from '@/utils/favorites'
+import { removeFavorite } from '@/api/favorites'
 
 /** 当前选中的标签页 */
 const activeTab = ref('folders')
@@ -267,7 +267,7 @@ async function deleteSelectedFavorites() {
         for (const id of selectedFavorites.value) {
           const item = folderFavorites.value.find(f => f.id === id)
           if (item) {
-            await removeFavorite(id, item.type)
+            await removeFavorite(item.type, id)
           }
         }
         uni.showToast({ title: '删除成功', icon: 'success' })
@@ -313,6 +313,7 @@ function goToDetail(item) {
 }
 
 onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.favoritesFolders.title') })
   loadFolders()
   loadTags()
 })

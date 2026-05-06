@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试收藏API</title>
+</head>
+<body>
+    <h1>收藏功能诊断测试</h1>
+
+    <div>
+        <h2>步骤1: 登录获取Token</h2>
+        <input id="username" placeholder="用户名" value="testuser">
+        <input id="password" type="password" placeholder="密码" value="123456">
+        <button onclick="login()">登录</button>
+        <div id="tokenDisplay"></div>
+    </div>
+
+    <div>
+        <h2>步骤2: 添加餐厅收藏</h2>
+        <input id="restaurantId" placeholder="餐厅ID" value="1">
+        <button onclick="addFavorite()">添加收藏</button>
+        <div id="addResult"></div>
+    </div>
+
+    <div>
+        <h2>步骤3: 查询收藏列表</h2>
+        <button onclick="getFavorites()">查询收藏</button>
+        <div id="favoritesList"></div>
+    </div>
+
+    <div>
+        <h2>步骤4: 检查特定收藏状态</h2>
+        <button onclick="checkFavorite()">检查收藏状态</button>
+        <div id="checkResult"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:8080/api';
+        let token = '';
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(BASE_URL + '/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+                console.log('登录响应:', result);
+
+                if (result.code === 200 && result.data && result.data.token) {
+                    token = result.data.token;
+                    document.getElementById('tokenDisplay').innerHTML =
+                        `<span style="color: green">登录成功! Token: ${token}</span>`;
+                } else {
+                    document.getElementById('tokenDisplay').innerHTML =
+                        `<span style="color: red">登录失败: ${result.message}</span>`;
+                }
+            } catch (error) {
+                console.error('登录错误:', error);
+                document.getElementById('tokenDisplay').innerHTML =
+                    `<span style="color: red">请求失败: ${error.message}</span>`;
+            }
+        }
+
+        async function addFavorite() {
+            if (!token) {
+                alert('请先登录!');
+                return;
+            }
+
+            const restaurantId = document.getElementById('restaurantId').value;
+            const data = {
+                targetType: 'restaurant',
+                targetId: parseInt(restaurantId)
+            };
+
+            console.log('发送收藏请求:', data);
+
+            try {
+                const response = await fetch(BASE_URL + '/favorites', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                console.log('添加收藏响应:', result);
+
+                document.getElementById('addResult').innerHTML =
+                    `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                console.error('添加收藏错误:', error);
+                document.getElementById('addResult').innerHTML =
+                    `<span style="color: red">请求失败: ${error.message}</span>`;
+            }
+        }
+
+        async function getFavorites() {
+            if (!token) {
+                alert('请先登录!');
+                return;
+            }
+
+            try {
+                const response = await fetch(BASE_URL + '/favorites', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                const result = await response.json();
+                console.log('查询收藏响应:', result);
+
+                document.getElementById('favoritesList').innerHTML =
+                    `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                console.error('查询收藏错误:', error);
+                document.getElementById('favoritesList').innerHTML =
+                    `<span style="color: red">请求失败: ${error.message}</span>`;
+            }
+        }
+
+        async function checkFavorite() {
+            if (!token) {
+                alert('请先登录!');
+                return;
+            }
+
+            const restaurantId = document.getElementById('restaurantId').value;
+
+            try {
+                const response = await fetch(
+                    BASE_URL + '/favorites/check/restaurant/' + restaurantId, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                const result = await response.json();
+                console.log('检查收藏状态响应:', result);
+
+                document.getElementById('checkResult').innerHTML =
+                    `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                console.error('检查收藏错误:', error);
+                document.getElementById('checkResult').innerHTML =
+                    `<span style="color: red">请求失败: ${error.message}</span>`;
+            }
+        }
+    </script>
+</body>
+</html>

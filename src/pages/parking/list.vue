@@ -45,6 +45,7 @@
 
 <script>
 import { getParkingSpaces } from '@/api/parking'
+import { t } from '@/utils/i18n'
 import PullRefresh from '@/components/PullRefresh/index.vue'
 
 export default {
@@ -60,6 +61,7 @@ export default {
   },
 
   onLoad() {
+    uni.setNavigationBarTitle({ title: t('page.parkingList.title') })
     this.loadParkingSpaces()
   },
 

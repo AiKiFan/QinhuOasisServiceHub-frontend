@@ -133,7 +133,10 @@ function onPullDownRefresh() {
   loadPage(true).finally(() => uni.stopPullDownRefresh())
 }
 
-onMounted(() => loadPage(true))
+onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.interpreterList.title') })
+  loadPage(true)
+})
 </script>
 
 

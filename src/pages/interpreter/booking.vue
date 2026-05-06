@@ -160,16 +160,17 @@ async function handleSubmit() {
 }
 
 onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.interpreterBooking.title') })
   // 获取页面参数
   const pages = getCurrentPages()
   const currentPage = pages[pages.length - 1]
   const options = currentPage.options || {}
   pageOptions.value = options
-  
+
   if (options.hourlyRate) {
     hourlyRate.value = Number(options.hourlyRate)
   }
-  
+
   if (!options.profileId) {
     uni.showToast({ title: t('common.paramError'), icon: 'none' })
     setTimeout(() => uni.navigateBack(), 1000)

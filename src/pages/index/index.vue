@@ -4,26 +4,22 @@
   @author AiKiFan
 -->
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { t } from '@/utils/i18n'
-import { isLoggedIn, getUser } from '@/utils/auth'
 import TabBar from '@/components/TabBar/index.vue'
 import HomeSwiper from '@/components/HomeSwiper/index.vue'
 import WeatherCard from '@/components/WeatherCard/index.vue'
 
-/** 用户信息 */
-const loggedIn = ref(false)
-const nickname = ref('')
-
 /** 快捷入口配置 */
-const QUICK_LINKS = [
-  { icon: '🏆', label: '餐厅排行', path: '/pages/rank/index', color: '#E8956D' },
-  { icon: '🍽️', label: '餐厅列表', path: '/pages/restaurant/list', color: '#FF7043' },
-  { icon: '🌍', label: '译员服务', path: '/pages/interpreter/list', color: '#5C6BC0' },
-  { icon: '🚗', label: '停车场', path: '/pages/parking/list', color: '#FFB74D' },
-  { icon: '📣', label: '投诉建议', path: '/pages/feedback/submit', color: '#F48FB1' },
-  { icon: '👤', label: '个人中心', path: '/pages/profile/index', color: '#78909C' },
-]
+const QUICK_LINKS = computed(() => [
+  { icon: '🏆', label: t('home.rankings'), path: '/pages/rank/index', color: '#E8956D' },
+  { icon: '🍽️', label: t('home.restaurantList'), path: '/pages/restaurant/list', color: '#FF7043' },
+  { icon: '🌍', label: t('home.interpreters'), path: '/pages/interpreter/list', color: '#5C6BC0' },
+  { icon: '🏔️', label: t('home.scenicSpots'), path: '/pages/scenic/list', color: '#66BB6A' },
+  { icon: '🚗', label: t('home.parking'), path: '/pages/parking/list', color: '#FFB74D' },
+  { icon: '📣', label: t('home.feedback'), path: '/pages/feedback/submit', color: '#F48FB1' },
+  { icon: '👤', label: t('home.profile'), path: '/pages/profile/index', color: '#78909C' },
+])
 
 /** 快捷入口跳转 */
 function goTo(path) {
@@ -39,29 +35,13 @@ function goTo(path) {
 }
 
 onMounted(() => {
-  loggedIn.value = isLoggedIn()
-  if (loggedIn.value) {
-    const u = getUser()
-    nickname.value = u?.nickname || u?.username || ''
-  }
+  // 动态设置导航栏标题
+  uni.setNavigationBarTitle({ title: t('page.index.title') })
 })
 </script>
 
 <template>
   <view class="home-page">
-    <!-- 顶部欢迎语 -->
-    <view class="home-header">
-      <view class="home-header__left">
-        <text class="home-header__greeting">
-          {{ loggedIn ? `👋 ${t('common.hello')}，${nickname}` : '👋 欢迎来到' }}
-        </text>
-        <text class="home-header__title">🏔️ 明月山 · 沁湖驿站</text>
-      </view>
-      <view class="home-header__right">
-        <text class="home-header__slogan">畅游明月</text>
-      </view>
-    </view>
-
     <!-- 轮播图 -->
     <HomeSwiper />
 
@@ -70,11 +50,11 @@ onMounted(() => {
 
     <!-- 快捷入口 -->
     <view class="quick-section">
-      <text class="section-title">⚡ 快捷服务</text>
+      <text class="section-title">⚡ {{ t('home.quickServices') }}</text>
       <view class="quick-grid">
         <view
           v-for="link in QUICK_LINKS"
-          :key="link.label"
+          :key="link.path"
           class="quick-item"
           @tap="goTo(link.path)"
         >
@@ -100,45 +80,6 @@ onMounted(() => {
 .home-page {
   min-height: 100vh;
   background-color: $color-bg-page;
-  padding-bottom: 120rpx;
-}
-
-/* ── 头部 ── */
-.home-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 32rpx 32rpx 16rpx;
-
-  &__left {
-    display: flex;
-    flex-direction: column;
-    gap: 8rpx;
-  }
-
-  &__greeting {
-    font-size: 28rpx;
-    color: $color-text-secondary;
-  }
-
-  &__title {
-    font-size: 40rpx;
-    font-weight: 700;
-    color: $color-text-primary;
-  }
-
-  &__right {
-    padding-top: 8rpx;
-  }
-
-  &__slogan {
-    font-size: 24rpx;
-    color: $color-primary;
-    background-color: $color-primary-light;
-    padding: 8rpx 20rpx;
-    border-radius: 24rpx;
-    font-weight: 500;
-  }
 }
 
 /* ── 区域标题 ── */
@@ -188,6 +129,10 @@ onMounted(() => {
     font-size: 24rpx;
     color: $color-text-primary;
     font-weight: 500;
+    text-align: center;
+    word-break: break-word;
+    line-height: 1.3;
+    max-width: 100%;
   }
 }
 </style>

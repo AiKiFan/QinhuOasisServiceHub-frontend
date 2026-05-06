@@ -6,6 +6,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { searchRestaurants, searchInterpreters } from '@/api/search'
+import { searchScenicSpots } from '@/api/scenic'
 import { t } from '@/utils/i18n'
 import TabBar from '@/components/TabBar/index.vue'
 import SafeImage from '@/components/SafeImage/index.vue'
@@ -15,6 +16,7 @@ const SEARCH_TYPES = {
   ALL: 'all',
   RESTAURANT: 'restaurant',
   INTERPRETER: 'interpreter',
+  SCENIC: 'scenic',
 }
 
 /** 当前搜索类型 */
@@ -51,6 +53,7 @@ const typeLabels = computed(() => [
   { key: SEARCH_TYPES.ALL, label: t('search.type.all') },
   { key: SEARCH_TYPES.RESTAURANT, label: t('search.type.restaurant') },
   { key: SEARCH_TYPES.INTERPRETER, label: t('search.type.interpreter') },
+  { key: SEARCH_TYPES.SCENIC, label: t('search.type.scenic') },
 ])
 
 /** 验证餐厅结果是否匹配关键词 */
@@ -66,6 +69,15 @@ function isValidInterpreterResult(item, keyword) {
   return (item.realName && item.realName.toLowerCase().includes(kw)) ||
          (item.nickname && item.nickname.toLowerCase().includes(kw)) ||
          (item.school && item.school.toLowerCase().includes(kw))
+}
+
+/** 验证景点结果是否匹配关键词 */
+function isValidScenicResult(item, keyword) {
+  const kw = keyword.toLowerCase()
+  return (item.displayName && item.displayName.toLowerCase().includes(kw)) ||
+         (item.name && item.name.toLowerCase().includes(kw)) ||
+         (item.address && item.address.toLowerCase().includes(kw)) ||
+         (item.desc && item.desc.toLowerCase().includes(kw))
 }
 
 /** 加载搜索历史 */
@@ -95,7 +107,7 @@ function switchType(type) {
 async function performSearch(refresh = true) {
   const word = keyword.value.trim()
   if (!word) { searchResults.value = []; return }
-  
+
   if (refresh) {
     currentPage.value = 1
     searchResults.value = []
@@ -105,25 +117,33 @@ async function performSearch(refresh = true) {
     loadingMore.value = true
   }
   hasError.value = false
-  
+
   try {
     let result
     if (searchType.value === SEARCH_TYPES.RESTAURANT) {
-      const res = await searchRestaurants(word, currentPage.value, PAGE_SIZE)
+      const res = await searchRestaurants(word, currentPage.value, PAGE_SIZE).catch(() => ({ list: [] }))
       const filtered = (res.list || [])
         .filter(item => isValidRestaurantResult(item, word))
         .map(item => ({ ...item, type: SEARCH_TYPES.RESTAURANT }))
       result = { list: filtered, total: filtered.length }
     } else if (searchType.value === SEARCH_TYPES.INTERPRETER) {
-      const res = await searchInterpreters(word, currentPage.value, PAGE_SIZE)
+      const res = await searchInterpreters(word, currentPage.value, PAGE_SIZE).catch(() => ({ list: [] }))
       const filtered = (res.list || [])
         .filter(item => isValidInterpreterResult(item, word))
         .map(item => ({ ...item, type: SEARCH_TYPES.INTERPRETER }))
       result = { list: filtered, total: filtered.length }
+    } else if (searchType.value === SEARCH_TYPES.SCENIC) {
+      const res = await searchScenicSpots(word, currentPage.value, PAGE_SIZE).catch(() => ({ list: [] }))
+      const filtered = (res.list || [])
+        .filter(item => isValidScenicResult(item, word))
+        .map(item => ({ ...item, type: SEARCH_TYPES.SCENIC }))
+      result = { list: filtered, total: filtered.length }
     } else {
-      const [rRes, iRes] = await Promise.all([
-        searchRestaurants(word, currentPage.value, PAGE_SIZE),
-        searchInterpreters(word, currentPage.value, PAGE_SIZE),
+      // 并行搜索所有类型，用try-catch包裹避免单个失败影响全部
+      const [rRes, iRes, sRes] = await Promise.all([
+        searchRestaurants(word, currentPage.value, PAGE_SIZE).catch(() => ({ list: [] })),
+        searchInterpreters(word, currentPage.value, PAGE_SIZE).catch(() => ({ list: [] })),
+        searchScenicSpots(word, currentPage.value, PAGE_SIZE).catch(() => ({ list: [] })),
       ])
       const rItems = (rRes.list || [])
         .filter(item => isValidRestaurantResult(item, word))
@@ -131,7 +151,10 @@ async function performSearch(refresh = true) {
       const iItems = (iRes.list || [])
         .filter(item => isValidInterpreterResult(item, word))
         .map(i => ({ ...i, type: SEARCH_TYPES.INTERPRETER }))
-      const items = [...rItems, ...iItems]
+      const sItems = (sRes.list || [])
+        .filter(item => isValidScenicResult(item, word))
+        .map(i => ({ ...i, type: SEARCH_TYPES.SCENIC }))
+      const items = [...rItems, ...iItems, ...sItems]
       result = { list: items, total: items.length }
     }
 
@@ -168,6 +191,8 @@ function goToDetail(item) {
     uni.navigateTo({ url: `/pages/restaurant/detail?id=${item.id}` })
   } else if (item.type === SEARCH_TYPES.INTERPRETER) {
     uni.navigateTo({ url: `/pages/interpreter/detail?id=${item.id}` })
+  } else if (item.type === SEARCH_TYPES.SCENIC) {
+    uni.navigateTo({ url: `/pages/scenic/detail?id=${item.id}` })
   }
 }
 
@@ -232,22 +257,27 @@ function clearSearch() {
   showSuggestions.value = false
 }
 
-onMounted(loadSearchHistory)
+onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.search.title') })
+  loadSearchHistory()
+})
 </script>
 
 <template>
   <view class="search-page">
     <!-- 搜索类型筛选 -->
-    <view class="type-filter">
-      <view
-        v-for="type in typeLabels"
-        :key="type.key"
-        class="type-item"
-        :class="{ 'type-item--active': searchType === type.key }"
-        @tap="switchType(type.key)"
-      >
-        <text class="type-item__text">{{ type.label }}</text>
-      </view>
+    <view class="type-filter-wrapper">
+      <scroll-view class="type-filter" scroll-x enable-flex scroll-with-animation>
+        <view
+          v-for="type in typeLabels"
+          :key="type.key"
+          class="type-item"
+          :class="{ 'type-item--active': searchType === type.key }"
+          @tap="switchType(type.key)"
+        >
+          <text class="type-item__text">{{ type.label }}</text>
+        </view>
+      </scroll-view>
     </view>
 
     <!-- 搜索框 -->
@@ -351,15 +381,13 @@ onMounted(loadSearchHistory)
       <!-- 景点卡片 -->
       <template v-for="item in searchResults.filter(i => i.type === 'scenic')" :key="item.id">
         <view class="scenic-card" @tap="goToDetail(item)">
-          <view class="scenic-card__emoji-wrap">
-            <text class="scenic-card__emoji">{{ item.emoji || '🏞️' }}</text>
-          </view>
+          <SafeImage class="scenic-card__cover" :src="item.coverImg" mode="aspectFill" />
           <view class="scenic-card__info">
-            <text class="scenic-card__name">{{ item.name }}</text>
-            <text class="scenic-card__desc">{{ item.desc }}</text>
+            <text class="scenic-card__name">{{ item.displayName || item.name }}</text>
+            <text class="scenic-card__desc">{{ item.openingHours || item.address || '' }}</text>
             <view class="scenic-card__meta">
               <text class="scenic-card__rating">★ {{ item.rating }}</text>
-              <text class="scenic-card__ticket">{{ item.ticket }}</text>
+              <text class="scenic-card__price">{{ item.ticketPrice === 0 ? t('scenic.free') : '¥' + item.ticketPrice }}</text>
             </view>
           </view>
         </view>
@@ -409,26 +437,52 @@ onMounted(loadSearchHistory)
 }
 
 /* ── 类型筛选 ── */
+.type-filter-wrapper {
+  background-color: $color-bg-card;
+  border-bottom: 2rpx solid $color-divider;
+  padding: 20rpx 0;
+}
+
 .type-filter {
   display: flex;
-  padding: 24rpx 32rpx;
-  gap: 16rpx;
-  border-bottom: 2rpx solid $color-divider;
-  background-color: $color-bg-card;
-  flex-wrap: wrap;
+  padding: 0 24rpx;
+  white-space: nowrap;
+
+  /* 隐藏滚动条但保持滚动功能 */
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .type-item {
-  padding: 16rpx 28rpx;
-  border-radius: 32rpx;
-  border: 2rpx solid transparent;
-  
-  &__text { font-size: 26rpx; color: $color-text-secondary; }
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid transparent;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  &__text {
+    font-size: 26rpx;
+    color: $color-text-secondary;
+    white-space: nowrap;
+    line-height: 1.4;
+  }
 
   &--active {
     border-color: $color-primary;
     background-color: $color-primary-light;
-    & .type-item__text { color: $color-primary; font-weight: 600; }
+
+    & .type-item__text {
+      color: $color-primary;
+      font-weight: 600;
+    }
   }
 }
 
@@ -695,26 +749,19 @@ onMounted(loadSearchHistory)
 /* 景点卡片 */
 .scenic-card {
   display: flex;
-  align-items: center;
   background-color: $color-bg-card;
   border-radius: 20rpx;
   margin-bottom: 20rpx;
   padding: 20rpx;
   box-shadow: 0 2rpx 16rpx rgba(67, 160, 71, 0.1);
 
-  &__emoji-wrap {
+  &__cover {
     flex-shrink: 0;
-    width: 80rpx;
-    height: 80rpx;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #43A047 0%, #66BB6A 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 140rpx;
+    height: 100rpx;
+    border-radius: 12rpx;
     margin-right: 16rpx;
   }
-
-  &__emoji { font-size: 40rpx; }
 
   &__info {
     flex: 1;
@@ -743,7 +790,7 @@ onMounted(loadSearchHistory)
 
   &__meta { display: flex; gap: 16rpx; }
   &__rating { font-size: 22rpx; color: $color-rank-gold; }
-  &__ticket { font-size: 22rpx; color: #43A047; font-weight: 500; }
+  &__price { font-size: 22rpx; color: #43A047; font-weight: 500; }
 }
 
 /* ── 加载更多 ── */

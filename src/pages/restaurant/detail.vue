@@ -9,7 +9,7 @@ import { getRestaurantDetail } from '@/api/restaurant'
 import { getCommentList, postComment, COMMENT_TARGET_TYPE } from '@/api/comment'
 import { isLoggedIn, getUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
-import { isFavorited as checkIsFavorited, addFavorite, removeFavorite, FAVORITE_TYPE } from '@/utils/favorites'
+import { checkFavorite, addFavorite, removeFavorite, FAVORITE_TYPE } from '@/api/favorites'
 import SafeImage from '@/components/SafeImage/index.vue'
 
 /** 页面参数（餐厅 ID），由 onLoad 注入，不再依赖 Storage 脏数据 */
@@ -59,23 +59,46 @@ const isFavorited = ref(false)
 /**
  * 切换收藏状态
  */
-function toggleFavorite() {
+async function toggleFavorite() {
   const restaurant = detail.value
   if (!restaurant) return
-  if (isFavorited.value) {
-    removeFavorite(restaurant.id, FAVORITE_TYPE.RESTAURANT)
-    isFavorited.value = false
-    uni.showToast({ title: t('favorites.removed'), icon: 'success' })
-  } else {
-    addFavorite(restaurant.id, FAVORITE_TYPE.RESTAURANT, {
-      displayName: restaurant.displayName,
-      coverImg: restaurant.coverImg,
-      category: restaurant.category,
-      rating: restaurant.rating,
-      avgPrice: restaurant.avgPrice,
+
+  if (!isLoggedIn()) {
+    uni.showModal({
+      title: t('common.confirm'),
+      content: '请先登录后再收藏',
+      confirmText: t('restaurant.goLogin'),
+      success(res) {
+        if (res.confirm) {
+          uni.navigateTo({ url: '/pages/login/index' })
+        }
+      },
     })
-    isFavorited.value = true
-    uni.showToast({ title: '已收藏', icon: 'success' })
+    return
+  }
+
+  const previousState = isFavorited.value
+  console.log('[收藏] 切换前状态:', previousState, '餐厅ID:', restaurant.id)
+
+  try {
+    if (isFavorited.value) {
+      console.log('[收藏] 调用removeFavorite API')
+      await removeFavorite(FAVORITE_TYPE.RESTAURANT, restaurant.id)
+      isFavorited.value = false
+      uni.showToast({ title: t('favorites.removed'), icon: 'success' })
+      console.log('[收藏] removeFavorite成功')
+    } else {
+      console.log('[收藏] 调用addFavorite API')
+      await addFavorite(FAVORITE_TYPE.RESTAURANT, restaurant.id)
+      isFavorited.value = true
+      uni.showToast({ title: '已收藏', icon: 'success' })
+      console.log('[收藏] addFavorite成功')
+    }
+  } catch (error) {
+    console.error('[收藏] API调用失败:', error)
+    // API调用失败,恢复状态
+    isFavorited.value = previousState
+    uni.showToast({ title: t('common.loadFailed'), icon: 'none' })
   }
 }
 
@@ -93,7 +116,15 @@ async function loadDetail() {
   hasError.value = false
   try {
     detail.value = await getRestaurantDetail(id)
-    isFavorited.value = checkIsFavorited(id, FAVORITE_TYPE.RESTAURANT)
+    // 检查收藏状态（如果已登录）
+    if (isLoggedIn()) {
+      try {
+        const result = await checkFavorite(FAVORITE_TYPE.RESTAURANT, id)
+        isFavorited.value = result || false
+      } catch {
+        isFavorited.value = false
+      }
+    }
     loadComments(true)
   } catch {
     hasError.value = true
@@ -225,6 +256,7 @@ onLoad((options) => {
   // uni-app 官方方式：onLoad 回调参数即为 URL query 解析后的对象
   // 例如 /pages/restaurant/detail?id=1 → options = { id: '1' }
   pageOptions.value = options || {}
+  uni.setNavigationBarTitle({ title: t('page.restaurantDetail.title') })
   loadDetail()
 })
 </script>

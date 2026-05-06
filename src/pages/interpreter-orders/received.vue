@@ -195,6 +195,7 @@ const statusFilters = computed(() => [
 ])
 
 onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.ordersReceived.title') })
   if (!isLoggedIn()) {
     uni.showModal({
       title: t('common.tip'),
