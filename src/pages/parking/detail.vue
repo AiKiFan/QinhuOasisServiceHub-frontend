@@ -84,6 +84,7 @@
 
 <script>
 import { getParkingSpaces, bookParking } from '@/api/parking'
+import { t } from '@/utils/i18n'
 
 export default {
   data() {
@@ -127,6 +128,7 @@ export default {
   },
 
   onLoad(options) {
+    uni.setNavigationBarTitle({ title: t('page.parkingDetail.title') })
     this.parkingId = options.id
     this.loadParkingDetail()
   },

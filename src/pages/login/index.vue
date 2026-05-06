@@ -3,7 +3,7 @@
   @author AiKiFan
 -->
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { login } from '@/api/auth'
 import { saveToken, saveUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
@@ -54,6 +54,10 @@ async function handleLogin() {
 function goRegister() {
   uni.navigateTo({ url: '/pages/register/index' })
 }
+
+onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.login.title') })
+})
 </script>
 
 <template>

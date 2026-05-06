@@ -194,6 +194,7 @@ function onPullDownRefresh() {
 }
 
 onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.ordersList.title') })
   if (!isLoggedIn()) {
     uni.showModal({
       title: t('common.tip'),

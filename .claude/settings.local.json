@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mysql -uroot -p123456 qinhu_oasis -e \"SHOW TABLES LIKE 'biz_user_favorite'\")",
+      "Bash(mysql -uroot -p123456 qinhu_oasis -e ' *)"
+    ]
+  }
+}

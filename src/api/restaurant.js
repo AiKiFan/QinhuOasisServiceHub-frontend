@@ -28,10 +28,15 @@ export function getRestaurantRank(top = DEFAULT_RANK_TOP) {
  * @param {number} [size=DEFAULT_PAGE_SIZE]
  * @returns {Promise<{total:number, list:Array}>}
  */
-export function getRestaurantList(category = '', page = 1, size = DEFAULT_PAGE_SIZE) {
+export async function getRestaurantList(category = '', page = 1, size = DEFAULT_PAGE_SIZE) {
   const params = { page, size }
   if (category) params.category = category
-  return get('/restaurants', params)
+  const data = await get('/restaurants', params)
+  // 确保返回的数据结构一致，避免null/undefined导致的问题
+  return {
+    list: data?.list || [],
+    total: data?.total || 0
+  }
 }
 
 /**

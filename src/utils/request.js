@@ -90,3 +90,13 @@ export function post(url, body = {}) {
 export function put(url, body = {}) {
   return request(url, 'PUT', body)
 }
+
+/**
+ * DELETE 请求简写
+ * @param {string} url
+ * @param {object} [params={}]
+ * @returns {Promise<any>}
+ */
+export function del(url, params = {}) {
+  return request(url, 'DELETE', params)
+}

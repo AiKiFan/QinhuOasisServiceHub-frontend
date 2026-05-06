@@ -19,23 +19,56 @@ const hasError = ref(false)
 
 /** 天气图标映射（和风天气 icon code → Emoji） */
 const WEATHER_ICONS = {
-  '100': '☀️', // 晴
-  '101': '🌤', // 多云
-  '102': '⛅', // 少云
-  '103': '🌥', // 晴间多云
-  '104': '☁️', // 阴
-  '300': '🌦', // 阵雨
-  '301': '🌧', // 强阵雨
-  '302': '⛈', // 雷阵雨
-  '305': '🌧', // 小雨
-  '306': '🌧', // 中雨
-  '307': '🌧', // 大雨
-  '400': '🌨', // 小雪
-  '401': '🌨', // 中雪
-  '402': '❄️', // 大雪
-  '501': '🌫', // 雾
-  '502': '🌫', // 霾
-  '999': '🌈', // 未知
+  // 晴
+  '100': '☀️',
+  // 多云
+  '101': '🌤️', '102': '⛅', '103': '🌥️',
+  // 阴
+  '104': '☁️',
+  // 风
+  '200': '🌪️', '201': '🌫️', '202': '🌫️', '203': '🌫️', '204': '🌫️', '205': '💨',
+  // 雷
+  '206': '⛈️', '207': '⚡️', '208': '⛈️', '209': '⛈️',
+  // 暴雨
+  '210': '🌧️', '211': '🌧️', '212': '🌧️', '213': '🌧️',
+  // 雨
+  '300': '🌦️', '301': '🌧️', '302': '⛈️', '303': '🌧️', '304': '🌧️', '305': '🌧️', '306': '🌧️', '307': '🌧️', '308': '🌧️', '309': '🌧️',
+  // 雪
+  '400': '🌨️', '401': '🌨️', '402': '❄️', '403': '❄️', '404': '🌨️', '405': '🌨️', '406': '🌨️', '407': '🌨️', '408': '❄️', '409': '❄️',
+  // 雾霾
+  '500': '🌫️', '501': '🌫️', '502': '🌫️', '503': '🌫️', '504': '🌫️', '505': '🌫️', '506': '🌫️', '507': '🌫️', '508': '🌫️', '509': '🌫️', '510': '🌫️', '511': '🌫️', '512': '🌫️', '513': '🌫️', '514': '🌫️', '515': '🌫️', '516': '🌫️', '517': '🌫️', '518': '🌫️', '519': '🌫️',
+  // 晴/阴/多云
+  '800': '☀️', '801': '🌤️', '802': '⛅', '803': '🌥️', '804': '☁️',
+  // 其他
+  '900': '🌨️', '901': '🌧️', '902': '❄️', '903': '☀️', '904': '🌤️', '905': '💨', '906': '🌨️', '907': '🌫️', '908': '🌫️', '909': '🌪️', '999': '☀️',
+}
+
+/** 星期映射（带国际化） */
+const WEEK_DAYS = ['weather.sun', 'weather.mon', 'weather.tue', 'weather.wed', 'weather.thu', 'weather.fri', 'weather.sat']
+
+/** 风向映射 */
+const WIND_DIR_MAP = {
+  '北风': 'weather.north',
+  '东北风': 'weather.northeast',
+  '东风': 'weather.east',
+  '东南风': 'weather.southeast',
+  '南风': 'weather.south',
+  '西南风': 'weather.southwest',
+  '西风': 'weather.west',
+  '西北风': 'weather.northwest',
+  '无风': 'weather.calm',
+}
+
+/** 获取星期几（带国际化） */
+function getWeekDay(dateStr) {
+  const dayIndex = new Date(dateStr).getDay()
+  return t(WEEK_DAYS[dayIndex])
+}
+
+/** 获取风向翻译 */
+function getWindDir(dir) {
+  const key = WIND_DIR_MAP[dir]
+  return key ? t(key) : dir
 }
 
 /** 获取天气 Emoji */
@@ -59,13 +92,6 @@ async function loadWeather() {
   } finally {
     loading.value = false
   }
-}
-
-/** 获取星期几 */
-function getWeekDay(dateStr) {
-  const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-  const date = new Date(dateStr)
-  return days[date.getDay()]
 }
 
 onMounted(loadWeather)
@@ -92,12 +118,11 @@ onMounted(loadWeather)
           <text class="weather__icon-big">{{ getWeatherEmoji(weather.icon) }}</text>
           <view class="weather__info">
             <text class="weather__temp">{{ weather.temp }}°C</text>
-            <text class="weather__desc">{{ weather.text }}</text>
           </view>
         </view>
         <view class="weather__now-right">
-          <text class="weather__scenic">明月山景区</text>
-          <text class="weather__detail">体感 {{ weather.feelsLike }}°C · {{ weather.windDir }}{{ weather.windScale }}级 · 湿度 {{ weather.humidity }}%</text>
+          <text class="weather__scenic">{{ t('weather.location') }}</text>
+          <text class="weather__detail">{{ getWindDir(weather.windDir) }} {{ weather.windScale }}{{ t('weather.level') }} · {{ t('weather.humidity') }} {{ weather.humidity }}%</text>
         </view>
       </view>
 
@@ -110,7 +135,6 @@ onMounted(loadWeather)
         >
           <text class="weather__day-name">{{ getWeekDay(day.date) }}</text>
           <text class="weather__day-icon">{{ getWeatherEmoji(day.icon) }}</text>
-          <text class="weather__day-desc">{{ day.text }}</text>
           <text class="weather__day-temp">{{ day.tempMin }}/{{ day.tempMax }}°C</text>
         </view>
       </view>
@@ -185,11 +209,6 @@ onMounted(loadWeather)
     line-height: 1.2;
   }
 
-  &__desc {
-    font-size: 26rpx;
-    color: rgba(255, 255, 255, 0.85);
-  }
-
   &__now-right {
     display: flex;
     flex-direction: column;
@@ -206,6 +225,7 @@ onMounted(loadWeather)
     font-size: 22rpx;
     color: rgba(255, 255, 255, 0.75);
     margin-top: 4rpx;
+    text-align: right;
   }
 
   &__forecast {
@@ -223,21 +243,17 @@ onMounted(loadWeather)
 
   &__day-name {
     font-size: 24rpx;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.8);
   }
 
   &__day-icon {
     font-size: 36rpx;
   }
 
-  &__day-desc {
-    font-size: 22rpx;
-    color: rgba(255, 255, 255, 0.75);
-  }
-
   &__day-temp {
-    font-size: 22rpx;
-    color: rgba(255, 255, 255, 0.8);
+    font-size: 24rpx;
+    color: #ffffff;
+    font-weight: 500;
   }
 }
 </style>

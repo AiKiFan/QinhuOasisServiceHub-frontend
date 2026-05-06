@@ -212,6 +212,25 @@
         "navigationBarTextStyle": "white",
         "backgroundColor": "#FFF8F0"
       }
+    },
+    {
+      "path": "pages/scenic/list",
+      "style": {
+        "navigationBarTitleText": "景点浏览",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/scenic/detail",
+      "style": {
+        "navigationBarTitleText": "景点详情",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
     }
   ],
   "globalStyle": {

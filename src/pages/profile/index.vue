@@ -129,7 +129,10 @@ function goEditProfile() {
   uni.navigateTo({ url: '/pages/profile/edit' })
 }
 
-onMounted(init)
+onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.profile.title') })
+  init()
+})
 </script>
 
 <template>

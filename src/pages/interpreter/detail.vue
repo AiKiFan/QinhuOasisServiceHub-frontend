@@ -8,7 +8,7 @@ import { getInterpreterDetail } from '@/api/interpreter'
 import { getCommentList, postComment, COMMENT_TARGET_TYPE } from '@/api/comment'
 import { isLoggedIn, getUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
-import { isFavorite, addFavorite, removeFavorite, FAVORITE_TYPE } from '@/utils/favorites'
+import { checkFavorite, addFavorite, removeFavorite, FAVORITE_TYPE } from '@/api/favorites'
 import SafeImage from '@/components/SafeImage/index.vue'
 
 // SafeImage 已导入，无需额外操作
@@ -51,28 +51,38 @@ const isFavorited = ref(false)
 /**
  * 切换收藏状态
  */
-function toggleFavorite() {
+async function toggleFavorite() {
   const interpreter = detail.value
   if (!interpreter) return
-  if (isFavorited.value) {
-    removeFavorite(interpreter.id, FAVORITE_TYPE.INTERPRETER)
-    isFavorited.value = false
-    uni.showToast({ title: t('favorites.removed'), icon: 'success' })
-  } else {
-    addFavorite({
-      id: interpreter.id,
-      type: FAVORITE_TYPE.INTERPRETER,
-      data: {
-        nickname: interpreter.nickname,
-        realName: interpreter.realName,
-        avatar: interpreter.avatar,
-        school: interpreter.school,
-        rating: interpreter.rating,
-        hourlyRate: interpreter.hourlyRate,
+
+  if (!isLoggedIn()) {
+    uni.showModal({
+      title: t('common.confirm'),
+      content: '请先登录后再收藏',
+      confirmText: t('restaurant.goLogin'),
+      success(res) {
+        if (res.confirm) {
+          uni.navigateTo({ url: '/pages/login/index' })
+        }
       },
     })
-    isFavorited.value = true
-    uni.showToast({ title: t('favorites.added'), icon: 'success' })
+    return
+  }
+
+  try {
+    if (isFavorited.value) {
+      await removeFavorite(FAVORITE_TYPE.INTERPRETER, interpreter.id)
+      isFavorited.value = false
+      uni.showToast({ title: t('favorites.removed'), icon: 'success' })
+    } else {
+      await addFavorite(FAVORITE_TYPE.INTERPRETER, interpreter.id)
+      isFavorited.value = true
+      uni.showToast({ title: t('favorites.added'), icon: 'success' })
+    }
+  } catch (error) {
+    // API调用失败,恢复状态
+    isFavorited.value = !isFavorited.value
+    uni.showToast({ title: t('common.loadFailed'), icon: 'none' })
   }
 }
 
@@ -98,7 +108,15 @@ async function loadDetail() {
   hasError.value = false
   try {
     detail.value = await getInterpreterDetail(id)
-    isFavorited.value = isFavorite(id, FAVORITE_TYPE.INTERPRETER)
+    // 检查收藏状态（如果已登录）
+    if (isLoggedIn()) {
+      try {
+        const result = await checkFavorite(FAVORITE_TYPE.INTERPRETER, id)
+        isFavorited.value = result || false
+      } catch {
+        isFavorited.value = false
+      }
+    }
     loadComments(true)
   } catch {
     hasError.value = true
@@ -218,6 +236,7 @@ function previewCert(url) {
 }
 
 onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.interpreterDetail.title') })
   isUserLoggedIn.value = isLoggedIn()
   currentUser.value = getUser()
   // 获取页面参数（id 从上一个页面传递）

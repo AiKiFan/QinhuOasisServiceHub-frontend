@@ -146,6 +146,7 @@ async function handleSubmit() {
 }
 
 onMounted(() => {
+  uni.setNavigationBarTitle({ title: t('page.profileEdit.title') })
   loadUser()
 })
 </script>
