@@ -7,6 +7,7 @@ import { ref, onMounted } from 'vue'
 import TabBar from '@/components/TabBar/index.vue'
 import { isLoggedIn, getUser, saveUser, logout, isAdmin as checkIsAdmin } from '@/utils/auth'
 import { getMyProfile } from '@/api/user'
+import { getMyProfile as getInterpreterProfile } from '@/api/interpreter'
 import { getLanguage, toggleLanguage as toggleLang, t } from '@/utils/i18n'
 import SafeImage from '@/components/SafeImage/index.vue'
 
@@ -89,9 +90,44 @@ function handleToggleLanguage() {
   })
 }
 
-/** 跳转译员申请页 */
-function goApplyInterpreter() {
+/** 跳转译员申请页（Bug #12: 不同身份不同弹窗） */
+async function goApplyInterpreter() {
+  const user = getUser()
+  if (!user) {
+    uni.navigateTo({ url: '/pages/interpreter/apply' })
+    return
+  }
+  // 管理员
+  if (user.role === 2) {
+    showIdentityDialog.value = 'admin'
+    return
+  }
+  // 检查是否已有译员档案
+  try {
+    const profile = await getInterpreterProfile()
+    if (profile) {
+      if (profile.status === 1) {
+        // 已通过
+        showIdentityDialog.value = 'already'
+        return
+      } else {
+        // 有申请（待审核/已拒绝），跳转到申请状态页
+        uni.navigateTo({ url: '/pages/interpreter/my-application' })
+        return
+      }
+    }
+  } catch {
+    // 忽略错误，直接跳转申请页
+  }
+  // 游客，正常进入申请页
   uni.navigateTo({ url: '/pages/interpreter/apply' })
+}
+
+/** 身份弹窗 */
+const showIdentityDialog = ref('')
+
+function closeIdentityDialog() {
+  showIdentityDialog.value = ''
 }
 
 /** 跳转我的翻译订单 */
@@ -279,10 +315,25 @@ onMounted(() => {
         <text class="confirm-dialog__content">{{ t('profile.logoutConfirmContent') }}</text>
         <view class="confirm-dialog__actions">
           <view class="confirm-dialog__btn confirm-dialog__btn--cancel" @tap="showLogoutConfirm = false">
-            <text>取消</text>
+            <text>{{ t('common.cancel') }}</text>
           </view>
           <view class="confirm-dialog__btn confirm-dialog__btn--confirm" @tap="confirmLogout">
-            <text>退出</text>
+            <text>{{ t('profile.logout') }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 身份弹窗（申请译员时） -->
+    <view v-if="showIdentityDialog" class="confirm-mask" @tap.self="closeIdentityDialog">
+      <view class="confirm-dialog">
+        <text class="confirm-dialog__title">{{ t('profile.applyInterpreter') }}</text>
+        <text class="confirm-dialog__content">
+          {{ showIdentityDialog === 'admin' ? t('interpreter.identity.adminMessage') : t('interpreter.identity.alreadyMessage') }}
+        </text>
+        <view class="confirm-dialog__actions">
+          <view class="confirm-dialog__btn confirm-dialog__btn--confirm" @tap="closeIdentityDialog" style="flex:1">
+            <text>{{ t('common.confirm') }}</text>
           </view>
         </view>
       </view>

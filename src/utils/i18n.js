@@ -241,6 +241,8 @@ const ZH = {
   'profile.edit.nicknameRequired': '请输入昵称',
   'profile.edit.emailRequired': '请输入邮箱',
   'profile.edit.saveSuccess': '保存成功',
+  'profile.edit.noChange': '当前暂无内容修改，无需保存',
+  'profile.edit.noChangeTitle': '提示',
   'profile.edit.save': '保存',
 
   // ── 餐厅排行榜 ──
@@ -415,13 +417,30 @@ const ZH = {
   'common.uploadSuccess': '上传成功',
   'common.uploadFailed': '上传失败',
 
-  // ── 管理端：译员审核 ──
+  // ── 我的申请 ──
+  'interpreter.myApplication.title': '我的申请',
+  'interpreter.myApplication.status.pending': '待审核',
+  'interpreter.myApplication.status.approved': '已通过',
+  'interpreter.myApplication.status.rejected': '已拒绝',
+  'interpreter.myApplication.rejectReason': '拒绝原因',
+  'interpreter.myApplication.editBtn': '修改申请',
+  'interpreter.myApplication.noApplication': '您还没有提交申请',
+  'interpreter.myApplication.goApply': '去申请',
+  'interpreter.myApplication.updateSuccess': '修改成功',
+  'interpreter.myApplication.alreadyInterpreter': '您已经是译员',
+
+  // ── 身份弹窗 ──
+  'interpreter.identity.adminTitle': '提示',
+  'interpreter.identity.adminMessage': '当前为管理员账号',
+  'interpreter.identity.alreadyTitle': '提示',
+  'interpreter.identity.alreadyMessage': '您已经是译员',
+
+  // ── 管端：译员审核 ──
   'admin.review.title': '译员申请审核',
   'admin.review.status.all': '全部',
   'admin.review.status.pending': '待审核',
   'admin.review.status.approved': '已通过',
   'admin.review.status.rejected': '已拒绝',
-  'admin.review.status.suspended': '暂停',
   'admin.review.approveBtn': '通过',
   'admin.review.rejectBtn': '拒绝',
   'admin.review.rejectReason': '拒绝理由',
@@ -434,6 +453,38 @@ const ZH = {
   'admin.review.rejectSuccess': '已拒绝',
   'admin.review.rejectReasonRequired': '请输入拒绝理由',
   'admin.review.applyTime': '申请时间',
+
+  // ── 译员预约（补充） ──
+  'interpreter.booking.startTimeRequired': '请选择开始时间',
+  'interpreter.booking.endTimeRequired': '请选择结束时间',
+  'interpreter.booking.endBeforeStart': '结束时间必须晚于开始时间',
+  'interpreter.booking.minGroupSize': '团队人数至少2人',
+  'interpreter.booking.bookingSuccess': '预约成功',
+  'interpreter.booking.timeLabel': '服务时间',
+  'interpreter.booking.timePlaceholder': '请输入时间（YYYY-MM-DD HH:mm）',
+  'interpreter.booking.invalidTimeFormat': '时间格式不正确',
+
+  // ── 译员申请（补充） ──
+  'interpreter.apply.loginRequired': '请先登录后再申请',
+  'interpreter.apply.realNameRequired': '请输入真实姓名',
+  'interpreter.apply.studentIdRequired': '请输入学号',
+  'interpreter.apply.schoolRequired': '请输入学校',
+  'interpreter.apply.certRequired': '请上传资质证书',
+  'interpreter.apply.introRequired': '请填写中文和英文介绍',
+  'interpreter.apply.hourlyRateInvalid': '时薪不能为负数',
+  'interpreter.apply.serviceTypeRequired': '请选择至少一种服务类型',
+  'interpreter.apply.submitSuccess': '申请已提交，等待审核',
+  'interpreter.apply.realNamePlaceholder': '请输入真实姓名',
+  'interpreter.apply.studentIdPlaceholder': '请输入学号',
+  'interpreter.apply.schoolPlaceholder': '请输入学校名称',
+  'interpreter.apply.reuploadHint': '点击重新上传',
+  'interpreter.apply.introPlaceholder': '介绍您的英语能力和服务经验...',
+  'interpreter.apply.introEnPlaceholder': '介绍您的英语能力和服务经验...',
+  'interpreter.apply.hourlyRatePlaceholder': '请输入时薪',
+  'interpreter.apply.englishLevelRequired': '请选择英语等级',
+  'interpreter.apply.certHint': '最多上传4张资质证书',
+  'interpreter.apply.addCert': '继续添加',
+  'interpreter.apply.certMaxTip': '最多上传4张资质证书',
 
   // ── 管理端：投诉建议 ──
   'admin.feedback.title': '投诉建议管理',
@@ -692,6 +743,8 @@ const EN = {
   'profile.edit.nicknameRequired': 'Nickname is required',
   'profile.edit.emailRequired': 'Email is required',
   'profile.edit.saveSuccess': 'Saved successfully',
+  'profile.edit.noChange': 'No changes to save',
+  'profile.edit.noChangeTitle': 'Notice',
   'profile.edit.save': 'Save',
 
   // ── 餐厅排行榜 ──
@@ -833,7 +886,25 @@ const EN = {
   'interpreter.apply.submitBtn': 'Submit Application',
   'interpreter.apply.submitting': 'Submitting...',
 
-  // ── 我的订单 ──
+  // ── My Application ──
+  'interpreter.myApplication.title': 'My Application',
+  'interpreter.myApplication.status.pending': 'Pending',
+  'interpreter.myApplication.status.approved': 'Approved',
+  'interpreter.myApplication.status.rejected': 'Rejected',
+  'interpreter.myApplication.rejectReason': 'Reject Reason',
+  'interpreter.myApplication.editBtn': 'Edit Application',
+  'interpreter.myApplication.noApplication': 'You have not submitted an application',
+  'interpreter.myApplication.goApply': 'Apply Now',
+  'interpreter.myApplication.updateSuccess': 'Updated successfully',
+  'interpreter.myApplication.alreadyInterpreter': 'You are already an interpreter',
+
+  // ── Identity Dialog ──
+  'interpreter.identity.adminTitle': 'Notice',
+  'interpreter.identity.adminMessage': 'This is an admin account',
+  'interpreter.identity.alreadyTitle': 'Notice',
+  'interpreter.identity.alreadyMessage': 'You are already an interpreter',
+
+  // ── My Orders ──
   'orders.title': 'My Orders',
   'orders.noData': 'No orders',
   'orders.loadMore': 'Load More',
@@ -892,6 +963,10 @@ const EN = {
   'interpreter.apply.introPlaceholder': 'Describe your English skills and service experience...',
   'interpreter.apply.introEnPlaceholder': 'Describe your English skills and service experience...',
   'interpreter.apply.hourlyRatePlaceholder': 'Enter hourly rate',
+  'interpreter.apply.englishLevelRequired': 'Please select your English level',
+  'interpreter.apply.certHint': 'Upload up to 4 certificates',
+  'interpreter.apply.addCert': 'Add More',
+  'interpreter.apply.certMaxTip': 'Maximum 4 certificates allowed',
 
   // ── 管理端：译员审核 ──
   'admin.review.title': 'Interpreter Review',
@@ -899,7 +974,6 @@ const EN = {
   'admin.review.status.pending': 'Pending',
   'admin.review.status.approved': 'Approved',
   'admin.review.status.rejected': 'Rejected',
-  'admin.review.status.suspended': 'Suspended',
   'admin.review.approveBtn': 'Approve',
   'admin.review.rejectBtn': 'Reject',
   'admin.review.rejectReason': 'Reject Reason',

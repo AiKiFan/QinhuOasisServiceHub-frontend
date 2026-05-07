@@ -40,6 +40,25 @@ export function applyInterpreter(data) {
 }
 
 /**
+ * 获取当前用户的译员申请档案
+ * 接口：GET /api/interpreter/my-profile
+ * @returns {Promise<Object|null>}
+ */
+export function getMyProfile() {
+  return get('/interpreter/my-profile')
+}
+
+/**
+ * 更新当前用户的译员申请（仅待审核状态可修改）
+ * 接口：POST /api/interpreter/my-application
+ * @param {Object} data - 申请数据
+ * @returns {Promise<Object>}
+ */
+export function updateMyApplication(data) {
+  return post('/interpreter/my-application', data)
+}
+
+/**
  * 上传译员资质证书（需要登录）
  * 接口：POST /api/interpreter/cert-upload
  * @param {string} filePath - 文件本地路径

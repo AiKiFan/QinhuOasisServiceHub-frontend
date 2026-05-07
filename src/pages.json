@@ -130,6 +130,15 @@
       }
     },
     {
+      "path": "pages/interpreter/my-application",
+      "style": {
+        "navigationBarTitleText": "我的申请",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
       "path": "pages/admin/interpreter-review",
       "style": {
         "navigationBarTitleText": "译员审核",

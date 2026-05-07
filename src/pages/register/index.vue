@@ -40,8 +40,10 @@ async function handleRegister() {
     await register(username.value.trim(), password.value, nickname.value.trim())
     uni.showToast({ title: '注册成功，请登录', icon: 'success' })
     setTimeout(() => uni.navigateBack(), 800)
-  } catch (err) {
-    // 错误已在 request.js 中统一提示，无需重复处理
+  } catch {
+    // 注册失败时清空密码字段，用户可重新输入
+    password.value = ''
+    confirmPwd.value = ''
   } finally {
     submitting.value = false
   }

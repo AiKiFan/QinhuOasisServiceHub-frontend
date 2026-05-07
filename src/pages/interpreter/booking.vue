@@ -17,12 +17,16 @@ const SERVICE_TYPES = computed(() => [
 /** 页面参数（译员档案 ID 和时薪） */
 const pageOptions = ref({})
 
+/** 日期选择器绑定值 */
+const startDate = ref('')
+const startTime = ref('')
+const endDate = ref('')
+const endTime = ref('')
+
 /** 表单数据 */
 const form = ref({
-  serviceType: 1, // 1=个人 2=团队
+  serviceType: 1,
   groupSize: 1,
-  startTime: '',
-  endTime: '',
   remark: '',
 })
 
@@ -32,13 +36,48 @@ const hourlyRate = ref(50)
 /** 提交中状态 */
 const submitting = ref(false)
 
+/** 生成未来7天日期选项 */
+const dateRange = computed(() => {
+  const dates = []
+  const now = new Date()
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(now)
+    d.setDate(d.getDate() + i)
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    dates.push(`${y}-${m}-${day}`)
+  }
+  return dates
+})
+
+/** 生成时间选项（08:00 ~ 20:00，每半小时） */
+const timeOptions = computed(() => {
+  const times = []
+  for (let h = 8; h <= 20; h++) {
+    times.push(`${String(h).padStart(2, '0')}:00`)
+    if (h < 20) times.push(`${String(h).padStart(2, '0')}:30`)
+  }
+  return times
+})
+
+/** 计算合并后的开始/结束时间字符串 */
+const startDateTime = computed(() => {
+  if (!startDate.value || !startTime.value) return ''
+  return `${startDate.value} ${startTime.value}`
+})
+const endDateTime = computed(() => {
+  if (!endDate.value || !endTime.value) return ''
+  return `${endDate.value} ${endTime.value}`
+})
+
 /**
  * 计算服务时长（小时）
  */
 const durationHours = computed(() => {
-  if (!form.value.startTime || !form.value.endTime) return 0
-  const start = new Date(form.value.startTime)
-  const end = new Date(form.value.endTime)
+  if (!startDateTime.value || !endDateTime.value) return 0
+  const start = new Date(startDateTime.value)
+  const end = new Date(endDateTime.value)
   const diff = end.getTime() - start.getTime()
   const hours = diff / (1000 * 60 * 60)
   return hours > 0 ? hours : 0
@@ -51,56 +90,20 @@ const totalFee = computed(() => {
   return durationHours.value * hourlyRate.value
 })
 
-/**
- * 选择开始时间
- */
-function chooseStartTime() {
-  const now = new Date()
-  const minDate = now.toISOString().slice(0, 10)
-  
-  uni.showModal({
-    title: t('interpreter.booking.startTime'),
-    editable: true,
-    placeholderText: t('interpreter.booking.timePlaceholder'),
-    success: (res) => {
-      if (res.confirm && res.content) {
-        // 简单验证格式
-        if (isValidDateTime(res.content)) {
-          form.value.startTime = res.content
-        } else {
-          uni.showToast({ title: t('interpreter.booking.invalidTimeFormat'), icon: 'none' })
-        }
-      }
-    },
-  })
+/** 日期选择器变更 */
+function onStartDateChange(e) {
+  startDate.value = dateRange.value[e.detail.value] || ''
+}
+function onEndDateChange(e) {
+  endDate.value = dateRange.value[e.detail.value] || ''
 }
 
-/**
- * 选择结束时间
- */
-function chooseEndTime() {
-  uni.showModal({
-    title: t('interpreter.booking.endTime'),
-    editable: true,
-    placeholderText: t('interpreter.booking.timePlaceholder'),
-    success: (res) => {
-      if (res.confirm && res.content) {
-        if (isValidDateTime(res.content)) {
-          form.value.endTime = res.content
-        } else {
-          uni.showToast({ title: t('interpreter.booking.invalidTimeFormat'), icon: 'none' })
-        }
-      }
-    },
-  })
+/** 时间选择器变更 */
+function onStartTimeChange(e) {
+  startTime.value = timeOptions.value[e.detail.value] || ''
 }
-
-/**
- * 简单验证日期时间格式
- */
-function isValidDateTime(str) {
-  const date = new Date(str)
-  return date instanceof Date && !isNaN(date)
+function onEndTimeChange(e) {
+  endTime.value = timeOptions.value[e.detail.value] || ''
 }
 
 /**
@@ -120,12 +123,12 @@ async function handleSubmit() {
     })
     return
   }
-  
-  if (!form.value.startTime) {
+
+  if (!startDateTime.value) {
     uni.showToast({ title: t('interpreter.booking.startTimeRequired'), icon: 'none' })
     return
   }
-  if (!form.value.endTime) {
+  if (!endDateTime.value) {
     uni.showToast({ title: t('interpreter.booking.endTimeRequired'), icon: 'none' })
     return
   }
@@ -137,15 +140,15 @@ async function handleSubmit() {
     uni.showToast({ title: t('interpreter.booking.minGroupSize'), icon: 'none' })
     return
   }
-  
+
   submitting.value = true
   try {
     await createInterpreterOrder({
       profileId: pageOptions.value.profileId,
       serviceType: form.value.serviceType,
       groupSize: form.value.groupSize,
-      startTime: new Date(form.value.startTime).toISOString(),
-      endTime: new Date(form.value.endTime).toISOString(),
+      startTime: new Date(startDateTime.value).toISOString(),
+      endTime: new Date(endDateTime.value).toISOString(),
       remark: form.value.remark,
     })
     uni.showToast({ title: t('interpreter.booking.bookingSuccess'), icon: 'success' })
@@ -218,22 +221,50 @@ onMounted(() => {
       <!-- 服务时间 -->
       <view class="form-section">
         <text class="form-section__title">{{ t('interpreter.booking.timeLabel') }}</text>
-        
-        <view class="time-row" @tap="chooseStartTime">
-          <text class="time-row__label">{{ t('interpreter.booking.startTime') }}</text>
-          <view class="time-row__value">
-            <text class="time-row__text">{{ form.startTime || t('common.select') }}</text>
-            <text class="time-row__arrow">›</text>
-          </view>
-        </view>
 
-        <view class="time-row time-row--last" @tap="chooseEndTime">
-          <text class="time-row__label">{{ t('interpreter.booking.endTime') }}</text>
-          <view class="time-row__value">
-            <text class="time-row__text">{{ form.endTime || t('common.select') }}</text>
-            <text class="time-row__arrow">›</text>
+        <!-- 开始日期 -->
+        <picker :range="dateRange" @change="onStartDateChange">
+          <view class="time-row">
+            <text class="time-row__label">{{ t('interpreter.booking.startTime') }}</text>
+            <view class="time-row__value">
+              <text class="time-row__text">{{ startDate || t('common.select') }}</text>
+              <text class="time-row__arrow">›</text>
+            </view>
           </view>
-        </view>
+        </picker>
+
+        <!-- 开始时间 -->
+        <picker v-if="startDate" :range="timeOptions" @change="onStartTimeChange">
+          <view class="time-row">
+            <text class="time-row__label"></text>
+            <view class="time-row__value">
+              <text class="time-row__text">{{ startTime || t('common.select') }}</text>
+              <text class="time-row__arrow">›</text>
+            </view>
+          </view>
+        </picker>
+
+        <!-- 结束日期 -->
+        <picker :range="dateRange" @change="onEndDateChange">
+          <view class="time-row">
+            <text class="time-row__label">{{ t('interpreter.booking.endTime') }}</text>
+            <view class="time-row__value">
+              <text class="time-row__text">{{ endDate || t('common.select') }}</text>
+              <text class="time-row__arrow">›</text>
+            </view>
+          </view>
+        </picker>
+
+        <!-- 结束时间 -->
+        <picker v-if="endDate" :range="timeOptions" @change="onEndTimeChange">
+          <view class="time-row time-row--last">
+            <text class="time-row__label"></text>
+            <view class="time-row__value">
+              <text class="time-row__text">{{ endTime || t('common.select') }}</text>
+              <text class="time-row__arrow">›</text>
+            </view>
+          </view>
+        </picker>
       </view>
 
       <!-- 备注 -->

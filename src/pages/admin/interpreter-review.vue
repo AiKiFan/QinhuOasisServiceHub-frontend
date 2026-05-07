@@ -9,13 +9,12 @@ import { getUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
 import SafeImage from '@/components/SafeImage/index.vue'
 
-/** 状态筛选（支持国际化） */
+/** 状态筛选（移除暂停状态） */
 const STATUS_FILTER = computed(() => [
   { value: undefined, label: t('common.all') },
   { value: 0, label: t('admin.review.status.pending') },
   { value: 1, label: t('admin.review.status.approved') },
   { value: 2, label: t('admin.review.status.rejected') },
-  { value: 3, label: t('admin.review.status.suspended') },
 ])
 
 /** 英语等级映射（支持国际化） */
@@ -39,6 +38,8 @@ const loading = ref(false)
 
 /** 拒绝理由弹窗 */
 const showRejectModal = ref(false)
+/** 通过确认弹窗 */
+const showApproveModal = ref(false)
 /** 正在审核的 ID */
 const reviewingId = ref(null)
 /** 拒绝理由输入 */
@@ -79,24 +80,26 @@ function openRejectModal(id) {
 }
 
 /**
- * 通过申请
+ * 打开通过确认弹窗
  * @param {number} id
  */
-async function handleApprove(id) {
-  uni.showModal({
-    title: t('admin.review.approveConfirm'),
-    content: t('admin.review.approveContent'),
-    success: async (res) => {
-      if (!res.confirm) return
-      try {
-        await reviewInterpreterProfile(id, true)
-        uni.showToast({ title: t('admin.review.approveSuccess'), icon: 'success' })
-        loadList()
-      } catch {
-        // 错误已在 request.js 中处理
-      }
-    },
-  })
+function openApproveModal(id) {
+  reviewingId.value = id
+  showApproveModal.value = true
+}
+
+/**
+ * 确认通过
+ */
+async function confirmApprove() {
+  try {
+    await reviewInterpreterProfile(reviewingId.value, true)
+    uni.showToast({ title: t('admin.review.approveSuccess'), icon: 'success' })
+    showApproveModal.value = false
+    loadList()
+  } catch {
+    // 错误已在 request.js 中处理
+  }
 }
 
 /**
@@ -122,7 +125,10 @@ async function handleReject() {
  * @param {string} url
  */
 function previewCert(url) {
-  uni.previewImage({ urls: [url], current: url })
+  const certUrls = (url || '').split(',').filter(Boolean)
+  if (certUrls.length > 0) {
+    uni.previewImage({ urls: certUrls, current: url })
+  }
 }
 
 onMounted(() => {
@@ -178,11 +184,10 @@ onMounted(() => {
               'status-badge--pending': item.status === 0,
               'status-badge--approved': item.status === 1,
               'status-badge--rejected': item.status === 2,
-              'status-badge--paused': item.status === 3,
             }"
           >
             <text class="status-badge__text">
-              {{ item.status === 0 ? t('admin.review.status.pending') : item.status === 1 ? t('admin.review.status.approved') : item.status === 2 ? t('admin.review.status.rejected') : t('admin.review.status.suspended') }}
+              {{ item.status === 0 ? t('admin.review.status.pending') : item.status === 1 ? t('admin.review.status.approved') : t('admin.review.status.rejected') }}
             </text>
           </view>
         </view>
@@ -225,14 +230,23 @@ onMounted(() => {
         </view>
 
         <!-- 证书展示 -->
-        <view v-if="item.certUrl" class="cert-section">
+        <view v-if="(item.certUrl || '').split(',').filter(Boolean).length" class="cert-section">
           <text class="cert-section__title">{{ t('interpreter.apply.cert') }}</text>
-          <SafeImage
-            class="cert-image"
-            :src="item.certUrl"
-            mode="aspectFill"
-            :previewable="true"
-          />
+          <view class="cert-grid">
+            <view
+              v-for="(url, index) in (item.certUrl || '').split(',').filter(Boolean)"
+              :key="index"
+              class="cert-grid__item"
+              @tap="previewCert(url)"
+            >
+              <SafeImage
+                class="cert-grid__img"
+                :src="url"
+                mode="aspectFill"
+                :previewable="true"
+              />
+            </view>
+          </view>
         </view>
 
         <!-- 介绍 -->
@@ -252,33 +266,49 @@ onMounted(() => {
           <button class="action-btn action-btn--reject" @tap="openRejectModal(item.id)">
             {{ t('admin.review.rejectBtn') }}
           </button>
-          <button class="action-btn action-btn--approve" @tap="handleApprove(item.id)">
+          <button class="action-btn action-btn--approve" @tap="openApproveModal(item.id)">
             {{ t('admin.review.approveBtn') }}
           </button>
         </view>
       </view>
     </view>
 
-    <!-- 拒绝理由弹窗 -->
-    <uni-popup v-model:show="showRejectModal" type="dialog">
-      <view class="reject-modal">
-        <text class="reject-modal__title">{{ t('admin.review.rejectTitle') }}</text>
+    <!-- 通过确认弹窗（自定义 confirm-dialog 风格） -->
+    <view v-if="showApproveModal" class="confirm-mask" @tap.self="showApproveModal = false">
+      <view class="confirm-dialog">
+        <text class="confirm-dialog__title">{{ t('admin.review.approveConfirm') }}</text>
+        <text class="confirm-dialog__content">{{ t('admin.review.approveContent') }}</text>
+        <view class="confirm-dialog__actions">
+          <view class="confirm-dialog__btn confirm-dialog__btn--cancel" @tap="showApproveModal = false">
+            <text>{{ t('common.cancel') }}</text>
+          </view>
+          <view class="confirm-dialog__btn confirm-dialog__btn--confirm" @tap="confirmApprove">
+            <text>{{ t('admin.review.approveBtn') }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 拒绝理由弹窗（自定义 confirm-dialog 风格） -->
+    <view v-if="showRejectModal" class="confirm-mask" @tap.self="showRejectModal = false">
+      <view class="reject-dialog">
+        <text class="reject-dialog__title">{{ t('admin.review.rejectTitle') }}</text>
         <textarea
-          class="reject-modal__input"
+          class="reject-dialog__input"
           v-model="rejectReason"
           :placeholder="t('admin.review.rejectPlaceholder')"
           maxlength="200"
         />
-        <view class="reject-modal__actions">
-          <button class="reject-modal__btn reject-modal__btn--cancel" @tap="showRejectModal = false">
-            {{ t('common.cancel') }}
-          </button>
-          <button class="reject-modal__btn reject-modal__btn--confirm" @tap="handleReject">
-            {{ t('admin.review.confirmReject') }}
-          </button>
+        <view class="reject-dialog__actions">
+          <view class="reject-dialog__btn reject-dialog__btn--cancel" @tap="showRejectModal = false">
+            <text>{{ t('common.cancel') }}</text>
+          </view>
+          <view class="reject-dialog__btn reject-dialog__btn--confirm" @tap="handleReject">
+            <text>{{ t('admin.review.confirmReject') }}</text>
+          </view>
         </view>
       </view>
-    </uni-popup>
+    </view>
   </view>
 </template>
 
@@ -394,10 +424,6 @@ onMounted(() => {
   &--rejected {
     background-color: #E05252;
   }
-
-  &--paused {
-    background-color: #9BA3AF;
-  }
 }
 
 .card-info {
@@ -455,6 +481,25 @@ onMounted(() => {
   background-color: $color-divider;
 }
 
+.cert-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+
+  &__item {
+    width: 160rpx;
+    height: 160rpx;
+    border-radius: 8rpx;
+    overflow: hidden;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    border-radius: 8rpx;
+  }
+}
+
 /* ── 介绍 ── */
 .intro-section {
   margin-bottom: 24rpx;
@@ -462,7 +507,7 @@ onMounted(() => {
 
 .intro-section__title {
   display: block;
-   font-size: 26rpx;
+  font-size: 26rpx;
   color: $color-text-secondary;
   margin-bottom: 12rpx;
 }
@@ -521,57 +566,117 @@ onMounted(() => {
   }
 }
 
-/* ── 拒绝理由弹窗 ── */
-.reject-modal {
-  width: 600rpx;
-  background-color: #ffffff;
-  border-radius: 20rpx;
-  padding: 32rpx;
-}
-
-.reject-modal__title {
-  display: block;
-  font-size: 32rpx;
-  font-weight: 600;
-  color: $color-text-primary;
-  margin-bottom: 24rpx;
-  text-align: center;
-}
-
-.reject-modal__input {
-  width: 100%;
-  height: 200rpx;
-  padding: 16rpx;
-  background-color: $color-bg-page;
-  border-radius: 12rpx;
-  font-size: 28rpx;
-  color: $color-text-primary;
-  box-sizing: border-box;
-  margin-bottom: 24rpx;
-}
-
-.reject-modal__actions {
+/* ── 自定义确认弹窗（统一风格） ── */
+.confirm-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
-  gap: 16rpx;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
 }
 
-.reject-modal__btn {
-  flex: 1;
-  height: 80rpx;
-  border-radius: 40rpx;
-  border: none;
-  font-size: 28rpx;
-  font-weight: 600;
-  line-height: 80rpx;
+.confirm-dialog {
+  width: 560rpx;
+  background-color: $color-bg-card;
+  border-radius: 24rpx;
+  overflow: hidden;
 
-  &--cancel {
-    background-color: $color-bg-page;
-    color: $color-text-secondary;
+  &__title {
+    display: block;
+    text-align: center;
+    font-size: 32rpx;
+    font-weight: 600;
+    color: $color-text-primary;
+    padding: 48rpx 40rpx 16rpx;
   }
 
-  &--confirm {
-    background-color: #E05252;
-    color: #ffffff;
+  &__content {
+    display: block;
+    text-align: center;
+    font-size: 26rpx;
+    color: $color-text-secondary;
+    padding: 0 40rpx 48rpx;
+    line-height: 1.6;
+  }
+
+  &__actions {
+    display: flex;
+    border-top: 2rpx solid $color-divider;
+  }
+
+  &__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 96rpx;
+    font-size: 30rpx;
+
+    &--cancel {
+      color: $color-text-secondary;
+      border-right: 2rpx solid $color-divider;
+    }
+
+    &--confirm {
+      color: $color-primary;
+      font-weight: 600;
+    }
+  }
+}
+
+/* ── 拒绝弹窗 ── */
+.reject-dialog {
+  width: 600rpx;
+  background-color: $color-bg-card;
+  border-radius: 24rpx;
+  overflow: hidden;
+
+  &__title {
+    display: block;
+    text-align: center;
+    font-size: 32rpx;
+    font-weight: 600;
+    color: $color-text-primary;
+    padding: 48rpx 40rpx 24rpx;
+  }
+
+  &__input {
+    width: calc(100% - 80rpx);
+    height: 200rpx;
+    margin: 0 40rpx;
+    padding: 16rpx;
+    background-color: $color-bg-page;
+    border-radius: 12rpx;
+    font-size: 28rpx;
+    color: $color-text-primary;
+    box-sizing: border-box;
+  }
+
+  &__actions {
+    display: flex;
+    border-top: 2rpx solid $color-divider;
+    margin-top: 32rpx;
+  }
+
+  &__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 96rpx;
+    font-size: 30rpx;
+
+    &--cancel {
+      color: $color-text-secondary;
+      border-right: 2rpx solid $color-divider;
+    }
+
+    &--confirm {
+      color: #E05252;
+      font-weight: 600;
+    }
   }
 }
 </style>

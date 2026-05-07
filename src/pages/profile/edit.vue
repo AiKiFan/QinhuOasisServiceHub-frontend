@@ -18,10 +18,18 @@ const form = ref({
   email: '',
   avatar: '',
 })
+/** 原始值（用于判断是否有变更） */
+const original = ref({
+  nickname: '',
+  email: '',
+  avatar: '',
+})
 /** 加载状态 */
 const loading = ref(false)
 /** 提交状态 */
 const submitting = ref(false)
+/** 无变更弹窗 */
+const showNoChangeDialog = ref(false)
 
 /**
  * 加载用户信息
@@ -36,6 +44,7 @@ async function loadUser() {
       email: data.email || '',
       avatar: data.avatar || '',
     }
+    original.value = { ...form.value }
   } catch {
     // 错误已在 request.js 中统一提示
   } finally {
@@ -90,8 +99,18 @@ async function uploadAvatar(filePath) {
         },
       })
     })
-    // 保存 MinIO URL
+    // 保存 MinIO URL 并立即保存到后端（昵称为空时用缓存值兜底）
     form.value.avatar = uploadRes.url
+    try {
+      const nick = form.value.nickname.trim() || user.value.nickname || ''
+      await updateMyProfile({ nickname: nick, avatar: form.value.avatar })
+      original.value = { ...form.value }
+      const updatedUser = { ...user.value, avatar: form.value.avatar }
+      saveUser(updatedUser)
+      uni.showToast({ title: t('profile.edit.saveSuccess'), icon: 'success' })
+    } catch {
+      // 保存失败时标记头像有变更，下次点击保存仍可提交
+    }
 
     // 同时保存到本地缓存（MinIO 关闭后仍可显示）
     await saveImageCache(uploadRes.url, filePath)
@@ -119,25 +138,31 @@ async function handleSubmit() {
     uni.showToast({ title: t('profile.edit.nicknameRequired'), icon: 'none' })
     return
   }
-  if (!form.value.email.trim()) {
-    uni.showToast({ title: t('profile.edit.emailRequired'), icon: 'none' })
+  // 检查是否有变更
+  const changed =
+    form.value.nickname.trim() !== original.value.nickname ||
+    form.value.email.trim() !== original.value.email ||
+    form.value.avatar !== original.value.avatar
+  if (!changed) {
+    showNoChangeDialog.value = true
     return
   }
   submitting.value = true
   try {
-    await updateMyProfile({
-      nickname: form.value.nickname.trim(),
-      email: form.value.email.trim(),
-      avatar: form.value.avatar,
-    })
-    uni.showToast({ title: t('profile.edit.saveSuccess'), icon: 'success' })
-    // 更新本地用户信息
+    // 只提交实际变更的字段
+    const data = { nickname: form.value.nickname.trim() }
+    if (form.value.email.trim() !== original.value.email) {
+      data.email = form.value.email.trim()
+    }
+    if (form.value.avatar !== original.value.avatar) {
+      data.avatar = form.value.avatar
+    }
+    await updateMyProfile(data)
+    original.value = { ...form.value }
     const updatedUser = { ...user.value, ...form.value }
     saveUser(updatedUser)
-    // 返回上一页
-    setTimeout(() => {
-      uni.navigateBack()
-    }, 1500)
+    uni.showToast({ title: t('profile.edit.saveSuccess'), icon: 'success' })
+    setTimeout(() => uni.navigateBack(), 1500)
   } catch {
     /* error handled by request.js */
   } finally {
@@ -233,6 +258,19 @@ onMounted(() => {
       >
         {{ submitting ? t('common.submitting') : t('profile.edit.save') }}
       </button>
+    </view>
+
+    <!-- 无变更弹窗 -->
+    <view v-if="showNoChangeDialog" class="confirm-mask" @tap.self="showNoChangeDialog = false">
+      <view class="confirm-dialog">
+        <text class="confirm-dialog__title">{{ t('profile.edit.noChangeTitle') }}</text>
+        <text class="confirm-dialog__content">{{ t('profile.edit.noChange') }}</text>
+        <view class="confirm-dialog__actions">
+          <view class="confirm-dialog__btn confirm-dialog__btn--single" @tap="showNoChangeDialog = false">
+            <text>{{ t('common.confirm') }}</text>
+          </view>
+        </view>
+      </view>
     </view>
   </view>
 </template>
@@ -395,6 +433,24 @@ onMounted(() => {
   }
 }
 
+/* ── 头像保存按钮 ── */
+.avatar-save-btn {
+  width: 100%;
+  height: 72rpx;
+  margin-bottom: 20rpx;
+  background-color: $color-primary-light;
+  color: $color-primary;
+  font-size: 26rpx;
+  font-weight: 600;
+  border-radius: 36rpx;
+  border: 2rpx solid $color-primary;
+  line-height: 72rpx;
+
+  &--disabled {
+    opacity: 0.6;
+  }
+}
+
 /* ── 保存按钮 ── */
 .save-btn {
   width: 100%;
@@ -410,6 +466,61 @@ onMounted(() => {
 
   &--disabled {
     opacity: 0.6;
+  }
+}
+
+/* ── 无变更弹窗（统一 confirm-dialog 风格） ── */
+.confirm-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.confirm-dialog {
+  width: 560rpx;
+  background-color: $color-bg-card;
+  border-radius: 24rpx;
+  overflow: hidden;
+
+  &__title {
+    display: block;
+    text-align: center;
+    font-size: 32rpx;
+    font-weight: 600;
+    color: $color-text-primary;
+    padding: 48rpx 40rpx 16rpx;
+  }
+
+  &__content {
+    display: block;
+    text-align: center;
+    font-size: 26rpx;
+    color: $color-text-secondary;
+    padding: 0 40rpx 48rpx;
+    line-height: 1.6;
+  }
+
+  &__actions {
+    display: flex;
+    border-top: 2rpx solid $color-divider;
+  }
+
+  &__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 96rpx;
+    font-size: 30rpx;
+
+    &--single {
+      color: $color-primary;
+      font-weight: 600;
+    }
   }
 }
 </style>

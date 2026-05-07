@@ -232,7 +232,10 @@ async function handlePostComment() {
  * @param {string} url
  */
 function previewCert(url) {
-  uni.previewImage({ urls: [url], current: url })
+  const certUrls = (detail.value?.certUrl || '').split(',').filter(Boolean)
+  if (certUrls.length > 0) {
+    uni.previewImage({ urls: certUrls, current: url || certUrls[0] })
+  }
 }
 
 onMounted(() => {
@@ -337,14 +340,23 @@ onMounted(() => {
       </view>
 
       <!-- 证书展示 -->
-      <view v-if="detail.certUrl" class="cert-card">
+      <view v-if="(detail.certUrl || '').split(',').filter(Boolean).length" class="cert-card">
         <text class="section-title">{{ t('interpreter.certificate') }}</text>
-        <SafeImage
-          class="cert-image"
-          :src="detail.certUrl"
-          mode="widthFix"
-          :previewable="true"
-        />
+        <view class="cert-grid">
+          <view
+            v-for="(url, index) in (detail.certUrl || '').split(',').filter(Boolean)"
+            :key="index"
+            class="cert-grid__item"
+            @tap="previewCert(url)"
+          >
+            <SafeImage
+              class="cert-grid__img"
+              :src="url"
+              mode="aspectFill"
+              :previewable="true"
+            />
+          </view>
+        </view>
         <text class="cert-hint">{{ t('interpreter.clickToPreview') }}</text>
       </view>
 
@@ -669,6 +681,25 @@ onMounted(() => {
   width: 100%;
   border-radius: 12rpx;
   background-color: $color-divider;
+}
+
+.cert-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+
+  &__item {
+    width: 200rpx;
+    height: 200rpx;
+    border-radius: 8rpx;
+    overflow: hidden;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    border-radius: 8rpx;
+  }
 }
 
 .cert-hint {

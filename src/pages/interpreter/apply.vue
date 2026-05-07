@@ -29,8 +29,8 @@ const form = ref({
   realName: '',
   studentId: '',
   school: '',
-  englishLevel: 1,
-  certUrl: '',
+  englishLevel: null,
+  certUrls: [],
   introduction: '',
   introductionEn: '',
   serviceTypes: 3,
@@ -58,21 +58,26 @@ function toggleServiceType(value) {
   form.value.serviceTypes ^= value
 }
 
-/** 选择证书图片 */
+/** 选择资质图片（最多4张） */
 function chooseCertImage() {
+  const remain = 4 - form.value.certUrls.length
+  if (remain <= 0) {
+    uni.showToast({ title: t('interpreter.apply.certMaxTip'), icon: 'none' })
+    return
+  }
   uni.chooseImage({
-    count: 1,
+    count: remain,
     sizeType: ['compressed'],
     success: (res) => {
-      const filePath = res.tempFilePaths[0]
-  uni.showLoading({ title: t('common.uploading') })
-      uploadInterpreterCert(filePath)
-        .then(result => {
-          form.value.certUrl = result.url
+      const tempFilePaths = res.tempFilePaths
+      uni.showLoading({ title: t('common.uploading') })
+      Promise.all(tempFilePaths.map(fp => uploadInterpreterCert(fp)))
+        .then(results => {
+          results.forEach(r => form.value.certUrls.push(r.url))
           uni.hideLoading()
           uni.showToast({ title: t('common.uploadSuccess'), icon: 'success' })
         })
-        .catch(err => {
+        .catch(() => {
           uni.hideLoading()
           uni.showToast({ title: t('common.uploadFailed'), icon: 'none' })
         })
@@ -81,11 +86,18 @@ function chooseCertImage() {
 }
 
 /**
- * 预览证书
+ * 删除资质图片
  */
-function previewCert() {
-  if (form.value.certUrl) {
-    uni.previewImage({ urls: [form.value.certUrl], current: form.value.certUrl })
+function removeCertImage(index) {
+  form.value.certUrls.splice(index, 1)
+}
+
+/**
+ * 预览资质图片
+ */
+function previewCert(url) {
+  if (url) {
+    uni.previewImage({ urls: form.value.certUrls, current: url })
   }
 }
 
@@ -118,7 +130,11 @@ async function handleSubmit() {
     uni.showToast({ title: t('interpreter.apply.schoolRequired'), icon: 'none' })
     return
   }
-  if (!form.value.certUrl) {
+  if (form.value.englishLevel === null) {
+    uni.showToast({ title: t('interpreter.apply.englishLevelRequired'), icon: 'none' })
+    return
+  }
+  if (!form.value.certUrls.length) {
     uni.showToast({ title: t('interpreter.apply.certRequired'), icon: 'none' })
     return
   }
@@ -141,7 +157,7 @@ async function handleSubmit() {
       studentId: form.value.studentId,
       school: form.value.school,
       englishLevel: form.value.englishLevel,
-      certUrl: form.value.certUrl,
+      certUrl: form.value.certUrls.join(','),
       introduction: form.value.introduction,
       introductionEn: form.value.introductionEn,
       serviceTypes: form.value.serviceTypes,
@@ -149,7 +165,7 @@ async function handleSubmit() {
     })
     uni.showToast({ title: t('interpreter.apply.submitSuccess'), icon: 'success' })
     setTimeout(() => {
-      uni.navigateBack()
+      uni.redirectTo({ url: '/pages/interpreter/my-application' })
     }, 1500)
   } catch {
     // 错误已在 request.js 中通过 Toast 展示
@@ -204,7 +220,7 @@ onMounted(() => {
         <text class="form-section__title">{{ t('interpreter.apply.englishLevel') }} *</text>
         <view class="level-selector" @tap="chooseEnglishLevel">
           <text class="level-selector__label">
-            {{ ENGLISH_LEVELS.value.find(el => el.value === form.englishLevel)?.label || t('common.select') }}
+            {{ ENGLISH_LEVELS.find(el => el.value === form.englishLevel)?.label || t('common.select') }}
           </text>
           <text class="level-selector__arrow">›</text>
         </view>
@@ -213,18 +229,39 @@ onMounted(() => {
       <!-- 资质证书 -->
       <view class="form-section">
         <text class="form-section__title">{{ t('interpreter.apply.cert') }} *</text>
-        <view v-if="form.certUrl" class="cert-uploaded" @tap="previewCert">
-          <SafeImage
-            class="cert-preview"
-            :src="form.certUrl"
-            mode="aspectFill"
-            :previewable="true"
-          />
-          <text class="cert-uploaded__hint">{{ t('interpreter.apply.reuploadHint') }}</text>
+        <!-- 已上传图片网格 -->
+        <view v-if="form.certUrls.length" class="cert-grid">
+          <view
+            v-for="(url, index) in form.certUrls"
+            :key="index"
+            class="cert-grid__item"
+          >
+            <SafeImage
+              class="cert-grid__img"
+              :src="url"
+              mode="aspectFill"
+              :previewable="true"
+              @tap="previewCert(url)"
+            />
+            <view class="cert-grid__del" @tap.stop="removeCertImage(index)">
+              <text class="cert-grid__del-icon">×</text>
+            </view>
+          </view>
+          <!-- 继续添加按钮（未满4张时显示） -->
+          <view
+            v-if="form.certUrls.length < 4"
+            class="cert-grid__add"
+            @tap="chooseCertImage"
+          >
+            <text class="cert-grid__add-icon">+</text>
+            <text class="cert-grid__add-text">{{ t('interpreter.apply.addCert') }}</text>
+          </view>
         </view>
+        <!-- 上传入口（无图片时） -->
         <view v-else class="cert-upload" @tap="chooseCertImage">
           <view class="cert-upload__icon">📷</view>
           <text class="cert-upload__text">{{ t('interpreter.apply.uploadCert') }}</text>
+          <text class="cert-upload__hint">{{ t('interpreter.apply.certHint') }}</text>
         </view>
       </view>
 
@@ -423,6 +460,76 @@ onMounted(() => {
   &__text {
     font-size: 24rpx;
     color: $color-text-hint;
+  }
+
+  &__hint {
+    display: block;
+    font-size: 22rpx;
+    color: $color-text-hint;
+    margin-top: 8rpx;
+  }
+}
+
+/* ── 资质图片网格 ── */
+.cert-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+
+  &__item {
+    position: relative;
+    width: 200rpx;
+    height: 200rpx;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    border-radius: 12rpx;
+  }
+
+  &__del {
+    position: absolute;
+    top: -16rpx;
+    right: -16rpx;
+    width: 44rpx;
+    height: 44rpx;
+    background-color: rgba(0, 0, 0, 0.55);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__del-icon {
+    font-size: 32rpx;
+    color: #fff;
+    line-height: 1;
+    font-weight: 600;
+  }
+
+  &__add {
+    width: 200rpx;
+    height: 200rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: $color-bg-page;
+    border: 2rpx dashed $color-divider;
+    border-radius: 12rpx;
+  }
+
+  &__add-icon {
+    font-size: 56rpx;
+    color: $color-text-hint;
+    line-height: 1;
+  }
+
+  &__add-text {
+    font-size: 22rpx;
+    color: $color-text-hint;
+    margin-top: 8rpx;
   }
 }
 
