@@ -3,6 +3,7 @@
  * @author AiKiFan
  */
 import { post } from '@/utils/request'
+import { getToken } from '@/utils/auth'
 
 /**
  * 提交投诉建议（用户端）
@@ -21,15 +22,14 @@ export function submitFeedback(data) {
 
 /**
  * 上传反馈图片
- * 接口：POST /api/feedback/upload
+ * 接口：POST /api/files/upload（FileController）
  * @param {string} filePath - 文件本地路径
  * @returns {Promise<{url:string, originalName:string, size:number}>}
  */
 export function uploadFeedbackImage(filePath) {
-  const { getToken } = require('@/utils/auth')
   return new Promise((resolve, reject) => {
     uni.uploadFile({
-      url: '/api/feedback/upload',
+      url: 'http://localhost:8080/api/files/upload',
       filePath,
       name: 'file',
       header: {
