@@ -2,7 +2,7 @@
  * 投诉建议相关接口
  * @author AiKiFan
  */
-import { post } from '@/utils/request'
+import { post, get, put } from '@/utils/request'
 import { getToken } from '@/utils/auth'
 
 /**
@@ -52,4 +52,52 @@ export function uploadFeedbackImage(filePath) {
       },
     })
   })
+}
+
+/**
+ * 获取当前用户投诉建议列表
+ * 接口：GET /api/feedback/me
+ */
+export function getMyFeedbackList(params = {}) {
+  return get('/feedback/me', params)
+}
+
+/**
+ * 获取投诉建议详情
+ * 接口：GET /api/feedback/{id}
+ */
+export function getMyFeedbackDetail(id) {
+  return get(`/feedback/${id}`)
+}
+
+/**
+ * 修改投诉建议（仅待处理状态可修改）
+ * 接口：PUT /api/feedback/{id}
+ */
+export function updateFeedback(id, data) {
+  return put(`/feedback/${id}`, data)
+}
+
+/**
+ * 追加回复（仅处理中状态）
+ * 接口：POST /api/feedback/{id}/reply
+ */
+export function appendFeedbackReply(id, replyContent) {
+  return post(`/feedback/${id}/reply`, { replyContent })
+}
+
+/**
+ * 关闭投诉（待处理/处理中可关闭）
+ * 接口：POST /api/feedback/{id}/close
+ */
+export function closeFeedback(id) {
+  return post(`/feedback/${id}/close`)
+}
+
+/**
+ * 标记已解决（仅处理中状态）
+ * 接口：POST /api/feedback/{id}/resolve
+ */
+export function resolveFeedback(id) {
+  return post(`/feedback/${id}/resolve`)
 }

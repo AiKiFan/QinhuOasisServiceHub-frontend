@@ -176,6 +176,15 @@
       }
     },
     {
+      "path": "pages/feedback/my-feedback",
+      "style": {
+        "navigationBarTitleText": "我的投诉建议",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
       "path": "pages/interpreter-orders/detail",
       "style": {
         "navigationBarTitleText": "订单详情",
