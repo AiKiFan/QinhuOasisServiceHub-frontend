@@ -80,7 +80,7 @@ function startEdit() {
     serviceTypes: profile.value.serviceTypes ?? 3,
     hourlyRate: profile.value.hourlyRate ?? 50,
   }
-  original.value = { ...form.value }
+  original.value = { ...form.value, certUrls: [...form.value.certUrls] }
   editing.value = true
 }
 
