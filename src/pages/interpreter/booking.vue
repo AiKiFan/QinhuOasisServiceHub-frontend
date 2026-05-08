@@ -28,6 +28,7 @@ const form = ref({
   serviceType: 1,
   groupSize: 1,
   remark: '',
+  phone: '',
 })
 
 /** 译员时薪（从上一页传递） */
@@ -150,6 +151,7 @@ async function handleSubmit() {
       startTime: new Date(startDateTime.value).toISOString(),
       endTime: new Date(endDateTime.value).toISOString(),
       remark: form.value.remark,
+      phone: form.value.phone.trim() || undefined,
     })
     uni.showToast({ title: t('interpreter.booking.bookingSuccess'), icon: 'success' })
     setTimeout(() => {
@@ -268,7 +270,7 @@ onMounted(() => {
       </view>
 
       <!-- 备注 -->
-      <view class="form-section form-section--last">
+      <view class="form-section">
         <text class="form-section__title">{{ t('interpreter.booking.remark') }} {{ t('common.optional') }}</text>
         <textarea
           class="form-textarea"
@@ -278,6 +280,19 @@ onMounted(() => {
           maxlength="200"
         />
         <text class="char-count">{{ form.remark.length }}/200</text>
+      </view>
+
+      <!-- 联系电话 -->
+      <view class="form-section form-section--last">
+        <text class="form-section__title">{{ t('interpreter.booking.phone') }} {{ t('common.optional') }}</text>
+        <input
+          class="form-input"
+          v-model="form.phone"
+          type="tel"
+          :placeholder="t('interpreter.booking.phonePlaceholder')"
+          placeholder-class="form-placeholder"
+          maxlength="20"
+        />
       </view>
     </view>
 
@@ -463,6 +478,17 @@ onMounted(() => {
 
 .form-placeholder {
   color: $color-text-hint;
+}
+
+.form-input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 16rpx;
+  background-color: $color-bg-page;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: $color-text-primary;
+  box-sizing: border-box;
 }
 
 .char-count {

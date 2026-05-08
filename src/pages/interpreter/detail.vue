@@ -353,7 +353,6 @@ onMounted(() => {
               class="cert-grid__img"
               :src="url"
               mode="aspectFill"
-              :previewable="true"
             />
           </view>
         </view>

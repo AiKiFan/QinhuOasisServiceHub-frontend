@@ -11,7 +11,11 @@
       "Bash(mvn dependency:tree)",
       "Bash(curl -s -X PUT \"http://localhost:9000/qosh-ugc-images?policy\" -H \"Content-Type: application/json\" -d '{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:GetObject\"],\"Resource\":[\"arn:aws:s3:::qosh-ugc-images/*\"]}]}' --user root:12345678)",
       "Bash(where mc *)",
-      "Bash(mysql -u root -p123456 -D qinhu_oasis -e \"SELECT id, images FROM sys_feedback LIMIT 3;\")"
+      "Bash(mysql -u root -p123456 -D qinhu_oasis -e \"SELECT id, images FROM sys_feedback LIMIT 3;\")",
+      "Bash(mysql -u root -p123456 -D qinhu_oasis -e \"SHOW COLUMNS FROM biz_order LIKE 'cancelled_by';\")",
+      "Bash(mysql -u root -p123456 -D qinhu_oasis -e \"ALTER TABLE biz_order ADD COLUMN cancelled_by VARCHAR\\(20\\) DEFAULT NULL COMMENT '取消方标识：user=游客取消 interpreter=译员取消' AFTER cancel_reason;\")",
+      "Bash(mvn compile *)",
+      "Bash(mysql -u root -p123456 qinhu_oasis)"
     ],
     "additionalDirectories": [
       "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\restaurant\\entity",

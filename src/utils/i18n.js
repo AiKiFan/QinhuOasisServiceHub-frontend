@@ -341,9 +341,13 @@ const ZH = {
   'interpreter.booking.hourlyRate': '时薪',
   'interpreter.booking.duration': '时长',
   'interpreter.booking.totalCost': '预计费用',
+  'interpreter.booking.paymentAmount': '应付金额',
+  'interpreter.booking.expectedEarning': '预计可得',
   'interpreter.booking.submitBtn': '提交预约',
   'interpreter.booking.submitting': '提交中...',
   'interpreter.booking.loginRequired': '请先登录',
+  'interpreter.booking.phone': '联系电话',
+  'interpreter.booking.phonePlaceholder': '请输入联系电话（选填）',
 
   // ── 用户端：投诉建议 ──
   'feedback.submit.title': '投诉建议',
@@ -423,6 +427,12 @@ const ZH = {
   'orders.status.completed': '已完成',
   'orders.status.cancelled': '已取消',
   'orders.cancelBtn': '取消订单',
+  'orders.cancelReasonLabel': '取消理由',
+  'orders.cancelReasonHint': '请填写取消理由（可选）',
+  'orders.cancelReasonPlaceholder': '请输入取消理由...',
+  'orders.rejectReasonLabel': '拒绝理由',
+  'orders.cancelledByUser': '游客取消',
+  'orders.cancelledByInterpreter': '译员拒绝',
   'orders.orderNo': '订单号',
   'orders.goToInterpreter': '查看译员',
   'orders.remark': '备注',
@@ -491,6 +501,7 @@ const ZH = {
   'interpreter.booking.timeLabel': '服务时间',
   'interpreter.booking.timePlaceholder': '请输入时间（YYYY-MM-DD HH:mm）',
   'interpreter.booking.invalidTimeFormat': '时间格式不正确',
+  'interpreter.booking.oneDayAheadRequired': '请至少提前一天预约',
 
   // ── 译员申请（补充） ──
   'interpreter.apply.loginRequired': '请先登录后再申请',
@@ -539,6 +550,7 @@ const ZH = {
   'admin.feedback.statusLabel': '状态',
   'admin.feedback.typeLabel': '类型',
   'admin.feedback.replyRequired': '请输入回复内容',
+  'admin.feedback.statusRequired': '请选择处理后状态',
 
   // ── 景点 ──
   'scenic.name': '景点名称',
@@ -871,9 +883,13 @@ const EN = {
   'interpreter.booking.hourlyRate': 'Hourly Rate',
   'interpreter.booking.duration': 'Duration',
   'interpreter.booking.totalCost': 'Estimated Cost',
+  'interpreter.booking.paymentAmount': 'Payment Amount',
+  'interpreter.booking.expectedEarning': 'Expected Earning',
   'interpreter.booking.submitBtn': 'Submit Booking',
   'interpreter.booking.submitting': 'Submitting...',
   'interpreter.booking.loginRequired': 'Please login first',
+  'interpreter.booking.phone': 'Phone Number',
+  'interpreter.booking.phonePlaceholder': 'Optional phone number...',
 
   // ── 用户端：投诉建议 ──
   'feedback.submit.title': 'Feedback',
@@ -971,6 +987,12 @@ const EN = {
   'orders.status.completed': 'Completed',
   'orders.status.cancelled': 'Cancelled',
   'orders.cancelBtn': 'Cancel Order',
+  'orders.cancelReasonLabel': 'Cancel Reason',
+  'orders.cancelReasonHint': 'Optional cancel reason...',
+  'orders.cancelReasonPlaceholder': 'Enter cancel reason...',
+  'orders.rejectReasonLabel': 'Reject Reason',
+  'orders.cancelledByUser': 'Cancelled by User',
+  'orders.cancelledByInterpreter': 'Rejected by Interpreter',
   'orders.orderNo': 'Order No.',
   'orders.goToInterpreter': 'View Interpreter',
   'orders.remark': 'Remark',
@@ -1002,6 +1024,7 @@ const EN = {
   'interpreter.booking.timeLabel': 'Service Time',
   'interpreter.booking.timePlaceholder': 'Enter time (YYYY-MM-DD HH:mm)',
   'interpreter.booking.invalidTimeFormat': 'Invalid time format',
+  'interpreter.booking.oneDayAheadRequired': 'Please book at least one day ahead',
 
   'interpreter.apply.loginRequired': 'Please login to apply',
   'interpreter.apply.realNameRequired': 'Please enter your full name',
@@ -1068,6 +1091,7 @@ const EN = {
   'admin.feedback.statusLabel': 'Status',
   'admin.feedback.typeLabel': 'Type',
   'admin.feedback.replyRequired': 'Please enter a reply',
+  'admin.feedback.statusRequired': 'Please select status after reply',
 
   // ── 景点 (英文) ──
   'scenic.name': 'Spot Name',

@@ -53,6 +53,11 @@ const currentPage = ref(1)
 /** 每页条数 */
 const pageSize = 10
 
+/** 取消弹窗 */
+const showCancelDialog = ref(false)
+const cancelReason = ref('')
+const cancellingOrderId = ref(null)
+
 /**
  * 加载订单列表
  * @param {boolean} refresh - 是否刷新（重置页码）
@@ -93,24 +98,26 @@ function loadMore() {
 }
 
 /**
- * 取消订单
- * @param {number} orderId
+ * 打开取消弹窗
  */
-function handleCancelOrder(orderId) {
-  uni.showModal({
-    title: t('orders.cancelConfirmTitle'),
-    content: t('orders.cancelConfirmContent'),
-    success: async (res) => {
-      if (!res.confirm) return
-      try {
-        await cancelInterpreterOrder(orderId)
-        uni.showToast({ title: t('orders.cancelled'), icon: 'success' })
-        loadList(true)
-      } catch {
-        // 错误已在 request.js 中处理
-      }
-    },
-  })
+function openCancelDialog(orderId) {
+  cancellingOrderId.value = orderId
+  cancelReason.value = ''
+  showCancelDialog.value = true
+}
+
+/**
+ * 确认取消订单
+ */
+async function handleConfirmCancel() {
+  try {
+    await cancelInterpreterOrder(cancellingOrderId.value, cancelReason.value.trim() || undefined)
+    uni.showToast({ title: t('orders.cancelled'), icon: 'success' })
+    showCancelDialog.value = false
+    loadList(true)
+  } catch {
+    // 错误已在 request.js 中处理
+  }
 }
 
 /**
@@ -123,10 +130,10 @@ function goToDetail(orderId) {
 
 /**
  * 跳转译员详情
- * @param {number} interpreterId
+ * @param {number} profileId - 译员档案ID
  */
-function goToInterpreter(interpreterId) {
-  uni.navigateTo({ url: `/pages/interpreter/detail?id=${interpreterId}` })
+function goToInterpreter(profileId) {
+  uni.navigateTo({ url: `/pages/interpreter/detail?id=${profileId}` })
 }
 
 /**
@@ -240,6 +247,7 @@ onMounted(() => {
           v-for="item in orderList"
           :key="item.id"
           class="order-card"
+          @tap="goToDetail(item.id)"
         >
           <!-- 头部：订单号 + 状态 -->
           <view class="card-header">
@@ -255,14 +263,14 @@ onMounted(() => {
           </view>
 
           <!-- 译员信息 -->
-          <view class="interpreter-info" @tap="goToInterpreter(item.interpreterId)">
+          <view class="interpreter-info" @tap.stop="goToInterpreter(item.profileId)">
             <SafeImage
               class="interpreter-avatar"
               :src="item.interpreterAvatar"
               mode="aspectFill"
             />
             <view class="interpreter-detail">
-              <text class="interpreter-name">{{ item.interpreterName }}</text>
+              <text class="interpreter-name">{{ item.interpreterNickname }}</text>
               <text class="service-type">{{ getServiceTypeLabel()[item.serviceType] }}</text>
             </view>
             <text class="card-arrow">›</text>
@@ -273,7 +281,7 @@ onMounted(() => {
             <view class="info-row">
               <text class="info-row__label">{{ t('orders.serviceTime') }}</text>
               <text class="info-row__value">
-                {{ formatDateTime(item.startTime) }} - {{ formatEndTime(item.endTime) }}
+                {{ formatDateTime(item.startTime) }} - {{ formatEndTime(item.endTime, item.startTime) }}
               </text>
             </view>
             <view v-if="item.groupSize > 1" class="info-row">
@@ -281,8 +289,8 @@ onMounted(() => {
               <text class="info-row__value">{{ item.groupSize }} {{ t('common.person') }}</text>
             </view>
             <view class="info-row info-row--last">
-              <text class="info-row__label">{{ t('interpreter.booking.totalCost') }}</text>
-              <text class="info-row__value price">¥{{ item.totalFee?.toFixed(0) || 0 }}</text>
+              <text class="info-row__label">{{ t('interpreter.booking.paymentAmount') }}</text>
+              <text class="info-row__value price">¥{{ item.totalAmount?.toFixed(2) || '0.00' }}</text>
             </view>
             <view v-if="item.remark" class="remark-section">
               <text class="remark-label">{{ t('orders.remarkLabel') }}：</text>
@@ -291,13 +299,13 @@ onMounted(() => {
           </view>
 
           <!-- 底部操作按钮 -->
-          <view v-if="item.status === 0" class="card-actions">
-            <button class="action-btn action-btn--cancel" @tap="handleCancelOrder(item.id)">
+          <view v-if="item.status === 0" class="card-actions" @tap.stop>
+            <button class="action-btn action-btn--cancel" @tap="openCancelDialog(item.id)">
               {{ t('orders.cancelBtn') }}
             </button>
           </view>
-          <view v-if="item.status === 3 && !reviewedOrderIds.has(item.id)" class="card-actions">
-            <button class="action-btn action-btn--review" @tap="openReviewDialog(item)">
+          <view v-if="item.status === 3 && !reviewedOrderIds.has(item.id)" class="card-actions" @tap.stop>
+            <button class="action-btn action-btn--review" @tap.stop="openReviewDialog(item)">
               {{ t('orders.reviewBtn') }}
             </button>
           </view>
@@ -316,6 +324,28 @@ onMounted(() => {
       </view>
       <view v-if="orderList.length >= total && orderList.length > 0" class="no-more">
         <text class="no-more__text">{{ t('common.noMore') }}</text>
+      </view>
+    </view>
+
+    <!-- 取消弹窗 -->
+    <view v-if="showCancelDialog" class="confirm-mask" @tap.self="showCancelDialog = false">
+      <view class="cancel-dialog">
+        <text class="cancel-dialog__title">{{ t('orders.cancelBtn') }}</text>
+        <text class="cancel-dialog__hint">{{ t('orders.cancelReasonHint') }}</text>
+        <textarea
+          class="cancel-dialog__input"
+          v-model="cancelReason"
+          :placeholder="t('orders.cancelReasonPlaceholder')"
+          maxlength="200"
+        />
+        <view class="cancel-dialog__actions">
+          <view class="cancel-dialog__btn cancel-dialog__btn--cancel" @tap="showCancelDialog = false">
+            <text>{{ t('common.cancel') }}</text>
+          </view>
+          <view class="cancel-dialog__btn cancel-dialog__btn--confirm" @tap="handleConfirmCancel">
+            <text>{{ t('common.confirm') }}</text>
+          </view>
+        </view>
       </view>
     </view>
 
@@ -387,15 +417,30 @@ function formatDateTime(isoString) {
 }
 
 /**
- * 格式化结束时间（仅显示时分）
- * @param {string} isoString
+ * 格式化结束时间（跨日期显示完整日期，同一天仅显示时分）
+ * @param {string} endIsoString - 结束时间
+ * @param {string} startIsoString - 开始时间（用于判断是否跨日期）
  * @returns {string}
  */
-function formatEndTime(isoString) {
-  if (!isoString) return '-'
-  const date = new Date(isoString)
-  const hour = String(date.getHours()).padStart(2, '0')
-  const minute = String(date.getMinutes()).padStart(2, '0')
+function formatEndTime(endIsoString, startIsoString) {
+  if (!endIsoString) return '-'
+  const endDate = new Date(endIsoString)
+  const startDate = startIsoString ? new Date(startIsoString) : null
+
+  // 如果有开始时间，判断是否跨日期
+  if (startDate && endDate.toDateString() !== startDate.toDateString()) {
+    // 跨日期：显示完整日期时间
+    const year = endDate.getFullYear()
+    const month = String(endDate.getMonth() + 1).padStart(2, '0')
+    const day = String(endDate.getDate()).padStart(2, '0')
+    const hour = String(endDate.getHours()).padStart(2, '0')
+    const minute = String(endDate.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day} ${hour}:${minute}`
+  }
+
+  // 同一天：仅显示时分
+  const hour = String(endDate.getHours()).padStart(2, '0')
+  const minute = String(endDate.getMinutes()).padStart(2, '0')
   return `${hour}:${minute}`
 }
 </script>
@@ -638,6 +683,78 @@ function formatEndTime(isoString) {
   }
 }
 
+/* ── 取消弹窗 ── */
+.confirm-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.cancel-dialog {
+  width: 600rpx;
+  background-color: $color-bg-card;
+  border-radius: 24rpx;
+  overflow: hidden;
+
+  &__title {
+    display: block;
+    text-align: center;
+    font-size: 32rpx;
+    font-weight: 600;
+    color: $color-text-primary;
+    padding: 48rpx 40rpx 16rpx;
+  }
+
+  &__hint {
+    display: block;
+    text-align: center;
+    font-size: 24rpx;
+    color: $color-text-hint;
+    padding: 0 40rpx 24rpx;
+  }
+
+  &__input {
+    width: calc(100% - 80rpx);
+    height: 200rpx;
+    margin: 0 40rpx;
+    padding: 16rpx;
+    background-color: $color-bg-page;
+    border-radius: 12rpx;
+    font-size: 28rpx;
+    color: $color-text-primary;
+    box-sizing: border-box;
+  }
+
+  &__actions {
+    display: flex;
+    border-top: 2rpx solid $color-divider;
+    margin-top: 32rpx;
+  }
+
+  &__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 96rpx;
+    font-size: 30rpx;
+
+    &--cancel {
+      color: $color-text-secondary;
+      border-right: 2rpx solid $color-divider;
+    }
+
+    &--confirm {
+      color: #E05252;
+      font-weight: 600;
+    }
+  }
+}
+
 /* ── 评价弹窗 ── */
 .review-overlay {
   position: fixed;
@@ -694,14 +811,20 @@ function formatEndTime(isoString) {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.2s;
 
   &__icon {
     font-size: 40rpx;
     color: $color-divider;
+    transition: color 0.2s;
   }
 
-  &--active .star-option__icon {
-    color: $color-rank-gold;
+  &--active {
+    transform: scale(1.1);
+
+    .star-option__icon {
+      color: $color-rank-gold;
+    }
   }
 }
 

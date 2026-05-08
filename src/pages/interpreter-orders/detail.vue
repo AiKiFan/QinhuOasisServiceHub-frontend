@@ -67,8 +67,8 @@ async function loadDetail() {
  * 跳转译员详情
  */
 function goToInterpreter() {
-  if (!detail.value?.interpreterId) return
-  uni.navigateTo({ url: `/pages/interpreter/detail?id=${detail.value.interpreterId}` })
+  if (!detail.value?.profileId) return
+  uni.navigateTo({ url: `/pages/interpreter/detail?id=${detail.value.profileId}` })
 }
 
 /**
@@ -160,13 +160,27 @@ function formatDateTime(isoString) {
 }
 
 /**
- * 格式化结束时间（仅显示时分）
+ * 格式化结束时间（跨日期显示完整日期，同一天仅显示时分）
  */
-function formatEndTime(isoString) {
-  if (!isoString) return '-'
-  const date = new Date(isoString)
-  const hour = String(date.getHours()).padStart(2, '0')
-  const minute = String(date.getMinutes()).padStart(2, '0')
+function formatEndTime(endIsoString, startIsoString) {
+  if (!endIsoString) return '-'
+  const endDate = new Date(endIsoString)
+  const startDate = startIsoString ? new Date(startIsoString) : null
+
+  // 如果有开始时间，判断是否跨日期
+  if (startDate && endDate.toDateString() !== startDate.toDateString()) {
+    // 跨日期：显示完整日期时间
+    const year = endDate.getFullYear()
+    const month = String(endDate.getMonth() + 1).padStart(2, '0')
+    const day = String(endDate.getDate()).padStart(2, '0')
+    const hour = String(endDate.getHours()).padStart(2, '0')
+    const minute = String(endDate.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day} ${hour}:${minute}`
+  }
+
+  // 同一天：仅显示时分
+  const hour = String(endDate.getHours()).padStart(2, '0')
+  const minute = String(endDate.getMinutes()).padStart(2, '0')
   return `${hour}:${minute}`
 }
 
@@ -263,7 +277,7 @@ onMounted(() => {
           </view>
           <view class="info-row">
             <text class="info-row__label">{{ t('interpreter.booking.endTime') }}</text>
-            <text class="info-row__value">{{ formatEndTime(detail.endTime) }}</text>
+            <text class="info-row__value">{{ formatEndTime(detail.endTime, detail.startTime) }}</text>
           </view>
           <view class="info-row">
             <text class="info-row__label">{{ t('interpreter.booking.duration') }}</text>
@@ -300,6 +314,31 @@ onMounted(() => {
         <text class="section-title">{{ t('orders.remarkLabel') }}</text>
         <view class="remark-card">
           <text class="remark-text">{{ detail.remark }}</text>
+        </view>
+      </view>
+
+      <!-- 取消/拒绝信息卡片 -->
+      <view v-if="detail.status === 4" class="card-section">
+        <text class="section-title">订单取消信息</text>
+        <view class="cancel-info-card">
+          <!-- 取消方标识 -->
+          <view class="cancel-header">
+            <view
+              class="cancel-badge"
+              :style="{ backgroundColor: detail.cancelledBy === 'interpreter' ? '#E05252' : '#FFB22C' }"
+            >
+              <text class="cancel-badge__text">
+                {{ detail.cancelledBy === 'interpreter' ? t('orders.cancelledByInterpreter') : t('orders.cancelledByUser') }}
+              </text>
+            </view>
+          </view>
+          <!-- 取消理由 -->
+          <view v-if="detail.cancelReason" class="cancel-reason">
+            <text class="cancel-reason__label">
+              {{ detail.cancelledBy === 'interpreter' ? t('orders.rejectReasonLabel') : t('orders.cancelReasonLabel') }}：
+            </text>
+            <text class="cancel-reason__text">{{ detail.cancelReason }}</text>
+          </view>
         </view>
       </view>
 
@@ -563,6 +602,50 @@ onMounted(() => {
   line-height: 1.6;
 }
 
+/* ── 取消信息卡片 ── */
+.cancel-info-card {
+  background-color: $color-bg-card;
+  border-radius: 20rpx;
+  padding: 24rpx 32rpx;
+  box-shadow: 0 2rpx 16rpx rgba(232, 149, 109, 0.08);
+}
+
+.cancel-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.cancel-badge {
+  padding: 8rpx 20rpx;
+  border-radius: 24rpx;
+
+  &__text {
+    font-size: 26rpx;
+    color: #ffffff;
+    font-weight: 600;
+  }
+}
+
+.cancel-reason {
+  padding: 16rpx;
+  background-color: $color-bg-page;
+  border-radius: 12rpx;
+
+  &__label {
+    font-size: 26rpx;
+    color: $color-text-secondary;
+    margin-bottom: 8rpx;
+    display: block;
+  }
+
+  &__text {
+    font-size: 28rpx;
+    color: $color-text-primary;
+    line-height: 1.6;
+  }
+}
+
 /* ── 操作按钮 ── */
 .action-section {
   margin-top: 32rpx;
@@ -648,14 +731,20 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.2s;
 
   &__icon {
     font-size: 40rpx;
     color: $color-divider;
+    transition: color 0.2s;
   }
 
-  &--active &__icon {
-    color: $color-rank-gold;
+  &--active {
+    transform: scale(1.1);
+
+    .star-option__icon {
+      color: $color-rank-gold;
+    }
   }
 }
 

@@ -45,10 +45,11 @@ export function acceptInterpreterOrder(id) {
  * 取消翻译订单
  * 接口：POST /api/interpreter-orders/{id}/cancel
  * @param {number|string} id - 订单 ID
+ * @param {string} [reason] - 取消理由（可选）
  * @returns {Promise<null>}
  */
-export function cancelInterpreterOrder(id) {
-  return post(`/interpreter-orders/${id}/cancel`)
+export function cancelInterpreterOrder(id, reason) {
+  return post(`/interpreter-orders/${id}/cancel`, { reason })
 }
 
 /**
@@ -78,10 +79,11 @@ export function getReceivedOrders(params = {}) {
  * 译员拒绝订单
  * 接口：POST /api/interpreter-orders/{id}/reject
  * @param {number|string} id - 订单 ID
+ * @param {string} [reason] - 拒绝理由（可选）
  * @returns {Promise<null>}
  */
-export function rejectInterpreterOrder(id) {
-  return post(`/interpreter-orders/${id}/reject`)
+export function rejectInterpreterOrder(id, reason) {
+  return post(`/interpreter-orders/${id}/reject`, { reason })
 }
 
 /**

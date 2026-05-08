@@ -41,6 +41,16 @@ const currentUser = ref(getUser())
 /** 当前选中的状态筛选 */
 const activeStatusFilter = ref('')
 
+/** 拒绝弹窗 */
+const showRejectDialog = ref(false)
+const rejectReason = ref('')
+const rejectingOrderId = ref(null)
+
+/** 取消弹窗 */
+const showCancelDialog = ref(false)
+const cancelReason = ref('')
+const cancellingOrderId = ref(null)
+
 /**
  * 加载订单列表
  * @param {boolean} refresh - 是否刷新
@@ -112,23 +122,26 @@ function handleAccept(orderId) {
 }
 
 /**
- * 拒单
+ * 打开拒绝弹窗
  */
-function handleReject(orderId) {
-  uni.showModal({
-    title: t('common.confirm'),
-    content: '确认拒绝此订单吗？',
-    success: async (res) => {
-      if (!res.confirm) return
-      try {
-        await rejectInterpreterOrder(orderId)
-        uni.showToast({ title: '已拒绝', icon: 'success' })
-        loadList(true)
-      } catch {
-        // 错误已在 request.js 中处理
-      }
-    },
-  })
+function openRejectDialog(orderId) {
+  rejectingOrderId.value = orderId
+  rejectReason.value = ''
+  showRejectDialog.value = true
+}
+
+/**
+ * 确认拒绝订单
+ */
+async function handleConfirmReject() {
+  try {
+    await rejectInterpreterOrder(rejectingOrderId.value, rejectReason.value.trim() || undefined)
+    uni.showToast({ title: '已拒绝', icon: 'success' })
+    showRejectDialog.value = false
+    loadList(true)
+  } catch {
+    // 错误已在 request.js 中处理
+  }
 }
 
 /**
@@ -175,12 +188,26 @@ function formatDateTime(isoString) {
   return `${year}-${month}-${day} ${hour}:${minute}`
 }
 
-/** 格式化结束时间（仅显示时分） */
-function formatEndTime(isoString) {
-  if (!isoString) return '-'
-  const date = new Date(isoString)
-  const hour = String(date.getHours()).padStart(2, '0')
-  const minute = String(date.getMinutes()).padStart(2, '0')
+/** 格式化结束时间（跨日期显示完整日期，同一天仅显示时分） */
+function formatEndTime(endIsoString, startIsoString) {
+  if (!endIsoString) return '-'
+  const endDate = new Date(endIsoString)
+  const startDate = startIsoString ? new Date(startIsoString) : null
+
+  // 如果有开始时间，判断是否跨日期
+  if (startDate && endDate.toDateString() !== startDate.toDateString()) {
+    // 跨日期：显示完整日期时间
+    const year = endDate.getFullYear()
+    const month = String(endDate.getMonth() + 1).padStart(2, '0')
+    const day = String(endDate.getDate()).padStart(2, '0')
+    const hour = String(endDate.getHours()).padStart(2, '0')
+    const minute = String(endDate.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day} ${hour}:${minute}`
+  }
+
+  // 同一天：仅显示时分
+  const hour = String(endDate.getHours()).padStart(2, '0')
+  const minute = String(endDate.getMinutes()).padStart(2, '0')
   return `${hour}:${minute}`
 }
 
@@ -264,6 +291,7 @@ onMounted(() => {
           v-for="item in orderList"
           :key="item.id"
           class="order-card"
+          @tap="goToDetail(item.id)"
         >
           <!-- 头部：订单号 + 状态 -->
           <view class="card-header">
@@ -286,8 +314,8 @@ onMounted(() => {
               mode="aspectFill"
             />
             <view class="user-detail">
-              <text class="user-name">{{ item.userName }}</text>
-              <text class="service-type">{{ getServiceTypeLabel()[item.serviceType] }}</text>
+              <text class="user-name">{{ item.userNickname }}</text>
+              <text class="user-contact">{{ item.userPhone || item.userEmail || t('common.noContact') }}</text>
             </view>
           </view>
 
@@ -296,7 +324,7 @@ onMounted(() => {
             <view class="info-row">
               <text class="info-row__label">{{ t('orders.serviceTime') }}</text>
               <text class="info-row__value">
-                {{ formatDateTime(item.startTime) }} - {{ formatEndTime(item.endTime) }}
+                {{ formatDateTime(item.startTime) }} - {{ formatEndTime(item.endTime, item.startTime) }}
               </text>
             </view>
             <view v-if="item.groupSize > 1" class="info-row">
@@ -304,12 +332,12 @@ onMounted(() => {
               <text class="info-row__value">{{ item.groupSize }} {{ t('common.person') }}</text>
             </view>
             <view class="info-row info-row--last">
-              <text class="info-row__label">{{ t('interpreter.booking.totalCost') }}</text>
-              <text class="info-row__value price">¥{{ item.totalFee?.toFixed(0) || 0 }}</text>
+              <text class="info-row__label">{{ t('interpreter.booking.expectedEarning') }}</text>
+              <text class="info-row__value price">¥{{ item.totalAmount?.toFixed(2) || '0.00' }}</text>
             </view>
             <view v-if="item.remark" class="remark-section">
               <text class="remark-label">{{ t('orders.remarkLabel') }}：</text>
-              <text class="remark-text">{{ item.remark }}</text>
+              <text class="remark-text">{{ item.remark.length > 30 ? item.remark.substring(0, 30) + '...' : item.remark }}</text>
             </view>
           </view>
 
@@ -317,25 +345,19 @@ onMounted(() => {
           <view class="card-actions">
             <!-- 待接单状态 -->
             <view v-if="item.status === 0" class="action-row">
-              <button class="action-btn action-btn--reject" @tap="handleReject(item.id)">
+              <button class="action-btn action-btn--reject" @tap.stop="openRejectDialog(item.id)">
                 拒单
               </button>
-              <button class="action-btn action-btn--accept" @tap="handleAccept(item.id)">
+              <button class="action-btn action-btn--accept" @tap.stop="handleAccept(item.id)">
                 接单
               </button>
             </view>
             <!-- 服务中状态 -->
             <view v-if="item.status === 2" class="action-row">
-              <button class="action-btn action-btn--complete" @tap="handleComplete(item.id)">
+              <button class="action-btn action-btn--complete" @tap.stop="handleComplete(item.id)">
                 完成服务
               </button>
             </view>
-          </view>
-          
-          <!-- 查看详情 -->
-          <view class="view-detail" @tap="goToDetail(item.id)">
-            <text class="view-detail__text">查看详情</text>
-            <text class="view-detail__arrow">›</text>
           </view>
 
           <view class="card-time">
@@ -353,6 +375,28 @@ onMounted(() => {
       </view>
       <view v-if="orderList.length >= total && orderList.length > 0" class="no-more">
         <text class="no-more__text">{{ t('common.noMore') }}</text>
+      </view>
+    </view>
+
+    <!-- 拒绝弹窗 -->
+    <view v-if="showRejectDialog" class="confirm-mask" @tap.self="showRejectDialog = false">
+      <view class="reject-dialog">
+        <text class="reject-dialog__title">拒单</text>
+        <text class="reject-dialog__hint">请填写拒绝理由（可选）</text>
+        <textarea
+          class="reject-dialog__input"
+          v-model="rejectReason"
+          placeholder="请输入拒绝理由..."
+          maxlength="200"
+        />
+        <view class="reject-dialog__actions">
+          <view class="reject-dialog__btn reject-dialog__btn--cancel" @tap="showRejectDialog = false">
+            <text>{{ t('common.cancel') }}</text>
+          </view>
+          <view class="reject-dialog__btn reject-dialog__btn--confirm" @tap="handleConfirmReject">
+            <text>{{ t('common.confirm') }}</text>
+          </view>
+        </view>
       </view>
     </view>
   </view>
@@ -506,8 +550,8 @@ onMounted(() => {
   color: $color-text-primary;
 }
 
-.service-type {
-  font-size: 22rpx;
+.user-contact {
+  font-size: 24rpx;
   color: $color-text-secondary;
 }
 
@@ -654,6 +698,78 @@ onMounted(() => {
   &__text {
     font-size: 26rpx;
     color: $color-text-hint;
+  }
+}
+
+/* ── 拒绝弹窗 ── */
+.confirm-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.reject-dialog {
+  width: 600rpx;
+  background-color: $color-bg-card;
+  border-radius: 24rpx;
+  overflow: hidden;
+
+  &__title {
+    display: block;
+    text-align: center;
+    font-size: 32rpx;
+    font-weight: 600;
+    color: $color-text-primary;
+    padding: 48rpx 40rpx 16rpx;
+  }
+
+  &__hint {
+    display: block;
+    text-align: center;
+    font-size: 24rpx;
+    color: $color-text-hint;
+    padding: 0 40rpx 24rpx;
+  }
+
+  &__input {
+    width: calc(100% - 80rpx);
+    height: 200rpx;
+    margin: 0 40rpx;
+    padding: 16rpx;
+    background-color: $color-bg-page;
+    border-radius: 12rpx;
+    font-size: 28rpx;
+    color: $color-text-primary;
+    box-sizing: border-box;
+  }
+
+  &__actions {
+    display: flex;
+    border-top: 2rpx solid $color-divider;
+    margin-top: 32rpx;
+  }
+
+  &__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 96rpx;
+    font-size: 30rpx;
+
+    &--cancel {
+      color: $color-text-secondary;
+      border-right: 2rpx solid $color-divider;
+    }
+
+    &--confirm {
+      color: #E05252;
+      font-weight: 600;
+    }
   }
 }
 </style>

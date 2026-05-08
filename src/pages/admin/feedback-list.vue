@@ -90,7 +90,7 @@ function switchType(type) {
 function openReplyModal(id) {
   replyingId.value = id
   replyContent.value = ''
-  replyStatus.value = 2 // 默认设置为"已解决"
+  replyStatus.value = null // 不设置默认状态，让管理员自己选择
   showReplyModal.value = true
 }
 
@@ -100,6 +100,10 @@ function openReplyModal(id) {
 async function handleReply() {
   if (!replyContent.value.trim()) {
     uni.showToast({ title: t('admin.feedback.replyRequired'), icon: 'none' })
+    return
+  }
+  if (replyStatus.value === null) {
+    uni.showToast({ title: t('admin.feedback.statusRequired'), icon: 'none' })
     return
   }
   try {
