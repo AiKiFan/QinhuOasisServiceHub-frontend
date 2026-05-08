@@ -262,7 +262,7 @@ onMounted(() => {
         <!-- 接单管理（仅译员可见） -->
         <view v-if="userInfo && userInfo.role === 1" class="menu-item" @tap="goReceivedOrders">
           <text class="menu-item__icon">🎯</text>
-          <text class="menu-item__text">接单管理</text>
+          <text class="menu-item__text">{{ t('page.ordersReceived.title') }}</text>
           <text class="menu-item__arrow">›</text>
         </view>
 

@@ -253,12 +253,8 @@ onMounted(() => {
 
         <!-- 回复内容（已回复时显示） -->
         <view v-if="item.replyContent" class="card-reply">
-          <view class="card-reply__header">
-            <text class="card-reply__label">{{ t('admin.feedback.adminReply') }}</text>
-            <text class="card-reply__time">{{ item.replyTime?.split('T')[0] || '-' }}</text>
-          </view>
           <text class="card-reply__text">{{ item.replyContent }}</text>
-          <text class="card-reply__handler">{{ t('admin.feedback.handler') }}：{{ item.handlerNickname || t('common.unknown') }}</text>
+          <text class="card-reply__time">{{ item.replyTime?.split('T')[0] || '-' }}</text>
         </view>
 
         <!-- 回复按钮（未解决或未关闭时显示） -->

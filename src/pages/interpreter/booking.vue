@@ -5,8 +5,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { createInterpreterOrder } from '@/api/interpreter-order'
-import { isLoggedIn } from '@/utils/auth'
+import { isLoggedIn, getUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
+
+/** 当前用户 */
+const currentUser = ref(getUser())
 
 /** 服务类型选项 */
 const SERVICE_TYPES = computed(() => [
@@ -179,6 +182,25 @@ onMounted(() => {
   if (!options.profileId) {
     uni.showToast({ title: t('common.paramError'), icon: 'none' })
     setTimeout(() => uni.navigateBack(), 1000)
+    return
+  }
+
+  // 检查是否是译员自己（译员不能预约自己）
+  currentUser.value = getUser()
+  console.log('[预约页] 当前用户:', currentUser.value)
+  console.log('[预约页] profileId参数:', options.profileId)
+  const profileId = Number(options.profileId)
+
+  // 判断条件：用户是译员(role=1) 且 有profileId 且 profileId匹配
+  if (currentUser.value?.role === 1 && currentUser.value?.profileId && currentUser.value?.profileId === profileId) {
+    uni.showModal({
+      title: t('common.tip'),
+      content: t('interpreter.booking.cannotBookSelf'),
+      showCancel: false,
+      success() {
+        uni.navigateBack()
+      },
+    })
   }
 })
 </script>

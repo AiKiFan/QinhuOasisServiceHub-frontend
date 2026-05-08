@@ -15,7 +15,14 @@
       "Bash(mysql -u root -p123456 -D qinhu_oasis -e \"SHOW COLUMNS FROM biz_order LIKE 'cancelled_by';\")",
       "Bash(mysql -u root -p123456 -D qinhu_oasis -e \"ALTER TABLE biz_order ADD COLUMN cancelled_by VARCHAR\\(20\\) DEFAULT NULL COMMENT '取消方标识：user=游客取消 interpreter=译员取消' AFTER cancel_reason;\")",
       "Bash(mvn compile *)",
-      "Bash(mysql -u root -p123456 qinhu_oasis)"
+      "Bash(mysql -u root -p123456 qinhu_oasis)",
+      "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis -e \"UPDATE sys_feedback SET reply_content = REPLACE\\(REPLACE\\(reply_content, '[管理员] ', ''\\), '[用户] ', ''\\) WHERE reply_content LIKE '%[管理员]%' OR reply_content LIKE '%[用户]%';\")",
+      "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis -e \"SELECT id, reply_content FROM sys_feedback WHERE reply_content IS NOT NULL AND reply_content != '';\")",
+      "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis --default-character-set=utf8mb4 -e \"SELECT id, reply_content FROM sys_feedback WHERE reply_content LIKE '%[用户追加]%' OR reply_content LIKE '%[管理员]%' OR reply_content LIKE '%[用户]%' LIMIT 5;\")",
+      "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis --default-character-set=utf8mb4 -e \"UPDATE sys_feedback SET reply_content = REPLACE\\(reply_content, '[用户追加] ', ''\\) WHERE reply_content LIKE '%[用户追加]%';\")",
+      "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis --default-character-set=utf8mb4 -e \"SELECT COUNT\\(*\\) as count FROM sys_feedback WHERE reply_content LIKE '%[管理员]%' OR reply_content LIKE '%[用户]%' OR reply_content LIKE '%[用户追加]%';\")",
+      "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis --default-character-set=utf8mb4 -e \"DESCRIBE interpreter_profile;\")",
+      "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis --default-character-set=utf8mb4 -e \"ALTER TABLE interpreter_profile MODIFY COLUMN cert_url VARCHAR\\(2000\\);\")"
     ],
     "additionalDirectories": [
       "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\restaurant\\entity",

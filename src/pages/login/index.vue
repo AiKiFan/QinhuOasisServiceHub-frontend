@@ -40,6 +40,7 @@ async function handleLogin() {
       nickname: res.nickname,
       role: res.role,
       avatar: res.avatar,
+      profileId: res.profileId, // 译员档案ID（仅译员身份有值）
     })
     uni.showToast({ title: '登录成功', icon: 'success' })
     setTimeout(() => uni.reLaunch({ url: '/pages/profile/index' }), 800)

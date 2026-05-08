@@ -414,9 +414,8 @@ onMounted(() => {
 
         <!-- 管理员回复 -->
         <view v-if="detail.replyContent" class="reply-card">
-          <text class="reply-card__label">{{ t('feedback.view.replyFrom') }}</text>
           <text class="reply-card__content">{{ detail.replyContent }}</text>
-          <text v-if="detail.replyTime" class="reply-card__time">{{ detail.replyTime?.split('T')[0] || '-' }}</text>
+          <text v-if="detail.replyTime" class="reply-card__time">{{ t('feedback.view.replyTime') }}：{{ detail.replyTime?.split('T')[0] || '-' }}</text>
         </view>
 
         <!-- 操作按钮区域 -->

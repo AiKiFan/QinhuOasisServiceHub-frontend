@@ -3,13 +3,21 @@
   @author AiKiFan
 -->
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { getRestaurantList } from '@/api/restaurant'
-import { t } from '@/utils/i18n'
+import { t, getLanguage } from '@/utils/i18n'
 import TabBar from '@/components/TabBar/index.vue'
 
-/** 分类筛选选项 */
-const CATEGORIES = ['全部', '中餐', '西餐', '快餐', '甜品', '小吃', '茶饮']
+/** 分类筛选选项（支持国际化） */
+const CATEGORIES = computed(() => [
+  t('restaurant.category.all'),
+  t('restaurant.category.chinese'),
+  t('restaurant.category.western'),
+  t('restaurant.category.fastfood'),
+  t('restaurant.category.dessert'),
+  t('restaurant.category.snack'),
+  t('restaurant.category.tea'),
+])
 
 /** 当前选中分类，空字符串代表"全部" */
 const activeCategory = ref('')
@@ -74,7 +82,7 @@ async function loadMore() {
  * @param {string} cat
  */
 function switchCategory(cat) {
-  activeCategory.value = cat === '全部' ? '' : cat
+  activeCategory.value = cat === t('restaurant.category.all') ? '' : cat
   loadList()
 }
 

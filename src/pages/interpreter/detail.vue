@@ -3,7 +3,7 @@
   @author AiKiFan
 -->
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getInterpreterDetail } from '@/api/interpreter'
 import { getCommentList, postComment, COMMENT_TARGET_TYPE } from '@/api/comment'
 import { isLoggedIn, getUser } from '@/utils/auth'
@@ -47,6 +47,11 @@ const currentUser = ref(getUser())
 
 /** 是否已收藏 */
 const isFavorited = ref(false)
+
+/** 是否是译员本人（防止自预约、自评价） */
+const isSelf = computed(() =>
+  currentUser.value?.role === 1 && currentUser.value?.profileId === detail.value?.id
+)
 
 /**
  * 切换收藏状态
@@ -204,8 +209,19 @@ async function handlePostComment() {
     })
     return
   }
+
+  // 检查是否是译员自己（译员不能评价自己）
+  console.log('[评价] 当前用户:', currentUser.value)
+  console.log('[评价] 译员详情ID:', detail.value?.id)
+
+  // 判断条件：用户是译员(role=1) 且 有profileId 且 profileId匹配译员详情ID
+  if (currentUser.value?.role === 1 && currentUser.value?.profileId && currentUser.value?.profileId === detail.value?.id) {
+    uni.showToast({ title: t('interpreter.detail.cannotRateSelf'), icon: 'none' })
+    return
+  }
+
   if (!commentForm.value.content.trim()) {
-    uni.showToast({ title: t('common.loading'), icon: 'none' })
+    uni.showToast({ title: t('interpreter.commentPlaceholder'), icon: 'none' })
     return
   }
   submittingComment.value = true
@@ -401,6 +417,9 @@ onMounted(() => {
           <text class="login-tip__text">{{ t('interpreter.loginToComment') }}</text>
           <button class="login-tip__btn" @tap="() => uni.navigateTo({ url: '/pages/login/index' })">{{ t('restaurant.goLogin') }}</button>
         </view>
+        <view v-else-if="isSelf" class="self-tip">
+          <text class="self-tip__text">{{ t('interpreter.detail.cannotRateSelf') }}</text>
+        </view>
         <view v-else class="comment-form">
           <!-- 评分选择 -->
           <view class="rating-selector">
@@ -441,7 +460,7 @@ onMounted(() => {
       </view>
 
       <!-- 预约按钮 -->
-      <view class="booking-bar">
+      <view v-if="!isSelf" class="booking-bar">
         <button class="booking-btn" @tap="goToBooking">{{ t('interpreter.bookNow') }}</button>
       </view>
     </view>
@@ -853,14 +872,27 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
 
   &__icon {
     font-size: 32rpx;
     color: $color-divider;
+    transition: all 0.3s ease;
   }
 
-  &--active & .star-option__icon {
-    color: $color-rank-gold;
+  &--active {
+    transform: scale(1.2);
+
+    .star-option__icon {
+      color: $color-rank-gold;
+      font-size: 36rpx;
+      text-shadow: 0 0 8rpx rgba(255, 215, 0, 0.6);
+    }
+  }
+
+  &:hover {
+    transform: scale(1.1);
   }
 }
 
@@ -939,6 +971,17 @@ onMounted(() => {
 
   &__icon {
     font-size: 48rpx;
+  }
+}
+
+/* ── 自我评价提示 ── */
+.self-tip {
+  text-align: center;
+  padding: 40rpx 0;
+
+  &__text {
+    font-size: 26rpx;
+    color: $color-text-hint;
   }
 }
 </style>

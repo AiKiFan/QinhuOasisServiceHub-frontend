@@ -319,7 +319,7 @@ onMounted(() => {
 
       <!-- 取消/拒绝信息卡片 -->
       <view v-if="detail.status === 4" class="card-section">
-        <text class="section-title">订单取消信息</text>
+        <text class="section-title">{{ t('orders.cancelInfo') }}</text>
         <view class="cancel-info-card">
           <!-- 取消方标识 -->
           <view class="cancel-header">

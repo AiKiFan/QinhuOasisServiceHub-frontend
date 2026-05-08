@@ -206,8 +206,7 @@ onMounted(() => {
             @tap.stop="previewAvatar"
           />
           <view v-else class="avatar-placeholder">
-            <text class="avatar-placeholder__icon">📷</text>
-            <text class="avatar-placeholder__text">{{ t('profile.edit.uploadAvatar') }}</text>
+            <text class="avatar-placeholder__icon">👤</text>
           </view>
         </view>
         <text class="avatar-section__nickname">{{ form.nickname || user.nickname || t('profile.edit.nickname') }}</text>
@@ -388,15 +387,9 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4rpx;
 
   &__icon {
-    font-size: 40rpx;
-  }
-
-  &__text {
-    font-size: 20rpx;
-    color: $color-text-hint;
+    font-size: 48rpx;
   }
 }
 

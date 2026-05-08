@@ -107,12 +107,12 @@ function switchStatusFilter(status) {
 function handleAccept(orderId) {
   uni.showModal({
     title: t('common.confirm'),
-    content: '确认接单吗？',
+    content: t('orders.acceptConfirmContent'),
     success: async (res) => {
       if (!res.confirm) return
       try {
         await acceptInterpreterOrder(orderId)
-        uni.showToast({ title: '接单成功', icon: 'success' })
+        uni.showToast({ title: t('orders.acceptSuccess'), icon: 'success' })
         loadList(true)
       } catch {
         // 错误已在 request.js 中处理
@@ -136,7 +136,7 @@ function openRejectDialog(orderId) {
 async function handleConfirmReject() {
   try {
     await rejectInterpreterOrder(rejectingOrderId.value, rejectReason.value.trim() || undefined)
-    uni.showToast({ title: '已拒绝', icon: 'success' })
+    uni.showToast({ title: t('orders.rejectSuccess'), icon: 'success' })
     showRejectDialog.value = false
     loadList(true)
   } catch {
@@ -150,12 +150,12 @@ async function handleConfirmReject() {
 function handleComplete(orderId) {
   uni.showModal({
     title: t('common.confirm'),
-    content: '确认服务已完成吗？',
+    content: t('orders.completeConfirmContent'),
     success: async (res) => {
       if (!res.confirm) return
       try {
         await completeInterpreterOrder(orderId)
-        uni.showToast({ title: '服务已完成', icon: 'success' })
+        uni.showToast({ title: t('orders.completeSuccess'), icon: 'success' })
         loadList(true)
       } catch {
         // 错误已在 request.js 中处理
@@ -226,7 +226,7 @@ onMounted(() => {
   if (!isLoggedIn()) {
     uni.showModal({
       title: t('common.tip'),
-      content: '请先登录',
+      content: t('orders.loginRequired'),
       confirmText: t('interpreter.goLogin'),
       success(res) {
         if (res.confirm) {
@@ -240,7 +240,7 @@ onMounted(() => {
   }
   // 检查是否是译员
   if (currentUser.value?.role !== 1) {
-    uni.showToast({ title: '仅译员可访问', icon: 'none' })
+    uni.showToast({ title: t('orders.interpreterOnly'), icon: 'none' })
     setTimeout(() => uni.navigateBack(), 1500)
     return
   }
@@ -346,16 +346,16 @@ onMounted(() => {
             <!-- 待接单状态 -->
             <view v-if="item.status === 0" class="action-row">
               <button class="action-btn action-btn--reject" @tap.stop="openRejectDialog(item.id)">
-                拒单
+                {{ t('orders.rejectBtn') }}
               </button>
               <button class="action-btn action-btn--accept" @tap.stop="handleAccept(item.id)">
-                接单
+                {{ t('orders.acceptBtn') }}
               </button>
             </view>
             <!-- 服务中状态 -->
             <view v-if="item.status === 2" class="action-row">
               <button class="action-btn action-btn--complete" @tap.stop="handleComplete(item.id)">
-                完成服务
+                {{ t('orders.completeBtn') }}
               </button>
             </view>
           </view>
@@ -381,12 +381,12 @@ onMounted(() => {
     <!-- 拒绝弹窗 -->
     <view v-if="showRejectDialog" class="confirm-mask" @tap.self="showRejectDialog = false">
       <view class="reject-dialog">
-        <text class="reject-dialog__title">拒单</text>
-        <text class="reject-dialog__hint">请填写拒绝理由（可选）</text>
+        <text class="reject-dialog__title">{{ t('orders.rejectBtn') }}</text>
+        <text class="reject-dialog__hint">{{ t('orders.rejectReasonHint') }}</text>
         <textarea
           class="reject-dialog__input"
           v-model="rejectReason"
-          placeholder="请输入拒绝理由..."
+          :placeholder="t('orders.rejectReasonPlaceholder')"
           maxlength="200"
         />
         <view class="reject-dialog__actions">
