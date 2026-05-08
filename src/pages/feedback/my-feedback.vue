@@ -15,6 +15,7 @@ import {
 } from '@/api/feedback'
 import { t } from '@/utils/i18n'
 import SafeImage from '@/components/SafeImage/index.vue'
+import { saveImageCache } from '@/utils/image-cache'
 
 const loading = ref(true)
 const list = ref([])
@@ -142,7 +143,11 @@ function chooseImage() {
     sizeType: ['compressed'],
     success: (res) => {
       uni.showLoading({ title: t('common.uploading') })
-      Promise.all(res.tempFilePaths.map(fp => uploadFeedbackImage(fp)))
+      Promise.all(res.tempFilePaths.map(async (fp) => {
+        const r = await uploadFeedbackImage(fp)
+        await saveImageCache(r.url, fp)
+        return r
+      }))
         .then(results => {
           results.forEach(r => form.value.images.push(r.url))
           uni.hideLoading()

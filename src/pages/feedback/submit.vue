@@ -8,6 +8,7 @@ import { submitFeedback, uploadFeedbackImage } from '@/api/feedback'
 import { isLoggedIn } from '@/utils/auth'
 import { t } from '@/utils/i18n'
 import SafeImage from '@/components/SafeImage/index.vue'
+import { saveImageCache } from '@/utils/image-cache'
 
 /** 反馈类型选项（支持国际化） */
 const FEEDBACK_TYPES = computed(() => [
@@ -56,6 +57,8 @@ function chooseImage() {
           uni.showLoading({ title: t('common.uploading'), mask: true })
           const result = await uploadFeedbackImage(filePath)
           uploadedImages.value.push(result.url)
+          // Save to local cache for MinIO fallback
+          await saveImageCache(result.url, filePath)
           uni.hideLoading()
         } catch (e) {
           uni.hideLoading()

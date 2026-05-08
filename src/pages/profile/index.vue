@@ -140,6 +140,11 @@ function goFeedback() {
   uni.navigateTo({ url: '/pages/feedback/submit' })
 }
 
+/** 跳转我的投诉建议 */
+function goMyFeedback() {
+  uni.navigateTo({ url: '/pages/feedback/my-feedback' })
+}
+
 /** 跳转我的收藏 */
 function goFavorites() {
   uni.navigateTo({ url: '/pages/favorites/index' })
@@ -272,6 +277,13 @@ onMounted(() => {
         <view class="menu-item" @tap="goFeedback">
           <text class="menu-item__icon">📣</text>
           <text class="menu-item__text">{{ t('feedback.submit.title') }}</text>
+          <text class="menu-item__arrow">›</text>
+        </view>
+
+        <!-- 我的投诉建议 -->
+        <view class="menu-item" @tap="goMyFeedback">
+          <text class="menu-item__icon">📋</text>
+          <text class="menu-item__text">{{ t('feedback.view.title') }}</text>
           <text class="menu-item__arrow">›</text>
         </view>
 
