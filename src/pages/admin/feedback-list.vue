@@ -266,18 +266,18 @@ onMounted(() => {
       </view>
     </view>
 
-    <!-- 回复弹窗 -->
-    <uni-popup v-model:show="showReplyModal" type="dialog">
-      <view class="reply-modal">
-        <text class="reply-modal__title">{{ t('admin.feedback.replyTitle') }}</text>
+    <!-- 回复弹窗（自定义 confirm-dialog 风格） -->
+    <view v-if="showReplyModal" class="confirm-mask" @tap.self="showReplyModal = false">
+      <view class="reply-dialog">
+        <text class="reply-dialog__title">{{ t('admin.feedback.replyTitle') }}</text>
         <textarea
-          class="reply-modal__input"
+          class="reply-dialog__input"
           v-model="replyContent"
           :placeholder="t('admin.feedback.replyPlaceholder')"
           maxlength="500"
         />
-        <view class="reply-modal__status">
-          <text class="reply-modal__label">{{ t('admin.feedback.replyStatusLabel') }}</text>
+        <view class="reply-dialog__status">
+          <text class="reply-dialog__label">{{ t('admin.feedback.replyStatusLabel') }}</text>
           <view class="status-selector">
             <view
               v-for="st in [1, 2, 3]"
@@ -292,16 +292,16 @@ onMounted(() => {
             </view>
           </view>
         </view>
-        <view class="reply-modal__actions">
-          <button class="reply-modal__btn reply-modal__btn--cancel" @tap="showReplyModal = false">
-            {{ t('common.cancel') }}
-          </button>
-          <button class="reply-modal__btn reply-modal__btn--confirm" @tap="handleReply">
-            {{ t('admin.feedback.submitReply') }}
-          </button>
+        <view class="reply-dialog__actions">
+          <view class="reply-dialog__btn reply-dialog__btn--cancel" @tap="showReplyModal = false">
+            <text>{{ t('common.cancel') }}</text>
+          </view>
+          <view class="reply-dialog__btn reply-dialog__btn--confirm" @tap="handleReply">
+            <text>{{ t('admin.feedback.submitReply') }}</text>
+          </view>
         </view>
       </view>
-    </uni-popup>
+    </view>
   </view>
 </template>
 
@@ -588,97 +588,107 @@ onMounted(() => {
   border: none;
 }
 
-/* ── 回复弹窗 ── */
-.reply-modal {
-  width: 640rpx;
-  background-color: #ffffff;
-  border-radius: 20rpx;
-  padding: 32rpx;
-}
-
-.reply-modal__title {
-  display: block;
-  font-size: 32rpx;
-  font-weight: 600;
-  color: $color-text-primary;
-  margin-bottom: 24rpx;
-  text-align: center;
-}
-
-.reply-modal__input {
-  width: 100%;
-  height: 240rpx;
-  padding: 16rpx;
-  background-color: $color-bg-page;
-  border-radius: 12rpx;
-  font-size: 28rpx;
-  color: $color-text-primary;
-  line-height: 1.5;
-  box-sizing: border-box;
-  margin-bottom: 24rpx;
-}
-
-.reply-modal__status {
-  margin-bottom: 24rpx;
-}
-
-.reply-modal__label {
-  display: block;
-  font-size: 26rpx;
-  color: $color-text-secondary;
-  margin-bottom: 12rpx;
-}
-
-.status-selector {
+/* ── 自定义回复弹窗 ── */
+.confirm-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
-  gap: 12rpx;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
 }
 
-.status.status-option {
-  flex: 1;
-  padding: 16rpx;
-  border-radius: 16rpx;
-  border: 2rpx solid $color-divider;
-  text-align: center;
+.reply-dialog {
+  width: 600rpx;
+  background-color: $color-bg-card;
+  border-radius: 24rpx;
+  overflow: hidden;
 
-  &__text {
-    font-size: 24rpx;
-    color: $color-text-secondary;
+  &__title {
+    display: block;
+    text-align: center;
+    font-size: 32rpx;
+    font-weight: 600;
+    color: $color-text-primary;
+    padding: 48rpx 40rpx 24rpx;
   }
 
-  &--active {
-    border-color: $color-primary;
-    background-color: $color-primary-light;
+  &__input {
+    width: calc(100% - 80rpx);
+    height: 240rpx;
+    margin: 0 40rpx;
+    padding: 16rpx;
+    background-color: $color-bg-page;
+    border-radius: 12rpx;
+    font-size: 28rpx;
+    color: $color-text-primary;
+    line-height: 1.5;
+    box-sizing: border-box;
+  }
 
-    & .status-option__text {
+  &__status {
+    margin: 24rpx 40rpx;
+  }
+
+  &__label {
+    display: block;
+    font-size: 26rpx;
+    color: $color-text-secondary;
+    margin-bottom: 12rpx;
+  }
+
+  .status-selector {
+    display: flex;
+    gap: 12rpx;
+  }
+
+  .status-option {
+    flex: 1;
+    padding: 16rpx;
+    border-radius: 16rpx;
+    border: 2rpx solid $color-divider;
+    text-align: center;
+
+    &__text {
+      font-size: 24rpx;
+      color: $color-text-secondary;
+    }
+
+    &--active {
+      border-color: $color-primary;
+      background-color: $color-primary-light;
+
+      .status-option__text {
+        color: $color-primary;
+        font-weight: 600;
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    border-top: 2rpx solid $color-divider;
+    margin-top: 32rpx;
+  }
+
+  &__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 96rpx;
+    font-size: 30rpx;
+
+    &--cancel {
+      color: $color-text-secondary;
+      border-right: 2rpx solid $color-divider;
+    }
+
+    &--confirm {
       color: $color-primary;
       font-weight: 600;
     }
-  }
-}
-
-.reply-modal__actions {
-  display: flex;
-  gap: 16rpx;
-}
-
-.reply-modal__btn {
-  flex: 1;
-  height: 80rpx;
-  border-radius: 40rpx;
-  border: none;
-  font-size: 28rpx;
-  font-weight: 600;
-  line-height: 80rpx;
-
-  &--cancel {
-    background-color: $color-bg-page;
-    color: $color-text-secondary;
-  }
-
-  &--confirm {
-    background-color: $color-primary;
-    color: #ffffff;
   }
 }
 </style>
