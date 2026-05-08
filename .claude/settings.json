@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "Bash(xargs ls *)",
-      "Bash(npx degit *)"
+      "Bash(npx degit *)",
+      "Bash(cd /d/me/ycu/qinhu-smart-tourism-cloud-platform/QinhuOasisServiceHub-backend && find . -path \"*/interpreter-order/*\" -name \"*.java\" | head -15)",
+      "Read(//d/d/me/ycu/qinhu-smart-tourism-cloud-platform/**)",
+      "Bash(curl -I http://localhost:9000/qosh-ugc-images/20260508/test.jpg)",
+      "Bash(curl -s http://localhost:9000/minio/health/live)",
+      "Bash(curl -s -I http://localhost:9000/qosh-ugc-images/)",
+      "Bash(mvn dependency:tree)",
+      "Bash(curl -s -X PUT \"http://localhost:9000/qosh-ugc-images?policy\" -H \"Content-Type: application/json\" -d '{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:GetObject\"],\"Resource\":[\"arn:aws:s3:::qosh-ugc-images/*\"]}]}' --user root:12345678)",
+      "Bash(where mc *)",
+      "Bash(mysql -u root -p123456 -D qinhu_oasis -e \"SELECT id, images FROM sys_feedback LIMIT 3;\")"
     ],
     "additionalDirectories": [
       "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\restaurant\\entity",

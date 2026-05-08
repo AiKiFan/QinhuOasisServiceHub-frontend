@@ -257,8 +257,8 @@ onMounted(() => {
           <text class="card-reply__handler">{{ t('admin.feedback.handler') }}：{{ item.handlerNickname || t('common.unknown') }}</text>
         </view>
 
-        <!-- 回复按钮（未回复或未关闭时显示） -->
-        <view v-if="!item.replyContent && item.status !== 3" class="card-actions">
+        <!-- 回复按钮（未解决或未关闭时显示） -->
+        <view v-if="item.status !== 2 && item.status !== 3" class="card-actions">
           <button class="reply-btn" @tap="openReplyModal(item.id)">
             {{ t('admin.feedback.replyBtn') }}
           </button>
