@@ -2,7 +2,7 @@
  * 管理端相关接口（role=2 管理员专用）
  * @author AiKiFan
  */
-import { get, post } from '@/utils/request'
+import { get, post, put, del } from '@/utils/request'
 
 /**
  * 获取译员申请列表
@@ -55,4 +55,85 @@ export function getAdminFeedbackList(params = {}) {
  */
 export function replyFeedback(id, data) {
   return post(`/admin/feedback/${id}/reply`, data)
+}
+
+/**
+ * ───────────────────────────── 餐厅管理 ─────────────────────────────
+ */
+
+/**
+ * 管理员获取餐厅列表
+ * 接口：GET /api/restaurants/admin/list?keyword=&page=1&size=10
+ * @param {Object} [params={}] - 查询参数
+ * @param {string} [params.keyword] - 关键词（名称/地址）
+ * @param {number} [params.page=1] - 页码
+ * @param {number} [params.size=10] - 每页条数
+ * @returns {Promise<{total:number, list:Array}>}
+ */
+export function getAdminRestaurantList(params = {}) {
+  return get('/restaurants/admin/list', params)
+}
+
+/**
+ * 管理员新增餐厅
+ * 接口：POST /api/restaurants/admin/create
+ * @param {Object} data - 餐厅数据
+ * @returns {Promise<Object>}
+ */
+export function createRestaurant(data) {
+  return post('/restaurants/admin/create', data)
+}
+
+/**
+ * 管理员更新餐厅
+ * 接口：PUT /api/restaurants/admin/update
+ * @param {Object} data - 餐厅数据（需含 id）
+ * @returns {Promise<Object>}
+ */
+export function updateRestaurant(data) {
+  return put('/restaurants/admin/update', data)
+}
+
+/**
+ * 管理员删除餐厅
+ * 接口：DELETE /api/restaurants/admin/{id}
+ * @param {number|string} id - 餐厅 ID
+ * @returns {Promise<null>}
+ */
+export function deleteRestaurant(id) {
+  return del(`/restaurants/admin/${id}`)
+}
+
+/**
+ * 上传图片
+ * 接口：POST /api/files/upload
+ * @param {string} filePath - 文件临时路径
+ * @returns {Promise<{url:string}>}
+ */
+export function uploadImage(filePath) {
+  return new Promise((resolve, reject) => {
+    uni.uploadFile({
+      url: 'http://localhost:8080/api/files/upload',
+      filePath,
+      name: 'file',
+      header: {
+        Authorization: `Bearer ${uni.getStorageSync('token') || ''}`,
+      },
+      success(res) {
+        try {
+          const data = JSON.parse(res.data)
+          if (data.code === 200) {
+            resolve(data.data)
+          } else {
+            reject(new Error(data.message || 'Upload failed'))
+          }
+        } catch {
+          reject(new Error('Parse response failed'))
+        }
+      },
+      fail(err) {
+        reject(err)
+      },
+    })
+  })
 }

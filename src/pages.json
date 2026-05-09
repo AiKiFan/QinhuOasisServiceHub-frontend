@@ -157,6 +157,24 @@
       }
     },
     {
+      "path": "pages/admin/restaurant-list",
+      "style": {
+        "navigationBarTitleText": "餐厅管理",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/restaurant/album",
+      "style": {
+        "navigationBarTitleText": "相册",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
       "path": "pages/interpreter-orders/list",
       "style": {
         "navigationBarTitleText": "我的订单",

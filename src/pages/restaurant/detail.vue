@@ -56,6 +56,29 @@ const currentUser = computed(() => getUser())
 /** 是否已收藏 */
 const isFavorited = ref(false)
 
+/** 全部图片列表 */
+const imageList = computed(() => {
+  const raw = detail.value?.images
+  if (!raw) return []
+  // 如果已经是数组（后端直接返回），直接用；如果是字符串则解析
+  if (Array.isArray(raw)) return raw
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+})
+
+/** 轮播图（最多4张） */
+const carouselImages = computed(() => imageList.value.slice(0, 4))
+
+/** 是否有更多图片 */
+const hasMoreImages = computed(() => imageList.value.length > 4)
+
+/** 当前轮播图索引 */
+const carouselIndex = ref(0)
+
 /**
  * 切换收藏状态
  */
@@ -183,6 +206,24 @@ function loadMoreComments() {
 }
 
 /**
+ * 预览当前轮播图
+ */
+function previewCurrentImage() {
+  if (imageList.value.length > 0) {
+    uni.previewImage({ urls: imageList.value, current: imageList.value[carouselIndex.value] })
+  }
+}
+
+/**
+ * 打开相册页
+ */
+function openAlbum() {
+  const id = detail.value?.id
+  if (!id) return
+  uni.navigateTo({ url: `/pages/restaurant/album?id=${id}` })
+}
+
+/**
  * 提交评论
  */
 async function handlePostComment() {
@@ -265,29 +306,58 @@ onLoad((options) => {
   <view class="restaurant-detail-page">
     <!-- 加载中状态 -->
     <view v-if="loading" class="status">
-      <text class="status__text">加载中...</text>
+      <text class="status__text">{{ t('common.loading') }}</text>
     </view>
 
     <!-- 加载失败状态 -->
     <view v-else-if="hasError" class="status">
-      <text class="status__text">加载失败，请重试</text>
-      <view class="status__retry-btn" @tap="loadDetail">重新加载</view>
+      <text class="status__text">{{ t('common.loadFailed') }}</text>
+      <view class="status__retry-btn" @tap="loadDetail">{{ t('common.retry') }}</view>
     </view>
 
     <!-- 详情内容 -->
     <view v-else-if="detail" class="detail-content">
-      <!-- 封面轮播图 -->
-      <scroll-view scroll-x class="cover-scroll">
-        <view class="cover-list">
-          <SafeImage
-            v-for="(img, idx) in JSON.parse(detail.images || '[]')"
+      <!-- 图片轮播 -->
+      <view v-if="carouselImages.length > 0" class="carousel-wrap">
+        <swiper
+          class="carousel"
+          :autoplay="carouselImages.length > 1"
+          :interval="4000"
+          :circular="true"
+          @change="carouselIndex = $event.detail.current"
+        >
+          <swiper-item
+            v-for="(img, idx) in carouselImages"
             :key="idx"
-            class="cover-img"
-            :src="img"
-            mode="aspectFill"
+            class="carousel-item"
+          >
+            <SafeImage
+              class="carousel-img"
+              :src="img"
+              mode="aspectFill"
+              @tap="previewCurrentImage"
+            />
+          </swiper-item>
+        </swiper>
+        <!-- 轮播指示器 -->
+        <view v-if="carouselImages.length > 1" class="carousel-dots">
+          <view
+            v-for="i in carouselImages.length"
+            :key="i"
+            class="carousel-dot"
+            :class="{ 'carousel-dot--active': carouselIndex === i - 1 }"
           />
         </view>
-      </scroll-view>
+        <!-- 更多图片提示 -->
+        <view v-if="hasMoreImages" class="carousel-more" @tap="openAlbum">
+          <text class="carousel-more__text">{{ t('restaurant.album') }} ›</text>
+        </view>
+      </view>
+      <!-- 无图片占位 -->
+      <view v-else class="carousel-placeholder">
+        <text class="carousel-placeholder__icon">🍽</text>
+        <text class="carousel-placeholder__text">{{ t('restaurant.noImages') }}</text>
+      </view>
 
       <!-- 基本信息 -->
       <view class="info-card">
@@ -312,7 +382,7 @@ onLoad((options) => {
           </view>
           <view class="meta-item">
             <text class="meta-item__icon">💬</text>
-            <text class="meta-item__text">{{ detail.reviewCount }} 条评价</text>
+            <text class="meta-item__text">{{ detail.reviewCount }} {{ t('restaurant.reviews') }}</text>
           </view>
         </view>
 
@@ -329,39 +399,39 @@ onLoad((options) => {
 
         <!-- 营业时间 -->
         <view class="info-row">
-          <text class="info-row__label">营业时间</text>
+          <text class="info-row__label">{{ t('restaurant.businessHours') }}</text>
           <text class="info-row__value">{{ detail.businessHours || '-' }}</text>
         </view>
 
         <!-- 地址 -->
         <view class="info-row" @tap="openMap">
-          <text class="info-row__label">地址</text>
+          <text class="info-row__label">{{ t('restaurant.address') }}</text>
           <text class="info-row__value info-row__link">{{ detail.address || '-' }}</text>
         </view>
 
         <!-- 电话 -->
         <view class="info-row" @tap="makePhoneCall">
-          <text class="info-row__label">电话</text>
+          <text class="info-row__label">{{ t('restaurant.phone') }}</text>
           <text class="info-row__value info-row__link">{{ detail.phone || '-' }}</text>
         </view>
       </view>
 
       <!-- 评论区 -->
       <view class="comments-card">
-        <text class="section-title">用户评价 ({{ commentTotal }})</text>
+        <text class="section-title">{{ t('restaurant.comments') }} ({{ commentTotal }})</text>
 
         <view v-if="commentsLoading" class="status">
-          <text class="status__text">加载中...</text>
+          <text class="status__text">{{ t('common.loading') }}</text>
         </view>
 
         <view v-else class="comment-list">
           <view v-if="commentList.length === 0" class="empty">
-            <text class="empty__text">暂无评价</text>
+            <text class="empty__text">{{ t('restaurant.noComments') }}</text>
           </view>
 
           <view v-for="item in commentList" :key="item.id" class="comment-item">
             <view class="comment-header">
-              <text class="comment-author">{{ item.authorNickname || '匿名' }}</text>
+              <text class="comment-author">{{ item.authorNickname || t('common.anonymous') }}</text>
               <view class="comment-rating">
                 <text class="comment-rating-star">★</text>
                 <text class="comment-rating-val">{{ item.rating }}</text>
@@ -373,25 +443,25 @@ onLoad((options) => {
 
           <!-- 加载更多评论 -->
           <view v-if="hasMoreComments" class="load-more-comments" @tap="loadMoreComments">
-            <text class="load-more-comments__text">{{ loadingMoreComments ? '加载中...' : '查看更多评价' }}</text>
+            <text class="load-more-comments__text">{{ loadingMoreComments ? t('common.loading') : t('restaurant.loadMoreComments') }}</text>
           </view>
           <view v-else-if="commentList.length > 0" class="no-more-comments">
-            <text class="no-more-comments__text">已显示全部评价</text>
+            <text class="no-more-comments__text">{{ t('restaurant.allCommentsLoaded') }}</text>
           </view>
         </view>
       </view>
 
       <!-- 发表评论 -->
       <view class="post-comment-card">
-        <text class="section-title">发表评价</text>
+        <text class="section-title">{{ t('restaurant.postComment') }}</text>
         <view v-if="!isUserLoggedIn" class="login-tip">
-          <text class="login-tip__text">登录后才能评价</text>
-          <button class="login-tip__btn" @tap="() => uni.navigateTo({ url: '/pages/login/index' })">去登录</button>
+          <text class="login-tip__text">{{ t('restaurant.loginToComment') }}</text>
+          <button class="login-tip__btn" @tap="() => uni.navigateTo({ url: '/pages/login/index' })">{{ t('restaurant.goLogin') }}</button>
         </view>
         <view v-else class="comment-form">
           <!-- 评分选择 -->
           <view class="rating-selector">
-            <text class="rating-selector__label">评分</text>
+            <text class="rating-selector__label">{{ t('restaurant.ratingLabel') }}</text>
             <view class="rating-selector__stars">
               <view
                 v-for="i in 5"
@@ -409,7 +479,7 @@ onLoad((options) => {
           <textarea
             class="comment-input"
             v-model="commentForm.content"
-            placeholder="分享你的用餐体验..."
+            :placeholder="t('restaurant.commentPlaceholder')"
             placeholder-class="comment-placeholder"
             maxlength="500"
           />
@@ -422,7 +492,7 @@ onLoad((options) => {
             :disabled="submittingComment"
             @tap="handlePostComment"
           >
-            {{ submittingComment ? '提交中...' : '提交评价' }}
+            {{ submittingComment ? t('restaurant.submittingComment') : t('restaurant.submitComment') }}
           </button>
         </view>
       </view>
@@ -467,22 +537,88 @@ onLoad((options) => {
   padding: 24rpx;
 }
 
-/* ── 封面轮播 ── */
-.cover-scroll {
-  white-space: nowrap;
+/* ── 图片轮播 ── */
+.carousel-wrap {
+  position: relative;
   margin-bottom: 24rpx;
-}
-
-.cover-list {
-  display: inline-flex;
-  gap: 12rpx;
-}
-
-.cover-img {
-  width: 600rpx;
-  height: 360rpx;
   border-radius: 20rpx;
-  background-color: $color-divider;
+  overflow: hidden;
+}
+
+.carousel {
+  width: 100%;
+  height: 400rpx;
+}
+
+.carousel-item {
+  width: 100%;
+  height: 100%;
+}
+
+.carousel-img {
+  width: 100%;
+  height: 100%;
+}
+
+.carousel-dots {
+  position: absolute;
+  bottom: 20rpx;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 10rpx;
+}
+
+.carousel-dot {
+  width: 16rpx;
+  height: 6rpx;
+  border-radius: 3rpx;
+  background-color: rgba(255, 255, 255, 0.5);
+
+  &--active {
+    width: 32rpx;
+    background-color: #ffffff;
+  }
+}
+
+.carousel-more {
+  position: absolute;
+  bottom: 20rpx;
+  right: 20rpx;
+  padding: 8rpx 16rpx;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 20rpx;
+  z-index: 10;
+
+  &__text {
+    font-size: 22rpx;
+    color: #ffffff;
+    line-height: 1;
+    font-family: sans-serif;
+  }
+}
+
+.carousel-placeholder {
+  height: 300rpx;
+  background-color: $color-bg-card;
+  border-radius: 20rpx;
+  margin-bottom: 24rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+
+  &__icon {
+    font-size: 80rpx;
+    opacity: 0.4;
+  }
+
+  &__text {
+    font-size: 26rpx;
+    color: $color-text-hint;
+  }
 }
 
 /* ── 基本信息 ── */
@@ -739,14 +875,27 @@ onLoad((options) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
 
   &__icon {
     font-size: 32rpx;
     color: $color-divider;
+    transition: all 0.3s ease;
   }
 
-  &--active & .star-option__icon {
-    color: $color-rank-gold;
+  &--active {
+    transform: scale(1.2);
+
+    & .star-option__icon {
+      color: $color-rank-gold;
+      font-size: 36rpx;
+      text-shadow: 0 0 8rpx rgba(255, 215, 0, 0.6);
+    }
+  }
+
+  &:hover {
+    transform: scale(1.1);
   }
 }
 

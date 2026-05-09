@@ -165,6 +165,11 @@ function goAdminFeedback() {
   uni.navigateTo({ url: '/pages/admin/feedback-list' })
 }
 
+/** 跳转管理端：餐厅管理 */
+function goAdminRestaurant() {
+  uni.navigateTo({ url: '/pages/admin/restaurant-list' })
+}
+
 /** 跳转编辑资料页 */
 function goEditProfile() {
   uni.navigateTo({ url: '/pages/profile/edit' })
@@ -306,6 +311,12 @@ onMounted(() => {
         <view class="menu-item" @tap="goAdminReview">
           <text class="menu-item__icon">📝</text>
           <text class="menu-item__text">{{ t('profile.adminReview') }}</text>
+          <text class="menu-item__arrow">›</text>
+        </view>
+
+        <view class="menu-item" @tap="goAdminRestaurant">
+          <text class="menu-item__icon">🍽</text>
+          <text class="menu-item__text">{{ t('profile.adminRestaurant') }}</text>
           <text class="menu-item__arrow">›</text>
         </view>
 

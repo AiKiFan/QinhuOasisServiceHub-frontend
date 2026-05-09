@@ -22,7 +22,9 @@
       "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis --default-character-set=utf8mb4 -e \"UPDATE sys_feedback SET reply_content = REPLACE\\(reply_content, '[用户追加] ', ''\\) WHERE reply_content LIKE '%[用户追加]%';\")",
       "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis --default-character-set=utf8mb4 -e \"SELECT COUNT\\(*\\) as count FROM sys_feedback WHERE reply_content LIKE '%[管理员]%' OR reply_content LIKE '%[用户]%' OR reply_content LIKE '%[用户追加]%';\")",
       "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis --default-character-set=utf8mb4 -e \"DESCRIBE interpreter_profile;\")",
-      "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis --default-character-set=utf8mb4 -e \"ALTER TABLE interpreter_profile MODIFY COLUMN cert_url VARCHAR\\(2000\\);\")"
+      "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis --default-character-set=utf8mb4 -e \"ALTER TABLE interpreter_profile MODIFY COLUMN cert_url VARCHAR\\(2000\\);\")",
+      "Read(//d/me/ycu/qinhu-smin-cloud-platform/QinhuOasisServiceHub-frontend/src/api/**)",
+      "Read(//d/me/ycu/qincu-smart-tourism-cloud-platform/QinhuOasisServiceHub-frontend/src/pages/restaurant/**)"
     ],
     "additionalDirectories": [
       "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\restaurant\\entity",

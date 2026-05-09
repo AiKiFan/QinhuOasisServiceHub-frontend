@@ -412,14 +412,14 @@ onMounted(() => {
     <!-- 自定义清空确认弹窗 -->
     <view v-if="showClearConfirm" class="confirm-mask" @tap.self="showClearConfirm = false">
       <view class="confirm-dialog">
-        <text class="confirm-dialog__title">清空历史</text>
-        <text class="confirm-dialog__content">确定要清空全部搜索历史吗？</text>
+        <text class="confirm-dialog__title">{{ t('search.clearHistoryTitle') }}</text>
+        <text class="confirm-dialog__content">{{ t('search.clearHistoryConfirm') }}</text>
         <view class="confirm-dialog__actions">
           <view class="confirm-dialog__btn confirm-dialog__btn--cancel" @tap="showClearConfirm = false">
-            <text>取消</text>
+            <text>{{ t('common.cancel') }}</text>
           </view>
           <view class="confirm-dialog__btn confirm-dialog__btn--confirm" @tap="confirmClearHistory">
-            <text>清空</text>
+            <text>{{ t('search.clearAll') }}</text>
           </view>
         </view>
       </view>
