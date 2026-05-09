@@ -310,10 +310,11 @@ onMounted(() => {
       </view>
 
       <!-- 备注信息 -->
-      <view v-if="detail.remark" class="card-section">
+      <view v-if="detail.remark || detail.orderPhone" class="card-section">
         <text class="section-title">{{ t('orders.remarkLabel') }}</text>
         <view class="remark-card">
-          <text class="remark-text">{{ detail.remark }}</text>
+          <text v-if="detail.orderPhone" class="remark-phone">📞 {{ detail.orderPhone }}</text>
+          <text v-if="detail.remark" class="remark-text">{{ detail.remark }}</text>
         </view>
       </view>
 
@@ -600,6 +601,13 @@ onMounted(() => {
   font-size: 28rpx;
   color: $color-text-secondary;
   line-height: 1.6;
+}
+
+.remark-phone {
+  display: block;
+  font-size: 28rpx;
+  color: $color-primary;
+  margin-bottom: 12rpx;
 }
 
 /* ── 取消信息卡片 ── */

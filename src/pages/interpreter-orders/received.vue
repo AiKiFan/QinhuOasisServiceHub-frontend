@@ -46,6 +46,14 @@ const showRejectDialog = ref(false)
 const rejectReason = ref('')
 const rejectingOrderId = ref(null)
 
+/** 接单确认弹窗 */
+const showAcceptConfirm = ref(false)
+const acceptingOrderId = ref(null)
+
+/** 完成服务确认弹窗 */
+const showCompleteConfirm = ref(false)
+const completingOrderId = ref(null)
+
 /** 取消弹窗 */
 const showCancelDialog = ref(false)
 const cancelReason = ref('')
@@ -102,23 +110,47 @@ function switchStatusFilter(status) {
 }
 
 /**
- * 接单
+ * 打开接单确认弹窗
  */
-function handleAccept(orderId) {
-  uni.showModal({
-    title: t('common.confirm'),
-    content: t('orders.acceptConfirmContent'),
-    success: async (res) => {
-      if (!res.confirm) return
-      try {
-        await acceptInterpreterOrder(orderId)
-        uni.showToast({ title: t('orders.acceptSuccess'), icon: 'success' })
-        loadList(true)
-      } catch {
-        // 错误已在 request.js 中处理
-      }
-    },
-  })
+function openAcceptConfirm(orderId) {
+  acceptingOrderId.value = orderId
+  showAcceptConfirm.value = true
+}
+
+/**
+ * 确认接单
+ */
+async function handleConfirmAccept() {
+  try {
+    await acceptInterpreterOrder(acceptingOrderId.value)
+    uni.showToast({ title: t('orders.acceptSuccess'), icon: 'success' })
+    showAcceptConfirm.value = false
+    loadList(true)
+  } catch {
+    // 错误已在 request.js 中处理
+  }
+}
+
+/**
+ * 打开完成确认弹窗
+ */
+function openCompleteConfirm(orderId) {
+  completingOrderId.value = orderId
+  showCompleteConfirm.value = true
+}
+
+/**
+ * 确认完成服务
+ */
+async function handleConfirmComplete() {
+  try {
+    await completeInterpreterOrder(completingOrderId.value)
+    uni.showToast({ title: t('orders.completeSuccess'), icon: 'success' })
+    showCompleteConfirm.value = false
+    loadList(true)
+  } catch {
+    // 错误已在 request.js 中处理
+  }
 }
 
 /**
@@ -148,20 +180,7 @@ async function handleConfirmReject() {
  * 完成服务
  */
 function handleComplete(orderId) {
-  uni.showModal({
-    title: t('common.confirm'),
-    content: t('orders.completeConfirmContent'),
-    success: async (res) => {
-      if (!res.confirm) return
-      try {
-        await completeInterpreterOrder(orderId)
-        uni.showToast({ title: t('orders.completeSuccess'), icon: 'success' })
-        loadList(true)
-      } catch {
-        // 错误已在 request.js 中处理
-      }
-    },
-  })
+  openCompleteConfirm(orderId)
 }
 
 /**
@@ -316,6 +335,9 @@ onMounted(() => {
             <view class="user-detail">
               <text class="user-name">{{ item.userNickname }}</text>
               <text class="user-contact">{{ item.userPhone || item.userEmail || t('common.noContact') }}</text>
+              <text v-if="item.orderPhone" class="user-order-phone">
+                📞 {{ item.orderPhone }}
+              </text>
             </view>
           </view>
 
@@ -348,7 +370,7 @@ onMounted(() => {
               <button class="action-btn action-btn--reject" @tap.stop="openRejectDialog(item.id)">
                 {{ t('orders.rejectBtn') }}
               </button>
-              <button class="action-btn action-btn--accept" @tap.stop="handleAccept(item.id)">
+              <button class="action-btn action-btn--accept" @tap.stop="openAcceptConfirm(item.id)">
                 {{ t('orders.acceptBtn') }}
               </button>
             </view>
@@ -395,6 +417,38 @@ onMounted(() => {
           </view>
           <view class="reject-dialog__btn reject-dialog__btn--confirm" @tap="handleConfirmReject">
             <text>{{ t('common.confirm') }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 接单确认弹窗 -->
+    <view v-if="showAcceptConfirm" class="confirm-mask" @tap.self="showAcceptConfirm = false">
+      <view class="confirm-dialog">
+        <text class="confirm-dialog__title">{{ t('common.confirm') }}</text>
+        <text class="confirm-dialog__content">{{ t('orders.acceptConfirmContent') }}</text>
+        <view class="confirm-dialog__actions">
+          <view class="confirm-dialog__btn confirm-dialog__btn--cancel" @tap="showAcceptConfirm = false">
+            <text>{{ t('common.cancel') }}</text>
+          </view>
+          <view class="confirm-dialog__btn confirm-dialog__btn--confirm" @tap="handleConfirmAccept">
+            <text>{{ t('orders.acceptBtn') }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 完成确认弹窗 -->
+    <view v-if="showCompleteConfirm" class="confirm-mask" @tap.self="showCompleteConfirm = false">
+      <view class="confirm-dialog">
+        <text class="confirm-dialog__title">{{ t('common.confirm') }}</text>
+        <text class="confirm-dialog__content">{{ t('orders.completeConfirmContent') }}</text>
+        <view class="confirm-dialog__actions">
+          <view class="confirm-dialog__btn confirm-dialog__btn--cancel" @tap="showCompleteConfirm = false">
+            <text>{{ t('common.cancel') }}</text>
+          </view>
+          <view class="confirm-dialog__btn confirm-dialog__btn--confirm" @tap="handleConfirmComplete">
+            <text>{{ t('orders.completeBtn') }}</text>
           </view>
         </view>
       </view>
@@ -553,6 +607,12 @@ onMounted(() => {
 .user-contact {
   font-size: 24rpx;
   color: $color-text-secondary;
+}
+
+.user-order-phone {
+  font-size: 24rpx;
+  color: $color-primary;
+  margin-top: 4rpx;
 }
 
 /* ── 订单信息 ── */
@@ -768,6 +828,70 @@ onMounted(() => {
 
     &--confirm {
       color: #E05252;
+      font-weight: 600;
+    }
+  }
+}
+
+/* ── 通用确认弹窗 ── */
+.confirm-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-dialog {
+  width: 560rpx;
+  background-color: $color-bg-card;
+  border-radius: 24rpx;
+  overflow: hidden;
+
+  &__title {
+    display: block;
+    text-align: center;
+    font-size: 32rpx;
+    font-weight: 600;
+    color: $color-text-primary;
+    padding: 48rpx 40rpx 16rpx;
+  }
+
+  &__content {
+    display: block;
+    text-align: center;
+    font-size: 28rpx;
+    color: $color-text-secondary;
+    line-height: 1.5;
+    padding: 0 40rpx 32rpx;
+  }
+
+  &__actions {
+    display: flex;
+    border-top: 2rpx solid $color-divider;
+  }
+
+  &__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 96rpx;
+    font-size: 30rpx;
+    font-weight: 500;
+
+    &--cancel {
+      color: $color-text-secondary;
+      border-right: 2rpx solid $color-divider;
+    }
+
+    &--confirm {
+      color: $color-primary;
       font-weight: 600;
     }
   }
