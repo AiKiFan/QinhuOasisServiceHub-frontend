@@ -27,9 +27,15 @@ export function submitFeedback(data) {
  * @returns {Promise<{url:string, originalName:string, size:number}>}
  */
 export function uploadFeedbackImage(filePath) {
+  // #ifdef H5
+  const uploadUrl = `${location.protocol}//${location.hostname}:8080/api/files/upload`
+  // #endif
+  // #ifndef H5
+  const uploadUrl = 'http://localhost:8080/api/files/upload'
+  // #endif
   return new Promise((resolve, reject) => {
     uni.uploadFile({
-      url: 'http://localhost:8080/api/files/upload',
+      url: uploadUrl,
       filePath,
       name: 'file',
       header: {

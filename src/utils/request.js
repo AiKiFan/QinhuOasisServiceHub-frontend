@@ -7,8 +7,13 @@
 import { getToken } from '@/utils/auth'
 import { getLanguage } from '@/utils/i18n'
 
-/** API 基础路径 - 直接请求后端地址（开发环境） */
+/** API 基础路径 - 自动识别当前访问的 host（电脑用 localhost，手机用局域网 IP） */
+// #ifdef H5
+const BASE_URL = `${location.protocol}//${location.hostname}:8080/api`
+// #endif
+// #ifndef H5
 const BASE_URL = 'http://localhost:8080/api'
+// #endif
 
 /** 业务成功状态码 */
 const HTTP_SUCCESS_CODE = 200

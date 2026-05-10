@@ -24,7 +24,9 @@
       "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis --default-character-set=utf8mb4 -e \"DESCRIBE interpreter_profile;\")",
       "Bash(mysql -h localhost -P 3306 -u root -p123456 qinhu_oasis --default-character-set=utf8mb4 -e \"ALTER TABLE interpreter_profile MODIFY COLUMN cert_url VARCHAR\\(2000\\);\")",
       "Read(//d/me/ycu/qinhu-smin-cloud-platform/QinhuOasisServiceHub-frontend/src/api/**)",
-      "Read(//d/me/ycu/qincu-smart-tourism-cloud-platform/QinhuOasisServiceHub-frontend/src/pages/restaurant/**)"
+      "Read(//d/me/ycu/qincu-smart-tourism-cloud-platform/QinhuOasisServiceHub-frontend/src/pages/restaurant/**)",
+      "Bash(ipconfig)",
+      "Bash(findstr IPv4)"
     ],
     "additionalDirectories": [
       "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\restaurant\\entity",
