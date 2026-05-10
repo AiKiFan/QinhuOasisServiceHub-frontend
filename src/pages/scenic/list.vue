@@ -36,8 +36,8 @@ async function loadSpots(refresh = true) {
   }
 
   try {
-    const res = await getScenicSpotList(page.value, PAGE_SIZE)
-    const newList = res.data || []
+    const list = await getScenicSpotList(page.value, PAGE_SIZE)
+    const newList = Array.isArray(list) ? list : []
     spotList.value = refresh ? newList : [...spotList.value, ...newList]
     hasMore.value = newList.length >= PAGE_SIZE
     page.value++

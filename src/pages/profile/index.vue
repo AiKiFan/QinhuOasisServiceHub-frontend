@@ -150,6 +150,11 @@ function goFavorites() {
   uni.navigateTo({ url: '/pages/favorites/index' })
 }
 
+/** 跳转景区导览 */
+function goScenicList() {
+  uni.navigateTo({ url: '/pages/scenic/list' })
+}
+
 /** 跳转接单管理（译员端） */
 function goReceivedOrders() {
   uni.navigateTo({ url: '/pages/interpreter-orders/received' })
@@ -257,6 +262,13 @@ onMounted(() => {
           <text class="menu-item__arrow">›</text>
         </view>
 
+        <!-- 景区导览 -->
+        <view class="menu-item" @tap="goScenicList">
+          <text class="menu-item__icon">🏔️</text>
+          <text class="menu-item__text">{{ t('scenic.title') }}</text>
+          <text class="menu-item__arrow">›</text>
+        </view>
+
         <!-- 我的订单 -->
         <view class="menu-item" @tap="goMyOrders">
           <text class="menu-item__icon">📋</text>
@@ -315,7 +327,9 @@ onMounted(() => {
         </view>
 
         <view class="menu-item" @tap="goAdminRestaurant">
-          <text class="menu-item__icon">🍽</text>
+          <view class="menu-item__icon-img">
+            <image src="/static/icons/restaurant.svg" mode="aspectFit" class="menu-item__svg-icon" />
+          </view>
           <text class="menu-item__text">{{ t('profile.adminRestaurant') }}</text>
           <text class="menu-item__arrow">›</text>
         </view>
@@ -566,6 +580,23 @@ onMounted(() => {
     font-size: 36rpx;
     margin-right: 20rpx;
     line-height: 1;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__icon-img {
+    width: 44rpx;
+    height: 44rpx;
+    margin-right: 20rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__svg-icon {
+    width: 36rpx;
+    height: 36rpx;
   }
 
   &__text {

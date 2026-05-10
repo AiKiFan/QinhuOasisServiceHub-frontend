@@ -7,6 +7,7 @@ import { ref, onMounted } from 'vue'
 import { t } from '@/utils/i18n'
 import { getScenicSpotDetail } from '@/api/scenic'
 import { addFavorite, removeFavorite, checkFavorite } from '@/api/favorites'
+import { isLoggedIn } from '@/utils/auth'
 import SafeImage from '@/components/SafeImage/index.vue'
 
 /** 景点ID */
@@ -35,9 +36,15 @@ async function loadDetail() {
         imageList.value = []
       }
     }
-    // 检查是否已收藏
-    const favorited = await checkFavorite('scenic', spotId.value)
-    isFavorited.value = favorited
+    // 检查是否已收藏（仅登录用户）
+    if (isLoggedIn()) {
+      try {
+        const favorited = await checkFavorite('scenic', spotId.value)
+        isFavorited.value = favorited || false
+      } catch {
+        isFavorited.value = false
+      }
+    }
   } catch {
     /* error handled by request.js */
   } finally {
@@ -49,6 +56,20 @@ async function loadDetail() {
  * 切换收藏状态
  */
 async function toggleFavorite() {
+  if (!isLoggedIn()) {
+    uni.showModal({
+      title: t('common.confirm'),
+      content: '请先登录后再收藏',
+      confirmText: t('auth.login'),
+      success(res) {
+        if (res.confirm) {
+          uni.navigateTo({ url: '/pages/login/index' })
+        }
+      },
+    })
+    return
+  }
+
   try {
     if (isFavorited.value) {
       await removeFavorite('scenic', spotId.value)
@@ -60,7 +81,6 @@ async function toggleFavorite() {
       uni.showToast({ title: t('favorites.added'), icon: 'success' })
     }
   } catch (error) {
-    // API调用失败,恢复状态
     isFavorited.value = !isFavorited.value
     uni.showToast({ title: t('common.loadFailed'), icon: 'none' })
   }
