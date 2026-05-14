@@ -26,7 +26,9 @@
       "Read(//d/me/ycu/qinhu-smin-cloud-platform/QinhuOasisServiceHub-frontend/src/api/**)",
       "Read(//d/me/ycu/qincu-smart-tourism-cloud-platform/QinhuOasisServiceHub-frontend/src/pages/restaurant/**)",
       "Bash(ipconfig)",
-      "Bash(findstr IPv4)"
+      "Bash(findstr IPv4)",
+      "Read(//d/me/ycu/**)",
+      "Read(//d/me/software engineering/Journal/**)"
     ],
     "additionalDirectories": [
       "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\restaurant\\entity",

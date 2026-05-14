@@ -160,6 +160,15 @@ function goReceivedOrders() {
   uni.navigateTo({ url: '/pages/interpreter-orders/received' })
 }
 
+/** 译员点击头像，跳转自己的详情页 */
+function handleAvatarTap() {
+  if (userInfo.value && (userInfo.value.role === 1 || userInfo.value.role === 'interpreter')) {
+    if (userInfo.value.profileId) {
+      uni.navigateTo({ url: `/pages/interpreter/detail?id=${userInfo.value.profileId}` })
+    }
+  }
+}
+
 /** 跳转管理端：译员审核 */
 function goAdminReview() {
   uni.navigateTo({ url: '/pages/admin/interpreter-review' })
@@ -199,7 +208,7 @@ onMounted(() => {
     <!-- ── 已登录视图 ── -->
     <view v-else class="profile-user">
       <!-- 头部信息卡 -->
-      <view class="profile-hero">
+      <view class="profile-hero" @tap="handleAvatarTap">
         <view class="profile-hero__avatar-wrap">
           <SafeImage
             v-if="userInfo && userInfo.avatar"
