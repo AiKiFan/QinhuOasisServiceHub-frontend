@@ -35,7 +35,8 @@ async function handleLogin() {
     const res = await login(username.value.trim(), password.value)
     saveToken(res.token)
     saveUser({
-      userId: res.userId,
+      id: res.id,
+      userId: res.userId ?? res.id,
       username: res.username,
       nickname: res.nickname,
       role: res.role,
