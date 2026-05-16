@@ -18,6 +18,8 @@ const spot = ref(null)
 const loading = ref(false)
 /** 是否收藏 */
 const isFavorited = ref(false)
+/** 登录提示弹窗 */
+const showLoginHint = ref(false)
 /** 图片列表 */
 const imageList = ref([])
 
@@ -57,16 +59,7 @@ async function loadDetail() {
  */
 async function toggleFavorite() {
   if (!isLoggedIn()) {
-    uni.showModal({
-      title: t('common.confirm'),
-      content: '请先登录后再收藏',
-      confirmText: t('auth.login'),
-      success(res) {
-        if (res.confirm) {
-          uni.navigateTo({ url: '/pages/login/index' })
-        }
-      },
-    })
+    showLoginHint.value = true
     return
   }
 
@@ -80,10 +73,16 @@ async function toggleFavorite() {
       isFavorited.value = true
       uni.showToast({ title: t('favorites.added'), icon: 'success' })
     }
-  } catch (error) {
+  } catch {
     isFavorited.value = !isFavorited.value
     uni.showToast({ title: t('common.loadFailed'), icon: 'none' })
   }
+}
+
+/** 导航到登录页 */
+function goLogin() {
+  showLoginHint.value = false
+  uni.navigateTo({ url: '/pages/login/index' })
 }
 
 /**
@@ -191,6 +190,17 @@ onMounted(() => {
             <SafeImage :src="img" mode="aspectFill" />
           </view>
         </view>
+      </view>
+    </view>
+
+    <!-- 登录提示弹窗 -->
+    <view v-if="showLoginHint" class="interpreter-overlay" @tap.self="showLoginHint = false">
+      <view class="interpreter-dialog interpreter-dialog--center" @tap.stop>
+        <view class="hint-icon">!</view>
+        <text class="hint-title">{{ t('common.loginRequired') }}</text>
+        <text class="hint-msg">请先登录后再收藏景点</text>
+        <view class="interpreter-btn interpreter-btn--primary interpreter-btn--full" @tap="goLogin">{{ t('auth.login') }}</view>
+        <view class="interpreter-btn interpreter-btn--cancel interpreter-btn--full" @tap="showLoginHint = false">{{ t('common.cancel') }}</view>
       </view>
     </view>
 
@@ -330,6 +340,89 @@ onMounted(() => {
     border-radius: 8rpx;
     overflow: hidden;
   }
+}
+
+/* ── 登录提示弹窗 ── */
+.interpreter-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 32rpx;
+}
+
+.interpreter-dialog {
+  width: 100%;
+  max-width: 600rpx;
+  background-color: $color-bg-card;
+  border-radius: 24rpx;
+  padding: 40rpx 32rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
+
+  &--center {
+    text-align: center;
+    padding: 60rpx 32rpx 48rpx;
+  }
+}
+
+.interpreter-btn {
+  flex: 1;
+  height: 80rpx;
+  border-radius: 40rpx;
+  border: none;
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 80rpx;
+  text-align: center;
+
+  &--cancel {
+    background-color: $color-bg-page;
+    color: $color-text-secondary;
+  }
+
+  &--primary {
+    background: linear-gradient(135deg, $color-primary 0%, #D4784E 100%);
+    color: #ffffff;
+  }
+
+  &--full {
+    margin-top: 8rpx;
+  }
+}
+
+.hint-icon {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
+  color: #fff;
+  font-size: 48rpx;
+  font-weight: 700;
+  line-height: 100rpx;
+  text-align: center;
+  margin: 0 auto 24rpx;
+}
+
+.hint-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin-bottom: 12rpx;
+}
+
+.hint-msg {
+  display: block;
+  font-size: 26rpx;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  margin-bottom: 32rpx;
 }
 
 .back-btn {

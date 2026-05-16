@@ -118,13 +118,24 @@
     </view>
 
     <TabBar active="home" />
+
+    <!-- 登录提示弹窗 -->
+    <view v-if="showLoginHint" class="interpreter-overlay" @tap.self="showLoginHint = false">
+      <view class="interpreter-dialog interpreter-dialog--center" @tap.stop>
+        <view class="hint-icon">!</view>
+        <text class="hint-title">{{ t('common.loginRequired') }}</text>
+        <text class="hint-msg">请先登录后再进行入场登记</text>
+        <view class="interpreter-btn interpreter-btn--primary interpreter-btn--full" @tap="goLogin">{{ t('auth.login') }}</view>
+        <view class="interpreter-btn interpreter-btn--cancel interpreter-btn--full" @tap="showLoginHint = false">{{ t('common.cancel') }}</view>
+      </view>
+    </view>
   </view>
 </template>
 
 <script>
 import { getParkingZones, getZoneSpots, bookSpot, settleSpot } from '@/api/parking'
 import { t } from '@/utils/i18n'
-import { getUser } from '@/utils/auth'
+import { getUser, isLoggedIn } from '@/utils/auth'
 import TabBar from '@/components/TabBar/index.vue'
 import LicensePlateInput from '@/components/LicensePlateInput/index.vue'
 
@@ -141,6 +152,7 @@ export default {
       successDialogType: 'entry', // 'entry'=入场成功 'exit'=离场成功
       showOccupiedHint: false,
       showSettleDialog: false,
+      showLoginHint: false,
       selectedSpot: {},
       settleDetail: {},
       bookForm: { plateNumber: '' }
@@ -217,19 +229,26 @@ export default {
       return this.isMySpot(spot) ? 'spot--mine' : 'spot--others'
     },
     onSpotTap(spot) {
-      const isMine = this.isMySpot(spot)
       this.selectedSpot = spot
       if (spot.status === 0) {
+        if (!isLoggedIn()) {
+          this.showLoginHint = true
+          return
+        }
         this.bookForm = { plateNumber: '' }
         this.showBookDialog = true
         return
       }
-      if (isMine) {
+      if (this.isMySpot(spot)) {
         this.prepareSettleDetail(spot)
         this.showSettleDialog = true
       } else {
         this.showOccupiedHint = true
       }
+    },
+    goLogin() {
+      this.showLoginHint = false
+      uni.navigateTo({ url: '/pages/login/index' })
     },
     prepareSettleDetail(spot) {
       const now = new Date()

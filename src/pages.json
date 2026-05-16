@@ -166,6 +166,15 @@
       }
     },
     {
+      "path": "pages/admin/scenic-list",
+      "style": {
+        "navigationBarTitleText": "景点管理",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
       "path": "pages/restaurant/album",
       "style": {
         "navigationBarTitleText": "相册",

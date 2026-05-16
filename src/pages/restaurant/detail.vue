@@ -47,6 +47,10 @@ const submittingComment = ref(false)
 /** 评论每页条数 */
 const COMMENT_PAGE_SIZE = 10
 
+/** 登录提示弹窗 */
+const showLoginHint = ref(false)
+const loginHintMessage = ref('')
+
 /** 是否已登录 */
 const isUserLoggedIn = computed(() => isLoggedIn())
 
@@ -87,39 +91,23 @@ async function toggleFavorite() {
   if (!restaurant) return
 
   if (!isLoggedIn()) {
-    uni.showModal({
-      title: t('common.confirm'),
-      content: '请先登录后再收藏',
-      confirmText: t('restaurant.goLogin'),
-      success(res) {
-        if (res.confirm) {
-          uni.navigateTo({ url: '/pages/login/index' })
-        }
-      },
-    })
+    loginHintMessage.value = '请先登录后再收藏'
+    showLoginHint.value = true
     return
   }
 
   const previousState = isFavorited.value
-  console.log('[收藏] 切换前状态:', previousState, '餐厅ID:', restaurant.id)
-
   try {
     if (isFavorited.value) {
-      console.log('[收藏] 调用removeFavorite API')
       await removeFavorite(FAVORITE_TYPE.RESTAURANT, restaurant.id)
       isFavorited.value = false
       uni.showToast({ title: t('favorites.removed'), icon: 'success' })
-      console.log('[收藏] removeFavorite成功')
     } else {
-      console.log('[收藏] 调用addFavorite API')
       await addFavorite(FAVORITE_TYPE.RESTAURANT, restaurant.id)
       isFavorited.value = true
       uni.showToast({ title: '已收藏', icon: 'success' })
-      console.log('[收藏] addFavorite成功')
     }
   } catch (error) {
-    console.error('[收藏] API调用失败:', error)
-    // API调用失败,恢复状态
     isFavorited.value = previousState
     uni.showToast({ title: t('common.loadFailed'), icon: 'none' })
   }
@@ -228,16 +216,8 @@ function openAlbum() {
  */
 async function handlePostComment() {
   if (!isUserLoggedIn.value) {
-      uni.showModal({
-      title: t('common.confirm'),
-      content: t('restaurant.loginToComment'),
-      confirmText: t('restaurant.goLogin'),
-      success(res) {
-        if (res.confirm) {
-          uni.navigateTo({ url: '/pages/login/index' })
-        }
-      },
-    })
+    loginHintMessage.value = t('restaurant.loginToComment')
+    showLoginHint.value = true
     return
   }
   if (!commentForm.value.content.trim()) {
@@ -262,6 +242,12 @@ async function handlePostComment() {
   } finally {
     submittingComment.value = false
   }
+}
+
+/** 导航到登录页 */
+function goToLogin() {
+  showLoginHint.value = false
+  uni.navigateTo({ url: '/pages/login/index' })
 }
 
 /**
@@ -495,6 +481,17 @@ onLoad((options) => {
             {{ submittingComment ? t('restaurant.submittingComment') : t('restaurant.submitComment') }}
           </button>
         </view>
+      </view>
+    </view>
+
+    <!-- 登录提示弹窗 -->
+    <view v-if="showLoginHint" class="login-hint-overlay" @tap.self="showLoginHint = false">
+      <view class="login-hint-dialog" @tap.stop>
+        <view class="login-hint-icon">!</view>
+        <text class="login-hint-title">{{ t('common.loginRequired') }}</text>
+        <text class="login-hint-msg">{{ loginHintMessage }}</text>
+        <view class="login-hint-btn login-hint-btn--primary" @tap="goToLogin">{{ t('restaurant.goLogin') }}</view>
+        <view class="login-hint-btn login-hint-btn--cancel" @tap="showLoginHint = false">{{ t('common.cancel') }}</view>
       </view>
     </view>
 
@@ -942,6 +939,85 @@ onLoad((options) => {
 
 .bottom-placeholder {
   height: 120rpx;
+}
+
+/* ── 登录提示弹窗 ── */
+.login-hint-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 32rpx;
+}
+
+.login-hint-dialog {
+  width: 100%;
+  max-width: 600rpx;
+  background-color: $color-bg-card;
+  border-radius: 24rpx;
+  padding: 60rpx 32rpx 48rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.login-hint-icon {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
+  color: #fff;
+  font-size: 48rpx;
+  font-weight: 700;
+  line-height: 100rpx;
+  text-align: center;
+  margin: 0 auto 24rpx;
+}
+
+.login-hint-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin-bottom: 12rpx;
+}
+
+.login-hint-msg {
+  display: block;
+  font-size: 26rpx;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  margin-bottom: 32rpx;
+  word-break: break-all;
+}
+
+.login-hint-btn {
+  display: block;
+  width: 100%;
+  height: 80rpx;
+  border-radius: 40rpx;
+  border: none;
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 80rpx;
+  text-align: center;
+  margin-top: 16rpx;
+  overflow: hidden;
+
+  &--primary {
+    background: linear-gradient(135deg, $color-primary 0%, #D4784E 100%);
+    color: #ffffff;
+  }
+
+  &--cancel {
+    background-color: $color-bg-page;
+    color: $color-text-secondary;
+  }
 }
 
 /* ── 收藏按钮 ── */

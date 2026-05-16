@@ -184,6 +184,11 @@ function goAdminRestaurant() {
   uni.navigateTo({ url: '/pages/admin/restaurant-list' })
 }
 
+/** 跳转管理端：景点管理 */
+function goAdminScenic() {
+  uni.navigateTo({ url: '/pages/admin/scenic-list' })
+}
+
 /** 跳转编辑资料页 */
 function goEditProfile() {
   uni.navigateTo({ url: '/pages/profile/edit' })
@@ -340,6 +345,12 @@ onMounted(() => {
             <image src="/static/icons/restaurant.svg" mode="aspectFit" class="menu-item__svg-icon" />
           </view>
           <text class="menu-item__text">{{ t('profile.adminRestaurant') }}</text>
+          <text class="menu-item__arrow">›</text>
+        </view>
+
+        <view class="menu-item" @tap="goAdminScenic">
+          <text class="menu-item__icon">⛰️</text>
+          <text class="menu-item__text">{{ t('profile.adminScenic') }}</text>
           <text class="menu-item__arrow">›</text>
         </view>
 
