@@ -6,7 +6,13 @@
 import { ref, onMounted } from 'vue'
 import { login } from '@/api/auth'
 import { saveToken, saveUser } from '@/utils/auth'
-import { t } from '@/utils/i18n'
+import { t, toggleLanguage } from '@/utils/i18n'
+
+/** 语言切换并刷新页面 */
+function switchLang() {
+  toggleLanguage()
+  uni.reLaunch({ url: '/pages/login/index' })
+}
 
 /** 表单字段 */
 const username = ref('')
@@ -23,11 +29,11 @@ const PASSWORD_MIN_LEN = 6
  */
 async function handleLogin() {
   if (username.value.trim().length < USERNAME_MIN_LEN) {
-    uni.showToast({ title: `用户名至少 ${USERNAME_MIN_LEN} 位`, icon: 'none' })
+    uni.showToast({ title: t('auth.usernameTooShort', { n: USERNAME_MIN_LEN }), icon: 'none' })
     return
   }
   if (password.value.length < PASSWORD_MIN_LEN) {
-    uni.showToast({ title: `密码至少 ${PASSWORD_MIN_LEN} 位`, icon: 'none' })
+    uni.showToast({ title: t('auth.passwordTooShort', { n: PASSWORD_MIN_LEN }), icon: 'none' })
     return
   }
   submitting.value = true
@@ -43,7 +49,7 @@ async function handleLogin() {
       avatar: res.avatar,
       profileId: res.profileId, // 译员档案ID（仅译员身份有值）
     })
-    uni.showToast({ title: '登录成功', icon: 'success' })
+    uni.showToast({ title: t('auth.loginSuccess'), icon: 'success' })
     setTimeout(() => uni.reLaunch({ url: '/pages/profile/index' }), 800)
   } catch (err) {
     // 错误已在 request.js 中统一提示，无需重复处理
@@ -103,6 +109,10 @@ onMounted(() => {
       >
         {{ submitting ? t('auth.loggingIn') : t('auth.loginBtn') }}
       </button>
+
+      <view class="lang-switch-btn" @tap="switchLang">
+        <text class="lang-switch-btn__text">🌐 {{ t('profile.switchLang') }}</text>
+      </view>
 
       <view class="login-footer">
         <text class="login-footer__text">{{ t('auth.noAccount') }}</text>
@@ -200,6 +210,25 @@ onMounted(() => {
 
   &[disabled] {
     opacity: 0.6;
+  }
+}
+
+.lang-switch-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 88rpx;
+  background: linear-gradient(135deg, $color-primary 0%, #D4784E 100%);
+  color: #ffffff;
+  font-size: 30rpx;
+  font-weight: 600;
+  border-radius: 44rpx;
+  border: none;
+  margin-top: 24rpx;
+
+  &__text {
+    letter-spacing: 2rpx;
   }
 }
 

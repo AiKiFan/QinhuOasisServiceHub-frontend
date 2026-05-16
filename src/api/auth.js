@@ -21,8 +21,10 @@ export function login(username, password) {
  * @param {string} username
  * @param {string} password
  * @param {string} [nickname='']
+ * @param {object} [options={}]
+ * @param {boolean} [options.silent=false] - 静默模式，不弹出错误提示
  * @returns {Promise<null>}
  */
-export function register(username, password, nickname = '') {
-  return post('/auth/register', { username, password, nickname })
+export function register(username, password, nickname = '', options = {}) {
+  return post('/auth/register', { username, password, nickname }, options)
 }

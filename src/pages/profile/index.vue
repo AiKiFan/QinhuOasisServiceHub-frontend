@@ -66,6 +66,12 @@ function goRegister() {
   uni.navigateTo({ url: '/pages/register/index' })
 }
 
+/** 语言切换并刷新 */
+function switchLang() {
+  toggleLang()
+  uni.reLaunch({ url: '/pages/profile/index' })
+}
+
 /** 执行登出 */
 function handleLogout() {
   showLogoutConfirm.value = true
@@ -145,16 +151,6 @@ function goMyFeedback() {
   uni.navigateTo({ url: '/pages/feedback/my-feedback' })
 }
 
-/** 跳转我的收藏 */
-function goFavorites() {
-  uni.navigateTo({ url: '/pages/favorites/index' })
-}
-
-/** 跳转景区导览 */
-function goScenicList() {
-  uni.navigateTo({ url: '/pages/scenic/list' })
-}
-
 /** 跳转接单管理（译员端） */
 function goReceivedOrders() {
   uni.navigateTo({ url: '/pages/interpreter-orders/received' })
@@ -208,6 +204,7 @@ onMounted(() => {
       <text class="profile-guest__tip">{{ t('profile.guestTip') }}</text>
       <button class="profile-guest__login-btn" @tap="goLogin">{{ t('auth.login') }}</button>
       <button class="profile-guest__register-btn" @tap="goRegister">{{ t('auth.register') }}</button>
+      <button class="profile-guest__lang-btn" @tap="switchLang">🌐 {{ t('profile.switchLang') }}</button>
     </view>
 
     <!-- ── 已登录视图 ── -->
@@ -268,20 +265,6 @@ onMounted(() => {
       <!-- 功能菜单 -->
       <view class="profile-menu-card">
         <text class="menu-section-title">{{ t('profile.moreFeatures') }}</text>
-
-        <!-- 我的收藏 -->
-        <view class="menu-item" @tap="goFavorites">
-          <text class="menu-item__icon">⭐</text>
-          <text class="menu-item__text">{{ t('tab.favorites') }}</text>
-          <text class="menu-item__arrow">›</text>
-        </view>
-
-        <!-- 景区导览 -->
-        <view class="menu-item" @tap="goScenicList">
-          <text class="menu-item__icon">🏔️</text>
-          <text class="menu-item__text">{{ t('scenic.title') }}</text>
-          <text class="menu-item__arrow">›</text>
-        </view>
 
         <!-- 我的订单 -->
         <view class="menu-item" @tap="goMyOrders">
@@ -450,6 +433,19 @@ onMounted(() => {
     font-weight: 600;
     border-radius: 44rpx;
     border: 2rpx solid $color-primary;
+  }
+
+  &__lang-btn {
+    width: 480rpx;
+    height: 88rpx;
+    background-color: $color-bg-card;
+    color: $color-primary;
+    font-size: 30rpx;
+    font-weight: 600;
+    border-radius: 44rpx;
+    border: 2rpx solid $color-primary;
+    margin-top: 24rpx;
+    letter-spacing: 2rpx;
   }
 }
 

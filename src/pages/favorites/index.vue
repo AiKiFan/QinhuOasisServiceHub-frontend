@@ -7,6 +7,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { getAllFavorites, removeFavorite } from '@/api/favorites'
 import { t } from '@/utils/i18n'
+import { isLoggedIn } from '@/utils/auth'
 import TabBar from '@/components/TabBar/index.vue'
 import SafeImage from '@/components/SafeImage/index.vue'
 
@@ -27,6 +28,13 @@ const loading = ref(false)
 const showDeleteConfirm = ref(false)
 /** 待删除项 */
 const itemToDelete = ref(null)
+/** 登录引导弹窗 */
+const showLoginHint = ref(false)
+
+/** 跳转登录页 */
+function goLogin() {
+  uni.navigateTo({ url: '/pages/login/index' })
+}
 
 /** 筛选标签 */
 const filterLabels = computed(() => [
@@ -114,6 +122,10 @@ function goToDetail(type, id) {
 
 onMounted(() => {
   uni.setNavigationBarTitle({ title: t('page.favorites.title') })
+  if (!isLoggedIn()) {
+    showLoginHint.value = true
+    return
+  }
   loadFavorites()
 })
 </script>
@@ -143,7 +155,7 @@ onMounted(() => {
     <!-- 空状态 -->
     <view v-else-if="totalCount === 0" class="empty">
       <text class="empty__text">{{ t('favorites.empty') }}</text>
-      <button class="empty__btn" @tap="() => uni.switchTab({ url: '/pages/index/index' })">
+      <button class="empty__btn" @tap="() => uni.reLaunch({ url: '/pages/index/index' })">
         {{ t('favorites.goBrowse') }}
       </button>
     </view>
@@ -239,6 +251,17 @@ onMounted(() => {
             {{ t('common.confirm') }}
           </button>
         </view>
+      </view>
+    </view>
+
+    <!-- 登录引导弹窗 -->
+    <view v-if="showLoginHint" class="login-overlay" @tap.self="showLoginHint = false">
+      <view class="login-dialog" @tap.stop>
+        <view class="login-dialog__icon">!</view>
+        <text class="login-dialog__title">{{ t('common.loginRequired') }}</text>
+        <text class="login-dialog__msg">{{ t('favorites.loginRequired') }}</text>
+        <view class="login-dialog__btn login-dialog__btn--primary" @tap="goLogin">{{ t('auth.login') }}</view>
+        <view class="login-dialog__btn login-dialog__btn--cancel" @tap="showLoginHint = false">{{ t('common.cancel') }}</view>
       </view>
     </view>
 
@@ -486,6 +509,83 @@ onMounted(() => {
     &--confirm {
       background-color: $color-primary;
       color: #ffffff;
+    }
+  }
+}
+
+/* ── 登录引导弹窗 ── */
+.login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 32rpx;
+}
+
+.login-dialog {
+  width: 100%;
+  max-width: 600rpx;
+  background-color: $color-bg-card;
+  border-radius: 24rpx;
+  padding: 60rpx 32rpx 48rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
+  text-align: center;
+
+  &__icon {
+    width: 100rpx;
+    height: 100rpx;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
+    color: #fff;
+    font-size: 48rpx;
+    font-weight: 700;
+    line-height: 100rpx;
+    text-align: center;
+    margin: 0 auto 24rpx;
+  }
+
+  &__title {
+    display: block;
+    font-size: 34rpx;
+    font-weight: 600;
+    color: $color-text-primary;
+    margin-bottom: 12rpx;
+  }
+
+  &__msg {
+    display: block;
+    font-size: 26rpx;
+    color: $color-text-secondary;
+    line-height: 1.5;
+    margin-bottom: 36rpx;
+  }
+
+  &__btn {
+    display: block;
+    width: 100%;
+    height: 80rpx;
+    border-radius: 40rpx;
+    border: none;
+    font-size: 28rpx;
+    font-weight: 600;
+    line-height: 80rpx;
+    text-align: center;
+    margin-top: 8rpx;
+
+    &--primary {
+      background: linear-gradient(135deg, $color-primary 0%, #D4784E 100%);
+      color: #ffffff;
+    }
+
+    &--cancel {
+      background-color: $color-bg-page;
+      color: $color-text-secondary;
     }
   }
 }

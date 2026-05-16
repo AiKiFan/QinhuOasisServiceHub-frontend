@@ -17,7 +17,6 @@ const QUICK_LINKS = computed(() => [
   { icon: '🌍', label: t('home.interpreters'), path: '/pages/interpreter/list', color: '#5C6BC0' },
   { icon: '🏔️', label: t('home.scenicSpots'), path: '/pages/scenic/list', color: '#66BB6A' },
   { icon: '🚗', label: t('home.parking'), path: '/pages/parking/list', color: '#FFB74D' },
-  { icon: '📣', label: t('home.feedback'), path: '/pages/feedback/submit', color: '#F48FB1' },
   { icon: '👤', label: t('home.profile'), path: '/pages/profile/index', color: '#78909C' },
 ])
 

@@ -74,28 +74,30 @@ function request(url, method = 'GET', data = {}, header = {}, options = {}) {
  * @param {object} [params={}]
  * @returns {Promise<any>}
  */
-export function get(url, params = {}) {
-  return request(url, 'GET', params)
+export function get(url, params = {}, options = {}) {
+  return request(url, 'GET', params, {}, options)
 }
 
 /**
  * POST 请求简写
  * @param {string} url
  * @param {object} [body={}]
+ * @param {object} [options={}]
  * @returns {Promise<any>}
  */
-export function post(url, body = {}) {
-  return request(url, 'POST', body)
+export function post(url, body = {}, options = {}) {
+  return request(url, 'POST', body, {}, options)
 }
 
 /**
  * PUT 请求简写
  * @param {string} url
  * @param {object} [body={}]
+ * @param {object} [options={}]
  * @returns {Promise<any>}
  */
-export function put(url, body = {}) {
-  return request(url, 'PUT', body)
+export function put(url, body = {}, options = {}) {
+  return request(url, 'PUT', body, {}, options)
 }
 
 /**

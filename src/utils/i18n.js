@@ -155,6 +155,7 @@ const ZH = {
   'favorites.filter.scenic': '景点',
   'favorites.empty': '还没有收藏的内容',
   'favorites.goBrowse': '去逛逛',
+  'favorites.loginRequired': '请先登录后再查看收藏',
   'favorites.added': '已收藏',
   'favorites.removed': '已取消收藏',
   'favorites.deleteConfirmTitle': '取消收藏',
@@ -204,6 +205,9 @@ const ZH = {
   'auth.loginSuccess': '登录成功',
   'auth.registerSuccess': '注册成功，请登录',
   'auth.passwordMismatch': '两次密码不一致',
+  'auth.usernameTooShort': '用户名至少 {n} 位',
+  'auth.passwordTooShort': '密码至少 {n} 位',
+  'auth.registerFailed': '注册失败，请稍后重试',
 
   // ── 个人中心 ──
   'profile.title': '个人中心',
@@ -772,6 +776,7 @@ const EN = {
   'favorites.filter.scenic': 'Spots',
   'favorites.empty': 'No favorites yet',
   'favorites.goBrowse': 'Go Browse',
+  'favorites.loginRequired': 'Please login to view your favorites',
   'favorites.added': 'Added to favorites',
   'favorites.removed': 'Removed from favorites',
   'favorites.deleteConfirmTitle': 'Remove from Favorites',
@@ -911,6 +916,9 @@ const EN = {
   'auth.loginSuccess': 'Login successful',
   'auth.registerSuccess': 'Registration successful, please login',
   'auth.passwordMismatch': 'Passwords do not match',
+  'auth.usernameTooShort': 'Username must be at least {n} characters',
+  'auth.passwordTooShort': 'Password must be at least {n} characters',
+  'auth.registerFailed': 'Registration failed, please try again',
 
   // ── 个人中心 ──
   'profile.title': 'My Profile',
@@ -1453,10 +1461,17 @@ const EN = {
 /**
  * 翻译函数：根据当前语言返回对应文案
  * @param {string} key
+ * @param {object} [params] - 模板参数，如 { n: 3 } 替换字符串中的 {n}
  * @returns {string}
  */
-export function t(key) {
+export function t(key, params) {
   const lang = getLanguage()
   const dict = lang === 'en-US' ? EN : ZH
-  return dict[key] ?? key
+  let text = dict[key] ?? key
+  if (params) {
+    for (const [k, v] of Object.entries(params)) {
+      text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), v)
+    }
+  }
+  return text
 }
