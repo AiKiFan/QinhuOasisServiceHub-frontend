@@ -318,7 +318,6 @@ class AnalyticsManager {
     } catch (error) {
       // 上报失败，将事件放回队列
       eventQueue.unshift(...events)
-      console.error('埋点上报失败:', error)
     } finally {
       isFlushing = false
     }

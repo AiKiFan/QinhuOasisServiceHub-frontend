@@ -85,7 +85,6 @@ async function loadFolders() {
     const res = await getFavoriteFolders()
     folders.value = res.list || []
   } catch (error) {
-    console.error('加载分组失败:', error)
   } finally {
     loading.value = false
   }
@@ -97,7 +96,6 @@ async function loadTags() {
     const res = await getFavoriteTags()
     tags.value = res.list || []
   } catch (error) {
-    console.error('加载标签失败:', error)
   }
 }
 
@@ -108,7 +106,6 @@ async function loadFolderFavorites(folderId) {
     const res = await getFolderFavorites(folderId)
     folderFavorites.value = res.list || []
   } catch (error) {
-    console.error('加载收藏失败:', error)
   } finally {
     loading.value = false
   }
@@ -132,7 +129,6 @@ async function handleCreateFolder() {
     }
     loadFolders()
   } catch (error) {
-    console.error('创建分组失败:', error)
   }
 }
 
@@ -154,7 +150,6 @@ async function handleUpdateFolder() {
     editingFolder.value = null
     loadFolders()
   } catch (error) {
-    console.error('更新分组失败:', error)
   }
 }
 
@@ -170,7 +165,6 @@ function handleDeleteFolder(folder) {
           uni.showToast({ title: '删除成功', icon: 'success' })
           loadFolders()
         } catch (error) {
-          console.error('删除分组失败:', error)
         }
       }
     },
@@ -205,7 +199,6 @@ async function handleCreateTag() {
     }
     loadTags()
   } catch (error) {
-    console.error('创建标签失败:', error)
   }
 }
 
@@ -221,7 +214,6 @@ function handleDeleteTag(tag) {
           uni.showToast({ title: '删除成功', icon: 'success' })
           loadTags()
         } catch (error) {
-          console.error('删除标签失败:', error)
         }
       }
     },
@@ -297,7 +289,6 @@ async function moveToFolder() {
     selectedFavorites.value.clear()
     loadFolderFavorites(selectedFolderId.value)
   } catch (error) {
-    console.error('移动失败:', error)
   }
 }
 

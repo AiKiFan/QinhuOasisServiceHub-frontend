@@ -50,7 +50,6 @@ function request(url, method = 'GET', data = {}, header = {}, options = {}) {
           resolve(body.data)
         } else {
           const msg = (body && body.message) || '请求失败'
-          console.error('API Error:', url, body?.code, msg)
           if (!silent) {
             uni.showToast({ title: msg, icon: 'none' })
           }
@@ -58,7 +57,6 @@ function request(url, method = 'GET', data = {}, header = {}, options = {}) {
         }
       },
       fail(err) {
-        console.error('Network Error:', url, err)
         if (!silent) {
           uni.showToast({ title: '网络异常，请稍后重试', icon: 'none' })
         }

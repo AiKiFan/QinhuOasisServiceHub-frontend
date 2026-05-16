@@ -40,18 +40,15 @@ const PAGE_SIZE = 10
  * 加载餐厅列表（重置模式：清空列表从第1页开始）
  */
 async function loadList() {
-  console.log('[餐厅列表] 开始加载, category:', activeCategory.value)
   loading.value = true
   hasError.value = false
   currentPage.value = 1
   try {
     const res = await getRestaurantList(activeCategory.value, 1, PAGE_SIZE)
-    console.log('[餐厅列表] 加载成功, 数量:', res.list?.length, '总计:', res.total)
     restaurantList.value = res.list
     total.value = res.total
     hasMore.value = res.list.length < res.total
   } catch (e) {
-    console.error('[餐厅列表] 加载失败:', e)
     hasError.value = true
   } finally {
     loading.value = false
@@ -105,7 +102,6 @@ function goDetail(id) {
 }
 
 onMounted(() => {
-  console.log('[餐厅列表] 页面挂载，开始加载')
   uni.setNavigationBarTitle({ title: t('page.restaurantList.title') })
   loadList()
 })

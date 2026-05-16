@@ -168,7 +168,6 @@ class ShareManager {
       
       this.recordShareHistory('wechat', data)
     } catch (error) {
-      console.error('分享到微信失败:', error)
       showToast('分享失败')
     }
   }
@@ -197,7 +196,6 @@ class ShareManager {
       
       this.recordShareHistory('moments', data)
     } catch (error) {
-      console.error('分享到朋友圈失败:', error)
       showToast('分享失败')
     }
   }
@@ -213,7 +211,6 @@ class ShareManager {
       showToast('链接已复制，可以发送给好友')
       this.recordShareHistory('link', data)
     } catch (error) {
-      console.error('复制链接失败:', error)
       showToast('复制失败')
     }
   }
@@ -262,7 +259,6 @@ class ShareManager {
         showToast('海报生成失败')
       }
     } catch (error) {
-      console.error('生成海报失败:', error)
       showToast('海报生成失败')
     }
   }
@@ -288,7 +284,6 @@ class ShareManager {
       
       this.recordShareHistory('qq', data)
     } catch (error) {
-      console.error('分享到QQ失败:', error)
       showToast('分享失败')
     }
   }
@@ -305,7 +300,6 @@ class ShareManager {
       
       this.recordShareHistory('sina', data)
     } catch (error) {
-      console.error('分享到微博失败:', error)
       showToast('分享失败')
     }
   }
@@ -329,7 +323,6 @@ class ShareManager {
       
       showToast('已保存到相册')
     } catch (error) {
-      console.error('保存图片失败:', error)
       
       // 用户拒绝授权
       if (error.errMsg.includes('auth deny')) {
@@ -372,7 +365,6 @@ class ShareManager {
       // 上报分享统计数据
       this.reportShareStats(platform, data)
     } catch (error) {
-      console.error('记录分享历史失败:', error)
     }
   }
   
@@ -393,7 +385,6 @@ class ShareManager {
         },
       })
     } catch (error) {
-      console.error('上报分享统计失败:', error)
     }
   }
   
@@ -404,7 +395,6 @@ class ShareManager {
     try {
       return uni.getStorageSync('share_history') || []
     } catch (error) {
-      console.error('获取分享历史失败:', error)
       return []
     }
   }

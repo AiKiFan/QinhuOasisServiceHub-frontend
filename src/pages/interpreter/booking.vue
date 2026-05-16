@@ -187,8 +187,6 @@ onMounted(() => {
 
   // 检查是否是译员自己（译员不能预约自己）
   currentUser.value = getUser()
-  console.log('[预约页] 当前用户:', currentUser.value)
-  console.log('[预约页] profileId参数:', options.profileId)
   const profileId = Number(options.profileId)
 
   // 判断条件：用户是译员(role=1) 且 有profileId 且 profileId匹配

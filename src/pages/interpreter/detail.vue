@@ -211,8 +211,6 @@ async function handlePostComment() {
   }
 
   // 检查是否是译员自己（译员不能评价自己）
-  console.log('[评价] 当前用户:', currentUser.value)
-  console.log('[评价] 译员详情ID:', detail.value?.id)
 
   // 判断条件：用户是译员(role=1) 且 有profileId 且 profileId匹配译员详情ID
   if (currentUser.value?.role === 1 && currentUser.value?.profileId && currentUser.value?.profileId === detail.value?.id) {

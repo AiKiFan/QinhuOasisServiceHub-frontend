@@ -41,8 +41,27 @@ const displaySrc = ref('')
 const failed = ref(false)
 
 /**
- * 加载图片：先尝试 MinIO URL，失败后降级到本地缓存
+ * 将 MinIO 不可达地址替换为当前页面可访问的地址
+ * 后端预签名 URL 中的 localhost/127.0.0.1 在手机端不可达，
+ * 需替换为当前页面的 hostname（电脑上=localhost，手机上=10.220.119.171）
+ *
+ * 兼容以下所有格式：
+ * - http://localhost:9000/...
+ * - http://127.0.0.1:9000/...
+ * - http://10.220.119.171:9000/... （已经是正确地址，原样返回）
+ * - https://xxx/... （非 MinIO 地址，原样返回）
  */
+function buildAccessibleUrl(rawUrl) {
+  if (!rawUrl) return ''
+  // 非 HTTP 地址（相对路径等）直接返回
+  if (!rawUrl.match(/^https?:\/\//)) return rawUrl
+  // 已经包含正确的 IP 地址，原样返回
+  if (rawUrl.includes('10.220.119.171') && rawUrl.includes(':9000')) return rawUrl
+  // 替换 localhost / 127.0.0.1 为当前 hostname
+  const currentHost = `${location.protocol}//${location.hostname}:9000`
+  return rawUrl.replace(/http:\/\/(localhost|127\.0\.0\.1):9000/g, currentHost)
+}
+
 async function loadImage() {
   if (!props.src) {
     displaySrc.value = ''
@@ -50,8 +69,8 @@ async function loadImage() {
     return
   }
 
-  // 先尝试加载 MinIO URL
-  displaySrc.value = props.src
+  // 先尝试加载 MinIO URL（替换 localhost 为当前可访问地址）
+  displaySrc.value = buildAccessibleUrl(props.src)
   failed.value = false
 }
 
@@ -59,7 +78,6 @@ async function loadImage() {
  * 图片加载失败回调：尝试从本地缓存加载
  */
 async function onError() {
-  console.log('[SafeImage] MinIO load failed, trying cache:', props.src)
 
   // 尝试从本地缓存加载（现在是异步函数）
   try {
@@ -67,13 +85,10 @@ async function onError() {
 
     if (cachedPath) {
       displaySrc.value = cachedPath
-      console.log('[SafeImage] Using cached image:', cachedPath)
     } else {
       failed.value = true
-      console.log('[SafeImage] No cache available, showing placeholder')
     }
   } catch (err) {
-    console.error('[SafeImage] Cache load error:', err)
     failed.value = true
   }
 }

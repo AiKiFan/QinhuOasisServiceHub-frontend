@@ -56,6 +56,7 @@ const ZH = {
   'search.clearAll': '清空',
   'search.clearHistoryTitle': '清空历史',
   'search.clearHistoryConfirm': '确定要清空全部搜索历史吗？',
+  'search.hotSearch': '热门搜索',
   'search.noResults': '未找到相关内容',
 
   // ── 首页 ──
@@ -767,6 +768,7 @@ const EN = {
   'search.clearAll': 'Clear All',
   'search.clearHistoryTitle': 'Clear Search History',
   'search.clearHistoryConfirm': 'Clear all search history?',
+  'search.hotSearch': 'Hot Searches',
   'search.noResults': 'No results found',
 
   // ── 收藏 ──

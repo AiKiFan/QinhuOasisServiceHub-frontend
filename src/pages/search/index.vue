@@ -7,7 +7,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { searchRestaurants, searchInterpreters } from '@/api/search'
 import { searchScenicSpots } from '@/api/scenic'
-import { t } from '@/utils/i18n'
+import { getLanguage, t } from '@/utils/i18n'
 import TabBar from '@/components/TabBar/index.vue'
 import SafeImage from '@/components/SafeImage/index.vue'
 
@@ -19,14 +19,79 @@ const SEARCH_TYPES = {
   SCENIC: 'scenic',
 }
 
+/** 餐厅分类中英文映射（双向匹配） */
+const CATEGORY_MAP = {
+  // 英文 → 中文
+  'chinese food': '中餐',
+  'chinese': '中餐',
+  'chinese cuisine': '中餐',
+  'western food': '西餐',
+  'western': '西餐',
+  'western cuisine': '西餐',
+  'cafe': '咖啡',
+  'coffee': '咖啡',
+  'dessert': '甜品',
+  'desserts': '甜品',
+  'sweets': '甜品',
+  'hotpot': '火锅',
+  'bbq': '烧烤',
+  'noodles': '面馆',
+  'noodle': '面馆',
+  'seafood': '海鲜',
+  'vegetarian': '素食',
+  'fast food': '快餐',
+  'japanese': '日料',
+  'japanese food': '日料',
+  'korean': '韩餐',
+  'korean food': '韩餐',
+  'buffet': '自助餐',
+  // 中文 → 英文
+  '中餐': 'Chinese Food',
+  '西餐': 'Western Food',
+  '咖啡': 'Coffee',
+  '甜品': 'Dessert',
+  '火锅': 'Hotpot',
+  '烧烤': 'BBQ',
+  '面馆': 'Noodles',
+  '海鲜': 'Seafood',
+  '素食': 'Vegetarian',
+  '快餐': 'Fast Food',
+  '日料': 'Japanese',
+  '韩餐': 'Korean',
+  '自助餐': 'Buffet',
+}
+
+/**
+ * 检查关键词是否与分类标签匹配（支持中英文互查）
+ * 例如搜 "Chinese Food" 能匹配 "中餐"，搜 "中餐" 也能匹配
+ */
+function categoryMatch(category, keyword) {
+  if (!category) return false
+  const cat = category.toLowerCase()
+  const kw = keyword.toLowerCase().trim()
+  // 直接匹配
+  if (cat.includes(kw)) return true
+  // 通过映射表互查
+  const mappedCat = CATEGORY_MAP[cat]
+  const mappedKw = CATEGORY_MAP[kw]
+  if (mappedCat && mappedCat.toLowerCase().includes(kw)) return true
+  if (mappedKw && mappedKw.toLowerCase().includes(cat)) return true
+  if (mappedCat && mappedKw && mappedCat === mappedKw) return true
+  return false
+}
+
 /** 当前搜索类型 */
 const searchType = ref(SEARCH_TYPES.ALL)
 /** 搜索关键词 */
 const keyword = ref('')
 /** 搜索历史 */
 const searchHistory = ref([])
-/** 热门搜索关键词 */
-const hotSearchKeywords = ref(['中餐', '西餐', '个人译员', '咖啡', '甜品'])
+/** 热门搜索关键词（根据语言返回对应版本） */
+const hotSearchKeywords = computed(() => {
+  return getLanguage() === 'en-US'
+    ? ['Chinese Food', 'Western Food', 'Personal Guide', 'Coffee', 'Dessert']
+    : ['中餐', '西餐', '个人译员', '咖啡', '甜品']
+})
 /** 搜索建议 */
 const suggestions = ref([])
 /** 是否显示搜索建议 */
@@ -58,9 +123,8 @@ const typeLabels = computed(() => [
 
 /** 验证餐厅结果是否匹配关键词 */
 function isValidRestaurantResult(item, keyword) {
-  const kw = keyword.toLowerCase()
-  return (item.category && item.category.toLowerCase().includes(kw)) ||
-         (item.displayName && item.displayName.toLowerCase().includes(kw))
+  return categoryMatch(item.category, keyword) ||
+         (item.displayName && item.displayName.toLowerCase().includes(keyword.toLowerCase()))
 }
 
 /** 验证译员结果是否匹配关键词 */
@@ -324,7 +388,7 @@ onMounted(() => {
 
     <!-- 热门搜索 -->
     <view v-if="!keyword && searchResults.length === 0 && !showSuggestions" class="hot-section">
-      <text class="hot-title">🔥 热门搜索</text>
+      <text class="hot-title">🔥 {{ t('search.hotSearch') }}</text>
       <view class="hot-list">
         <view v-for="word in hotSearchKeywords" :key="word" class="hot-item" @tap="searchHistoryWord(word)">
           <text class="hot-item__icon">🔍</text>

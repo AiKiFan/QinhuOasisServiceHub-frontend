@@ -117,7 +117,6 @@ class CacheManager {
         })
       }
     } catch (error) {
-      console.error('加载缓存失败:', error)
     }
   }
   
@@ -129,7 +128,6 @@ class CacheManager {
       const cacheObj = Object.fromEntries(this.cache)
       uni.setStorageSync('app_cache', cacheObj)
     } catch (error) {
-      console.error('持久化缓存失败:', error)
     }
   }
   
