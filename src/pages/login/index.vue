@@ -11,7 +11,7 @@ import { t, toggleLanguage } from '@/utils/i18n'
 /** 语言切换并刷新页面 */
 function switchLang() {
   toggleLanguage()
-  uni.reLaunch({ url: '/pages/login/index' })
+  uni.redirectTo({ url: '/pages/login/index' })
 }
 
 /** 表单字段 */

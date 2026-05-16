@@ -65,9 +65,10 @@ const statusMap = computed(() => ({
   3: { label: t('feedback.view.status.closed'), color: '#9BA3AF' },
 }))
 
-/** 解析 images JSON */
+/** 解析 images（兼容后端返回的数组或 JSON 字符串） */
 function parseImages(images) {
   if (!images) return []
+  if (Array.isArray(images)) return images
   try {
     return JSON.parse(images)
   } catch {

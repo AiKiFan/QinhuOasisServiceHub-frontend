@@ -157,6 +157,15 @@
       }
     },
     {
+      "path": "pages/admin/feedback-detail",
+      "style": {
+        "navigationBarTitleText": "投诉详情",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
       "path": "pages/admin/restaurant-list",
       "style": {
         "navigationBarTitleText": "餐厅管理",

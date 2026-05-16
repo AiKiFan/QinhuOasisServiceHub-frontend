@@ -587,6 +587,10 @@ const ZH = {
   'admin.feedback.typeLabel': '类型',
   'admin.feedback.replyRequired': '请输入回复内容',
   'admin.feedback.statusRequired': '请选择处理后状态',
+  'admin.feedback.viewDetail': '查看详情',
+  'admin.feedback.filterStatus': '状态',
+  'admin.feedback.filterType': '类型',
+  'admin.feedback.attachmentCount': '{{n}}张附件',
 
   // ── 餐厅管理 ──
   'admin.restaurant.title': '餐厅管理',
@@ -1298,6 +1302,10 @@ const EN = {
   'admin.feedback.typeLabel': 'Type',
   'admin.feedback.replyRequired': 'Please enter a reply',
   'admin.feedback.statusRequired': 'Please select status after reply',
+  'admin.feedback.viewDetail': 'View Details',
+  'admin.feedback.filterStatus': 'Status',
+  'admin.feedback.filterType': 'Type',
+  'admin.feedback.attachmentCount': '{{n}} attachments',
 
   // ── Restaurant Admin ──
   'admin.restaurant.title': 'Restaurant Management',

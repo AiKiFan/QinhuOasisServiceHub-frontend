@@ -45,6 +45,16 @@ export function getAdminFeedbackList(params = {}) {
 }
 
 /**
+ * 获取投诉建议详情（管理员）
+ * 接口：GET /api/admin/feedback/{id}
+ * @param {number|string} id - 反馈 ID
+ * @returns {Promise<Object>} 完整反馈详情（含正文、图片、回复）
+ */
+export function getAdminFeedbackDetail(id) {
+  return get(`/admin/feedback/${id}`)
+}
+
+/**
  * 回复投诉建议
  * 接口：POST /api/admin/feedback/{id}/reply
  * @param {number|string} id - 反馈 ID

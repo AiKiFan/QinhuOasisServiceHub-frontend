@@ -7,7 +7,6 @@ import { ref, computed, onMounted } from 'vue'
 import { getAdminFeedbackList, replyFeedback } from '@/api/admin'
 import { getUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
-import SafeImage from '@/components/SafeImage/index.vue'
 
 /** 状态筛选（支持国际化） */
 const STATUS_FILTER = computed(() => [
@@ -120,13 +119,36 @@ async function handleReply() {
 }
 
 /**
+ * 解析 images（兼容后端返回的数组或 JSON 字符串）
+ * @param {string|string[]} images
+ * @returns {string[]}
+ */
+function parseImages(images) {
+  if (!images) return []
+  if (Array.isArray(images)) return images
+  try {
+    return JSON.parse(images)
+  } catch {
+    return []
+  }
+}
+
+/**
  * 预览反馈图片
- * @param {string[]} images
+ * @param {string|string[]} images
  */
 function previewImages(images) {
-  if (!images || images.length === 0) return
-  const imageUrls = JSON.parse(images)
-  uni.previewImage({ urls: imageUrls, current: imageUrls[0] })
+  const urls = parseImages(images)
+  if (urls.length === 0) return
+  uni.previewImage({ urls, current: urls[0] })
+}
+
+/**
+ * 进入详情页
+ * @param {Object} item
+ */
+function goDetail(item) {
+  uni.navigateTo({ url: `/pages/admin/feedback-detail?id=${item.id}` })
 }
 
 onMounted(() => {
@@ -147,7 +169,7 @@ onMounted(() => {
     <!-- 筛选栏 -->
     <view class="filter-bar">
       <view class="filter-group">
-        <text class="filter-group__label">状态</text>
+        <text class="filter-group__label">{{ t('admin.feedback.filterStatus') }}</text>
         <view class="filter-tabs">
           <view
             v-for="st in STATUS_FILTER"
@@ -161,7 +183,7 @@ onMounted(() => {
         </view>
       </view>
       <view class="filter-group">
-        <text class="filter-group__label">类型</text>
+        <text class="filter-group__label">{{ t('admin.feedback.filterType') }}</text>
         <view class="filter-tabs">
           <view
             v-for="ty in TYPE_FILTER"
@@ -191,6 +213,7 @@ onMounted(() => {
         v-for="item in list"
         :key="item.id"
         class="feedback-card"
+        @tap="goDetail(item)"
       >
         <!-- 头部：类型 + 状态 + 时间 -->
         <view class="card-header">
@@ -236,19 +259,9 @@ onMounted(() => {
           <text class="card-user__contact">{{ item.contact || t('admin.feedback.noContact') }}</text>
         </view>
 
-        <!-- 图片展示 -->
-        <view v-if="item.images" class="card-images">
-          <view class="card-images__title">{{ t('admin.feedback.attachment') }}</view>
-          <scroll-view scroll-x class="card-images__scroll">
-            <SafeImage
-              v-for="(img, idx) in JSON.parse(item.images)"
-              :key="idx"
-              class="card-images__img"
-              :src="img"
-              mode="aspectFill"
-              :previewable="true"
-            />
-          </scroll-view>
+        <!-- 有图片时显示附件数量 -->
+        <view v-if="parseImages(item.images).length" class="card-image-hint" @tap.stop="previewImages(item.images)">
+          <text class="card-image-hint__text">{{ t('admin.feedback.attachmentCount', { n: parseImages(item.images).length }) }}</text>
         </view>
 
         <!-- 回复内容（已回复时显示） -->
@@ -258,10 +271,15 @@ onMounted(() => {
         </view>
 
         <!-- 回复按钮（未解决或未关闭时显示） -->
-        <view v-if="item.status !== 2 && item.status !== 3" class="card-actions">
-          <button class="reply-btn" @tap="openReplyModal(item.id)">
+        <view v-if="item.status !== 2 && item.status !== 3" class="card-actions" @tap.stop>
+          <button class="reply-btn" @tap.stop="openReplyModal(item.id)">
             {{ t('admin.feedback.replyBtn') }}
           </button>
+        </view>
+
+        <!-- 查看详情指示器 -->
+        <view class="card-detail-hint">
+          <text class="card-detail-hint__text">{{ t('admin.feedback.viewDetail') }} ›</text>
         </view>
       </view>
     </view>
@@ -513,26 +531,30 @@ onMounted(() => {
   }
 }
 
-.card-images {
-  margin-bottom: 24rpx;
+/* ── 附件数量提示 ── */
+.card-image-hint {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  background-color: $color-bg-page;
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
 
-  &__title {
+  &__text {
     font-size: 22rpx;
     color: $color-text-secondary;
-    margin-bottom: 12rpx;
   }
+}
 
-  &__scroll {
-    white-space: nowrap;
-  }
+/* ── 查看详情指示器 ── */
+.card-detail-hint {
+  display: flex;
+  justify-content: center;
+  margin-top: 8rpx;
 
-  &__img {
-    width: 200rpx;
-    height: 200rpx;
-    border-radius: 12rpx;
-    margin-right: 16rpx;
-    flex-shrink: 0;
-    background-color: $color-divider;
+  &__text {
+    font-size: 22rpx;
+    color: $color-primary;
   }
 }
 
