@@ -97,15 +97,27 @@ function previewImage(url) {
  */
 function navigateToSpot() {
   if (!spot.value.lat || !spot.value.lng) return
+  const lat = parseFloat(spot.value.lat)
+  const lng = parseFloat(spot.value.lng)
+  // #ifdef H5
+  // H5 环境：打开高德地图网页版，页面顶部有"到这里"按钮
+  const name = encodeURIComponent(spot.value.displayName || '景点位置')
+  window.open(
+    `https://ditu.amap.com/?geo=${lng},${lat}&name=${name}`,
+    '_blank'
+  )
+  // #endif
+  // #ifndef H5
   uni.openLocation({
-    latitude: parseFloat(spot.value.lat),
-    longitude: parseFloat(spot.value.lng),
+    latitude: lat,
+    longitude: lng,
     name: spot.value.displayName,
     address: spot.value.address,
     fail: () => {
       uni.showToast({ title: t('common.loadFailed'), icon: 'none' })
     }
   })
+  // #endif
 }
 
 onMounted(() => {

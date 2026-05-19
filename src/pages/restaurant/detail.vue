@@ -258,12 +258,27 @@ function openMap() {
     uni.showToast({ title: '暂无位置信息', icon: 'none' })
     return
   }
+  const lat = parseFloat(detail.value.lat)
+  const lng = parseFloat(detail.value.lng)
+  // #ifdef H5
+  // H5 环境：打开高德地图网页版，页面顶部有"到这里"按钮
+  const name = encodeURIComponent(detail.value.displayName || '餐厅位置')
+  window.open(
+    `https://ditu.amap.com/?geo=${lng},${lat}&name=${name}`,
+    '_blank'
+  )
+  // #endif
+  // #ifndef H5
   uni.openLocation({
-    latitude: detail.value.lat,
-    longitude: detail.value.lng,
+    latitude: lat,
+    longitude: lng,
     name: detail.value.displayName,
     address: detail.value.address,
+    fail: () => {
+      uni.showToast({ title: '导航失败', icon: 'none' })
+    }
   })
+  // #endif
 }
 
 /**
