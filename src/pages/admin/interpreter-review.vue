@@ -62,7 +62,6 @@ async function loadList() {
 
 /**
  * 切换状态筛选
- * @param {number} status
  */
 function switchStatus(status) {
   selectedStatus.value = status
@@ -71,7 +70,6 @@ function switchStatus(status) {
 
 /**
  * 打开拒绝弹窗
- * @param {number} id
  */
 function openRejectModal(id) {
   reviewingId.value = id
@@ -81,7 +79,6 @@ function openRejectModal(id) {
 
 /**
  * 打开通过确认弹窗
- * @param {number} id
  */
 function openApproveModal(id) {
   reviewingId.value = id
@@ -121,8 +118,14 @@ async function handleReject() {
 }
 
 /**
+ * 跳转到编辑页面
+ */
+function goToEdit(id) {
+  uni.navigateTo({ url: `/pages/admin/interpreter-edit?id=${id}` })
+}
+
+/**
  * 预览证书
- * @param {string} url
  */
 function previewCert(url) {
   const certUrls = (url || '').split(',').filter(Boolean)
@@ -261,19 +264,22 @@ onMounted(() => {
           <text class="reject-reason__text">{{ item.rejectReason }}</text>
         </view>
 
-        <!-- 操作按钮（仅待审核状态显示） -->
-        <view v-if="item.status === 0" class="actions">
-          <button class="action-btn action-btn--reject" @tap="openRejectModal(item.id)">
+        <!-- 操作按钮 -->
+        <view class="actions">
+          <button class="action-btn action-btn--edit" @tap="goToEdit(item.id)">
+            {{ t('admin.review.editBtn') }}
+          </button>
+          <button v-if="item.status === 0" class="action-btn action-btn--reject" @tap="openRejectModal(item.id)">
             {{ t('admin.review.rejectBtn') }}
           </button>
-          <button class="action-btn action-btn--approve" @tap="openApproveModal(item.id)">
+          <button v-if="item.status === 0" class="action-btn action-btn--approve" @tap="openApproveModal(item.id)">
             {{ t('admin.review.approveBtn') }}
           </button>
         </view>
       </view>
     </view>
 
-    <!-- 通过确认弹窗（自定义 confirm-dialog 风格） -->
+    <!-- 通过确认弹窗 -->
     <view v-if="showApproveModal" class="confirm-mask" @tap.self="showApproveModal = false">
       <view class="confirm-dialog">
         <text class="confirm-dialog__title">{{ t('admin.review.approveConfirm') }}</text>
@@ -289,7 +295,7 @@ onMounted(() => {
       </view>
     </view>
 
-    <!-- 拒绝理由弹窗（自定义 confirm-dialog 风格） -->
+    <!-- 拒绝理由弹窗 -->
     <view v-if="showRejectModal" class="confirm-mask" @tap.self="showRejectModal = false">
       <view class="reject-dialog">
         <text class="reject-dialog__title">{{ t('admin.review.rejectTitle') }}</text>
@@ -346,7 +352,7 @@ onMounted(() => {
     border-color: $color-primary;
     background-color: $color-primary-light;
 
-    & .filter-item__text {
+    .filter-item__text {
       color: $color-primary;
       font-weight: 600;
     }
@@ -474,13 +480,6 @@ onMounted(() => {
   margin-bottom: 12rpx;
 }
 
-.cert-image {
-  width: 240rpx;
-  height: 240rpx;
-  border-radius: 12rpx;
-  background-color: $color-divider;
-}
-
 .cert-grid {
   display: flex;
   flex-wrap: wrap;
@@ -544,16 +543,23 @@ onMounted(() => {
 .actions {
   display: flex;
   gap: 16rpx;
+  flex-wrap: wrap;
 }
 
 .action-btn {
   flex: 1;
+  min-width: 120rpx;
   height: 80rpx;
   border-radius: 40rpx;
   border: none;
   font-size: 28rpx;
   font-weight: 600;
   line-height: 80rpx;
+
+  &--edit {
+    background-color: #4A90D9;
+    color: #ffffff;
+  }
 
   &--reject {
     background-color: #E05252;
@@ -566,7 +572,7 @@ onMounted(() => {
   }
 }
 
-/* ── 自定义确认弹窗（统一风格） ── */
+/* ── 弹窗 ── */
 .confirm-mask {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -626,7 +632,6 @@ onMounted(() => {
   }
 }
 
-/* ── 拒绝弹窗 ── */
 .reject-dialog {
   width: 600rpx;
   background-color: $color-bg-card;

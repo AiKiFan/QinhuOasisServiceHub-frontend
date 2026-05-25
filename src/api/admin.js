@@ -18,6 +18,17 @@ export function getAdminInterpreterProfiles(params = {}) {
 }
 
 /**
+ * 管理员编辑译员档案
+ * 接口：POST /api/admin/interpreter-profiles/{id}
+ * @param {number|string} id - 译员档案 ID
+ * @param {Object} data - 更新数据
+ * @returns {Promise<Object>}
+ */
+export function adminUpdateInterpreterProfile(id, data) {
+  return post(`/admin/interpreter-profiles/${id}`, data)
+}
+
+/**
  * 审核译员申请
  * 接口：POST /api/admin/interpreter-profiles/{id}/review?approve=true&rejectReason=
  * @param {number|string} id - 译员档案 ID

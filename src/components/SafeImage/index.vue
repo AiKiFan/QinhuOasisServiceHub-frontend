@@ -42,24 +42,22 @@ const failed = ref(false)
 
 /**
  * 将 MinIO 不可达地址替换为当前页面可访问的地址
- * 后端预签名 URL 中的 localhost/127.0.0.1 在手机端不可达，
- * 需替换为当前页面的 hostname（电脑上=localhost，手机上=10.220.119.171）
  *
- * 兼容以下所有格式：
- * - http://localhost:9000/...
- * - http://127.0.0.1:9000/...
- * - http://10.220.119.171:9000/... （已经是正确地址，原样返回）
- * - https://xxx/... （非 MinIO 地址，原样返回）
+ * 公共读策略下，图片 URL 不带预签名参数，格式为：
+ * http://localhost:9000/bucket/20260524/xxx.jpg
+ *
+ * 本地开发（localhost/127.0.0.1）直接返回原 URL
+ * 手机访问时，将 localhost/127.0.0.1 替换为当前页面 hostname
  */
 function buildAccessibleUrl(rawUrl) {
   if (!rawUrl) return ''
-  // 非 HTTP 地址（相对路径等）直接返回
+  // 非 HTTP 地址直接返回
   if (!rawUrl.match(/^https?:\/\//)) return rawUrl
-  // 已经包含正确的 IP 地址，原样返回
-  if (rawUrl.includes('10.220.119.171') && rawUrl.includes(':9000')) return rawUrl
-  // 替换 localhost / 127.0.0.1 为当前 hostname
-  const currentHost = `${location.protocol}//${location.hostname}:9000`
-  return rawUrl.replace(/http:\/\/(localhost|127\.0\.0\.1):9000/g, currentHost)
+  // 本地开发环境（hostname 是 localhost / 127.0.0.1）直接返回原 URL
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return rawUrl
+  // 手机访问环境：替换 localhost/127.0.0.1 为当前 hostname
+  return rawUrl.replace(/http:\/\/(localhost|127\.0\.0\.1):9000/g,
+      `${location.protocol}//${location.hostname}:9000`)
 }
 
 async function loadImage() {

@@ -148,6 +148,15 @@
       }
     },
     {
+      "path": "pages/admin/interpreter-edit",
+      "style": {
+        "navigationBarTitleText": "编辑译员资料",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
       "path": "pages/admin/feedback-list",
       "style": {
         "navigationBarTitleText": "投诉建议",
