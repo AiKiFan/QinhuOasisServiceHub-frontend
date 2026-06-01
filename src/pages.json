@@ -258,16 +258,6 @@
       }
     },
     {
-      "path": "pages/parking/list",
-      "style": {
-        "navigationBarTitleText": "停车场",
-        "navigationBarBackgroundColor": "#E8956D",
-        "navigationBarTextStyle": "white",
-        "backgroundColor": "#FFF8F0",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
       "path": "pages/parking/detail",
       "style": {
         "navigationBarTitleText": "停车场详情",

@@ -11,7 +11,6 @@ export function getParkingZones() {
   return get('/parking/spaces')
 }
 
-// 兼容旧版
 export const getParkingSpaces = getParkingZones
 
 /**
@@ -25,7 +24,7 @@ export function getZoneSpots(zoneId) {
 /**
  * 预约选位（点击空闲车位后调用）
  * @param {number} spotId - 车位ID
- * @param {Object} data - { vehicleNo: string, durationHours: number }
+ * @param {Object} data - { vehicleNo: string }
  */
 export function bookSpot(spotId, data) {
   return post(`/parking/spots/${spotId}/book`, data)
@@ -37,18 +36,4 @@ export function bookSpot(spotId, data) {
  */
 export function settleSpot(spotId) {
   return post(`/parking/spots/${spotId}/settle`, {})
-}
-
-/**
- * 旧版预约停车场（兼容）
- * @param {Object} data - { parkingSpaceId, plateNumber, duration }
- */
-export function bookParking(data) {
-  return post('/parking/orders', {
-    parkingSpaceId: data.parkingSpaceId,
-    vehicleNo: data.plateNumber,
-    durationHours: data.duration,
-    startTime: new Date().toISOString(),
-    endTime: new Date(Date.now() + data.duration * 3600000).toISOString()
-  })
 }

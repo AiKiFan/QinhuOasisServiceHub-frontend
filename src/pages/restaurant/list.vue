@@ -172,7 +172,7 @@ onMounted(() => {
               <text class="rest-card__score">{{ item.rating }}</text>
               <text class="rest-card__reviews">（{{ item.reviewCount }}条）</text>
             </view>
-            <text class="rest-card__price">¥{{ item.avgPrice }}/人</text>
+            <text class="rest-card__price">¥{{ item.avgPrice }}{{ t('restaurant.perPerson') }}</text>
           </view>
         </view>
       </view>

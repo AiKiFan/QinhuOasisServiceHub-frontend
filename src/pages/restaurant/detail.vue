@@ -375,7 +375,7 @@ onLoad((options) => {
           </view>
           <view class="meta-item">
             <text class="meta-item__icon">💰</text>
-            <text class="meta-item__text">¥{{ detail.avgPrice }}/人</text>
+            <text class="meta-item__text">¥{{ detail.avgPrice }}{{ t('restaurant.perPerson') }}</text>
           </view>
           <view class="meta-item">
             <text class="meta-item__icon">⭐</text>
