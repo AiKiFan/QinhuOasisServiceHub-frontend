@@ -11,6 +11,7 @@ import { isLoggedIn, getUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
 import { checkFavorite, addFavorite, removeFavorite, FAVORITE_TYPE } from '@/api/favorites'
 import SafeImage from '@/components/SafeImage/index.vue'
+import { previewImage } from '@/utils/image'
 
 /** 页面参数（餐厅 ID），由 onLoad 注入，不再依赖 Storage 脏数据 */
 const pageOptions = ref({})
@@ -198,7 +199,7 @@ function loadMoreComments() {
  */
 function previewCurrentImage() {
   if (imageList.value.length > 0) {
-    uni.previewImage({ urls: imageList.value, current: imageList.value[carouselIndex.value] })
+    previewImage({ urls: imageList.value, current: imageList.value[carouselIndex.value] })
   }
 }
 
@@ -365,7 +366,7 @@ onLoad((options) => {
         <view class="info-card__header">
           <text class="info-card__title">{{ detail.displayName }}</text>
           <view class="favorite-btn" @tap="toggleFavorite">
-            <text class="favorite-btn__icon">{{ isFavorited ? '❤️' : '🤍' }}</text>
+            <text class="favorite-btn__icon">{{ isFavorited ? '★' : '☆' }}</text>
           </view>
         </view>
         <view class="info-card__meta">
@@ -988,6 +989,7 @@ onLoad((options) => {
   background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
   color: #fff;
   font-size: 48rpx;
+ color: $color-rank-gold;
   font-weight: 700;
   line-height: 100rpx;
   text-align: center;
@@ -1041,6 +1043,7 @@ onLoad((options) => {
 
   &__icon {
     font-size: 48rpx;
+ color: $color-rank-gold;
   }
 }
 </style>

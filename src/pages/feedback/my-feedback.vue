@@ -16,6 +16,7 @@ import {
 import { t } from '@/utils/i18n'
 import SafeImage from '@/components/SafeImage/index.vue'
 import { saveImageCache } from '@/utils/image-cache'
+import { previewImage } from '@/utils/image'
 
 const loading = ref(true)
 const list = ref([])
@@ -168,10 +169,10 @@ function removeImage(index) {
 }
 
 /** 预览图片 */
-function previewImage(url, imageList) {
+function previewFeedbackImage(url, imageList) {
   const urls = imageList || []
   if (urls.length > 0) {
-    uni.previewImage({ urls, current: url || urls[0] })
+    previewImage({ urls, current: url || urls[0] })
   }
 }
 
@@ -338,7 +339,7 @@ onMounted(() => {
           <text class="form-section__title">{{ t('feedback.images') }}</text>
           <view class="image-grid">
             <view v-for="(img, idx) in form.images" :key="idx" class="image-item">
-              <SafeImage class="image-item__img" :src="img" mode="aspectFill" :previewable="true" @tap="previewImage(img, form.images)" />
+              <SafeImage class="image-item__img" :src="img" mode="aspectFill" :previewable="true" @tap="previewFeedbackImage(img, form.images)" />
               <view class="image-item__delete" @tap.stop="removeImage(idx)">
                 <text class="image-item__delete-icon">×</text>
               </view>
@@ -405,7 +406,7 @@ onMounted(() => {
                 v-for="(url, index) in parseImages(detail.images)"
                 :key="index"
                 class="cert-view-grid__item"
-                @tap="previewImage(url, parseImages(detail.images))"
+                @tap="previewFeedbackImage(url, parseImages(detail.images))"
               >
                 <SafeImage class="cert-view-grid__img" :src="url" mode="aspectFill" :previewable="true" />
               </view>

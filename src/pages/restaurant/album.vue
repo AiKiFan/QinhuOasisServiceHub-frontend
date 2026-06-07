@@ -8,6 +8,7 @@ import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { getRestaurantDetail } from '@/api/restaurant'
 import { t } from '@/utils/i18n'
+import { previewImage } from '@/utils/image'
 import SafeImage from '@/components/SafeImage/index.vue'
 
 /** 页面参数（餐厅 ID） */
@@ -37,9 +38,9 @@ const imageList = computed(() => {
  * 预览图片
  * @param {number} index - 当前点击图片的索引
  */
-function previewImage(index) {
+function previewAlbumImage(index) {
   if (imageList.value.length > 0) {
-    uni.previewImage({ urls: imageList.value, current: imageList.value[index] })
+    previewImage({ urls: imageList.value, current: imageList.value[index] })
   }
 }
 
@@ -99,7 +100,7 @@ onLoad((options) => {
           v-for="(img, idx) in imageList"
           :key="idx"
           class="image-grid__item"
-          @tap="previewImage(idx)"
+          @tap="previewAlbumImage(idx)"
         >
           <SafeImage class="image-grid__img" :src="img" mode="aspectFill" />
         </view>

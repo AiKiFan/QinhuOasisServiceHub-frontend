@@ -5,6 +5,7 @@
  */
 
 import { showToast, showModal } from '@/utils/common'
+import { previewImage } from '@/utils/image'
 
 /**
  * 分享平台类型
@@ -239,7 +240,7 @@ class ShareManager {
         const posterUrl = response.data.data.posterUrl
         
         // 预览海报
-        uni.previewImage({
+        previewImage({
           urls: [posterUrl],
           current: posterUrl,
         })

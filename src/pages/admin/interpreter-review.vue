@@ -8,6 +8,7 @@ import { getAdminInterpreterProfiles, reviewInterpreterProfile } from '@/api/adm
 import { getUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
 import SafeImage from '@/components/SafeImage/index.vue'
+import { previewImage } from '@/utils/image'
 
 /** 状态筛选（移除暂停状态） */
 const STATUS_FILTER = computed(() => [
@@ -130,7 +131,7 @@ function goToEdit(id) {
 function previewCert(url) {
   const certUrls = (url || '').split(',').filter(Boolean)
   if (certUrls.length > 0) {
-    uni.previewImage({ urls: certUrls, current: url })
+    previewImage({ urls: certUrls, current: url })
   }
 }
 

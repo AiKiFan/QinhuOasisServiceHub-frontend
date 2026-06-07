@@ -129,7 +129,16 @@
         <view class="interpreter-btn interpreter-btn--cancel interpreter-btn--full" @tap="showLoginHint = false">{{ t('common.cancel') }}</view>
       </view>
     </view>
-  </view>
+  <!-- 车牌号输入提示弹窗 -->
+ <view v-if="showPlateHint" class="interpreter-overlay" @tap.self="showPlateHint = false">
+ <view class="interpreter-dialog interpreter-dialog--center" @tap.stop>
+ <view class="hint-icon">!</view>
+ <text class="hint-title">{{ t('parking.enterPlate') }}</text>
+ <text class="hint-msg">请输入完整的车牌号（省+字母+5位字母数字）</text>
+ <view class="interpreter-btn interpreter-btn--primary interpreter-btn--full" @tap="showPlateHint = false">{{ t('parking.gotIt') }}</view>
+ </view>
+ </view>
+ </view>
 </template>
 
 <script>
@@ -153,6 +162,7 @@ export default {
       showOccupiedHint: false,
       showSettleDialog: false,
       showLoginHint: false,
+ showPlateHint: false,
       selectedSpot: {},
       settleDetail: {},
       bookForm: { plateNumber: '' }
@@ -291,7 +301,7 @@ export default {
     },
     async confirmBook() {
       if (!this.bookForm.plateNumber || this.bookForm.plateNumber.length !== 8) {
-        uni.showToast({ title: t('parking.enterPlate'), icon: 'none' })
+        this.showPlateHint = true
         return
       }
       uni.showLoading({ title: t('common.submitting') })

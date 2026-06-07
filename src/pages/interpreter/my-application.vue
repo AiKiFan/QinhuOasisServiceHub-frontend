@@ -7,6 +7,7 @@ import { ref, computed, onMounted } from 'vue'
 import { getMyProfile, updateMyApplication, uploadInterpreterCert } from '@/api/interpreter'
 import { t } from '@/utils/i18n'
 import SafeImage from '@/components/SafeImage/index.vue'
+import { previewImage } from '@/utils/image'
 
 /** 英语等级选项 */
 const ENGLISH_LEVELS = computed(() => [
@@ -138,7 +139,7 @@ function removeCertImage(index) {
 function previewCert(url) {
   const certUrls = (profile.value?.certUrl || '').split(',').filter(Boolean)
   if (certUrls.length > 0) {
-    uni.previewImage({ urls: certUrls, current: url || certUrls[0] })
+    previewImage({ urls: certUrls, current: url || certUrls[0] })
   }
 }
 

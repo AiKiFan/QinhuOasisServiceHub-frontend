@@ -9,6 +9,7 @@ import { getUser, saveUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
 import { saveImageCache } from '@/utils/image-cache'
 import SafeImage from '@/components/SafeImage/index.vue'
+import { previewImage } from '@/utils/image'
 
 /** 用户信息 */
 const user = ref(getUser() || {})
@@ -127,7 +128,7 @@ async function uploadAvatar(filePath) {
 function previewAvatar() {
   if (!form.value.avatar) return
   // 阻止触发父元素的 chooseAvatar
-  uni.previewImage({ urls: [form.value.avatar], current: form.value.avatar })
+  previewImage({ urls: [form.value.avatar], current: form.value.avatar })
 }
 
 /**

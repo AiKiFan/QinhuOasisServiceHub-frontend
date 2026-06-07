@@ -7,6 +7,7 @@ import { ref, computed, onMounted } from 'vue'
 import { getAdminFeedbackDetail, replyFeedback } from '@/api/admin'
 import { t } from '@/utils/i18n'
 import SafeImage from '@/components/SafeImage/index.vue'
+import { previewImage } from '@/utils/image'
 
 const detail = ref(null)
 const loading = ref(true)
@@ -47,7 +48,7 @@ function parseImages(images) {
 /** 预览图片 */
 function previewImages(imageList) {
   if (!imageList || imageList.length === 0) return
-  uni.previewImage({ urls: imageList, current: imageList[0] })
+  previewImage({ urls: imageList, current: imageList[0] })
 }
 
 /** 加载详情 */

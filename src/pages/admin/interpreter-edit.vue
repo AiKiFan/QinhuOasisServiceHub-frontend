@@ -10,6 +10,7 @@ import { uploadInterpreterCert } from '@/api/interpreter'
 import { getUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
 import SafeImage from '@/components/SafeImage/index.vue'
+import { previewImage } from '@/utils/image'
 
 /** 页面参数（译员 ID） */
 const pageOptions = ref(uni.getStorageSync('pageOptions') || {})
@@ -116,7 +117,7 @@ function removeCertImage(index) {
 /** 预览资质图片 */
 function previewCert(url) {
   if (url) {
-    uni.previewImage({ urls: form.value.certUrls, current: url })
+    previewImage({ urls: form.value.certUrls, current: url })
   }
 }
 

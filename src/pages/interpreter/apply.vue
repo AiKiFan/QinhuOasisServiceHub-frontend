@@ -8,6 +8,7 @@ import { applyInterpreter, uploadInterpreterCert } from '@/api/interpreter'
 import { isLoggedIn } from '@/utils/auth'
 import { t } from '@/utils/i18n'
 import SafeImage from '@/components/SafeImage/index.vue'
+import { previewImage } from '@/utils/image'
 
 /** 英语等级选项（支持国际化） */
 const ENGLISH_LEVELS = computed(() => [
@@ -97,7 +98,7 @@ function removeCertImage(index) {
  */
 function previewCert(url) {
   if (url) {
-    uni.previewImage({ urls: form.value.certUrls, current: url })
+    previewImage({ urls: form.value.certUrls, current: url })
   }
 }
 

@@ -9,6 +9,7 @@ import { getScenicSpotDetail } from '@/api/scenic'
 import { addFavorite, removeFavorite, checkFavorite } from '@/api/favorites'
 import { isLoggedIn } from '@/utils/auth'
 import SafeImage from '@/components/SafeImage/index.vue'
+import { previewImage } from '@/utils/image'
 
 /** 景点ID */
 const spotId = ref('')
@@ -88,8 +89,8 @@ function goLogin() {
 /**
  * 预览图片
  */
-function previewImage(url) {
-  uni.previewImage({ urls: [url], current: url })
+function previewSpotImage(url) {
+  previewImage({ urls: [url], current: url })
 }
 
 /**
@@ -148,7 +149,7 @@ onMounted(() => {
         :src="spot.coverImg"
         mode="aspectFill"
         :previewable="true"
-        @tap="previewImage(spot.coverImg)"
+        @tap="previewSpotImage(spot.coverImg)"
       />
 
       <!-- 基本信息 -->
@@ -156,7 +157,7 @@ onMounted(() => {
         <view class="scenic-info__header">
           <text class="scenic-info__name">{{ spot.displayName }}</text>
           <view class="favorite-btn" @tap="toggleFavorite">
-            <text class="favorite-btn__icon">{{ isFavorited ? '❤️' : '🤍' }}</text>
+            <text class="favorite-btn__icon">{{ isFavorited ? '★' : '☆' }}</text>
           </view>
         </view>
         <view class="scenic-info__meta">
@@ -197,7 +198,7 @@ onMounted(() => {
             v-for="(img, index) in imageList"
             :key="index"
             class="image-grid__item"
-            @tap="previewImage(img)"
+            @tap="previewSpotImage(img)"
           >
             <SafeImage :src="img" mode="aspectFill" />
           </view>
@@ -297,6 +298,7 @@ onMounted(() => {
 
   &__icon {
     font-size: 44rpx;
+ color: $color-rank-gold;
   }
 }
 

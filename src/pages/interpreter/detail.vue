@@ -10,6 +10,7 @@ import { isLoggedIn, getUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
 import { checkFavorite, addFavorite, removeFavorite, FAVORITE_TYPE } from '@/api/favorites'
 import SafeImage from '@/components/SafeImage/index.vue'
+import { previewImage } from '@/utils/image'
 
 // SafeImage 已导入，无需额外操作
 
@@ -248,7 +249,7 @@ async function handlePostComment() {
 function previewCert(url) {
   const certUrls = (detail.value?.certUrl || '').split(',').filter(Boolean)
   if (certUrls.length > 0) {
-    uni.previewImage({ urls: certUrls, current: url || certUrls[0] })
+    previewImage({ urls: certUrls, current: url || certUrls[0] })
   }
 }
 
@@ -293,7 +294,7 @@ onMounted(() => {
         <view class="hero-header">
           <text class="hero-name">{{ detail.realName || detail.nickname }}</text>
           <view class="favorite-btn" @tap="toggleFavorite">
-            <text class="favorite-btn__icon">{{ isFavorited ? '❤️' : '🤍' }}</text>
+            <text class="favorite-btn__icon">{{ isFavorited ? '★' : '☆' }}</text>
           </view>
         </view>
         <view class="hero-tags">
@@ -969,6 +970,7 @@ onMounted(() => {
 
   &__icon {
     font-size: 48rpx;
+ color: $color-rank-gold;
   }
 }
 

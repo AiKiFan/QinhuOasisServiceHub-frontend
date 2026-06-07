@@ -9,11 +9,11 @@ import {
   createScenicSpot,
   updateScenicSpot,
   deleteScenicSpot,
-  updateScenicSpotStatus,
-  uploadImage,
+  updateScenicSpotStatus,  uploadImage,
 } from '@/api/admin'
 import { getUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
+import { previewImage } from '@/utils/image'
 import SafeImage from '@/components/SafeImage/index.vue'
 
 /** 状态选项 */
@@ -231,8 +231,8 @@ function removeImage(index) {
  * 预览图片
  * @param {string} url
  */
-function previewImage(url) {
-  uni.previewImage({ urls: [url], current: url })
+function previewScenicImage(url) {
+  previewImage({ urls: [url], current: url })
 }
 
 /**
@@ -426,7 +426,7 @@ onMounted(() => {
           <!-- 封面图 -->
           <view class="form-item">
             <text class="form-item__label">{{ t('admin.scenic.coverImg') }} *</text>
-            <view v-if="form.coverImg" class="cover-preview" @tap="previewImage(form.coverImg)">
+            <view v-if="form.coverImg" class="cover-preview" @tap="previewScenicImage(form.coverImg)">
               <SafeImage class="cover-preview__img" :src="form.coverImg" mode="aspectFill" />
               <view class="cover-preview__change" @tap.stop="handleUploadCover">
                 <text>更换</text>
@@ -446,7 +446,7 @@ onMounted(() => {
                 v-for="(img, idx) in uploadingImages"
                 :key="idx"
                 class="images-grid__item"
-                @tap="previewImage(img)"
+                @tap="previewScenicImage(img)"
               >
                 <SafeImage class="images-grid__img" :src="img" mode="aspectFill" />
                 <view class="images-grid__remove" @tap.stop="removeImage(idx)">✕</view>

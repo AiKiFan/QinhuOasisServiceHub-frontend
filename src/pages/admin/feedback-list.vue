@@ -7,6 +7,7 @@ import { ref, computed, onMounted } from 'vue'
 import { getAdminFeedbackList, replyFeedback } from '@/api/admin'
 import { getUser } from '@/utils/auth'
 import { t } from '@/utils/i18n'
+import { previewImage } from '@/utils/image'
 
 /** 状态筛选（支持国际化） */
 const STATUS_FILTER = computed(() => [
@@ -140,7 +141,7 @@ function parseImages(images) {
 function previewImages(images) {
   const urls = parseImages(images)
   if (urls.length === 0) return
-  uni.previewImage({ urls, current: urls[0] })
+  previewImage({ urls, current: urls[0] })
 }
 
 /**
