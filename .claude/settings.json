@@ -28,7 +28,10 @@
       "Bash(ipconfig)",
       "Bash(findstr IPv4)",
       "Read(//d/me/ycu/**)",
-      "Read(//d/me/software engineering/Journal/**)"
+      "Read(//d/me/software engineering/Journal/**)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 fix_indent.py)",
+      "Bash(xargs grep -l \"parking.vehicle\")"
     ],
     "additionalDirectories": [
       "D:\\me\\ycu\\qinhu-smart-tourism-cloud-platform\\QinhuOasisServiceHub-backend\\src\\main\\java\\com\\qinhu\\oasis\\restaurant\\entity",

@@ -117,6 +117,16 @@
       </view>
     </view>
 
+    <!-- 预约失败提示弹窗 -->
+    <view v-if="showFailDialog" class="interpreter-overlay" @tap.self="showFailDialog = false">
+      <view class="interpreter-dialog interpreter-dialog--center" @tap.stop>
+        <view class="hint-icon">!</view>
+        <text class="hint-title">{{ t('parking.bookFailTitle') }}</text>
+        <text class="hint-msg">{{ failDialogMsg }}</text>
+        <view class="interpreter-btn interpreter-btn--primary interpreter-btn--full" @tap="showFailDialog = false">{{ t('parking.gotIt') }}</view>
+      </view>
+    </view>
+
     <TabBar active="home" />
 
     <!-- 登录提示弹窗 -->
@@ -160,6 +170,8 @@ export default {
       showSuccessDialog: false,
       successDialogType: 'entry', // 'entry'=入场成功 'exit'=离场成功
       showOccupiedHint: false,
+      showFailDialog: false,
+      failDialogMsg: '',
       showSettleDialog: false,
       showLoginHint: false,
  showPlateHint: false,
@@ -308,7 +320,7 @@ export default {
       try {
         await bookSpot(this.selectedSpot.id, {
           vehicleNo: this.bookForm.plateNumber
-        })
+        }, { silent: true })
         uni.hideLoading()
         this.showBookDialog = false
         this.successDialogType = 'entry'
@@ -316,7 +328,9 @@ export default {
         this.loadSpots()
       } catch (e) {
         uni.hideLoading()
-        uni.showToast({ title: e.message || t('parking.bookFailed'), icon: 'none' })
+        const msg = t(e.message)
+        this.failDialogMsg = msg !== e.message ? msg : t('parking.bookFailed')
+        this.showFailDialog = true
       }
     },
     maskPlate(plate) {
