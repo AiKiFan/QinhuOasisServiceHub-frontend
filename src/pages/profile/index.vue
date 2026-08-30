@@ -141,6 +141,12 @@ function goMyOrders() {
   uni.navigateTo({ url: '/pages/interpreter-orders/list' })
 }
 
+/** 跳转我的攻略 */
+function goMyGuides() {
+  uni.navigateTo({ url: '/pages/guide/my' })
+}
+
+
 /** 跳转投诉建议提交页 */
 function goFeedback() {
   uni.navigateTo({ url: '/pages/feedback/submit' })
@@ -169,6 +175,12 @@ function handleAvatarTap() {
 function goAdminReview() {
   uni.navigateTo({ url: '/pages/admin/interpreter-review' })
 }
+
+/** 跳转管理端：攻略管理 */
+function goAdminGuides() {
+  uni.navigateTo({ url: '/pages/admin/guide-moderation' })
+}
+
 
 /** 跳转管理端：投诉建议 */
 function goAdminFeedback() {
@@ -273,6 +285,13 @@ onMounted(() => {
           <text class="menu-item__arrow">›</text>
         </view>
 
+        <!-- 我的攻略 -->
+        <view class="menu-item" @tap="goMyGuides">
+          <text class="menu-item__icon">🗺️</text>
+          <text class="menu-item__text">我的攻略</text>
+          <text class="menu-item__arrow">›</text>
+        </view>
+
         <!-- 接单管理（仅译员可见） -->
         <view v-if="userInfo && userInfo.role === 1" class="menu-item" @tap="goReceivedOrders">
           <text class="menu-item__icon">🎯</text>
@@ -320,6 +339,12 @@ onMounted(() => {
         <view class="menu-item" @tap="goAdminReview">
           <text class="menu-item__icon">📝</text>
           <text class="menu-item__text">{{ t('profile.adminReview') }}</text>
+          <text class="menu-item__arrow">›</text>
+        </view>
+
+        <view class="menu-item" @tap="goAdminGuides">
+          <text class="menu-item__icon">🗺️</text>
+          <text class="menu-item__text">攻略管理</text>
           <text class="menu-item__arrow">›</text>
         </view>
 

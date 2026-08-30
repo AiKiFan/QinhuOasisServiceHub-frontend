@@ -20,6 +20,8 @@ const restaurantFavorites = ref([])
 const interpreterFavorites = ref([])
 /** 景点收藏列表 */
 const scenicFavorites = ref([])
+/** 攻略收藏列表 */
+const guideFavorites = ref([])
 
 /** 加载状态 */
 const loading = ref(false)
@@ -38,13 +40,15 @@ const filterLabels = computed(() => [
  { key: 'restaurant', label: t('favorites.filter.restaurant') },
  { key: 'interpreter', label: t('favorites.filter.interpreter') },
  { key: 'scenic', label: t('favorites.filter.scenic') },
+ { key: 'travel_guide', label: '攻略' },
 ])
 
 /** 总收藏数（用于判断空状态） */
 const totalCount = computed(() =>
  restaurantFavorites.value.length +
  interpreterFavorites.value.length +
- scenicFavorites.value.length
+ scenicFavorites.value.length +
+ guideFavorites.value.length
 )
 
 /**
@@ -57,6 +61,7 @@ async function loadFavorites() {
  restaurantFavorites.value = res.restaurants || []
  interpreterFavorites.value = res.interpreters || []
  scenicFavorites.value = res.scenicSpots || []
+ guideFavorites.value = res.travelGuides || []
  } catch {
  uni.showToast({ title: t('common.loadFailed'), icon: 'none' })
  } finally {
@@ -84,6 +89,8 @@ async function handleUnfavorite(item) {
  interpreterFavorites.value = interpreterFavorites.value.filter(x => x.id !== item.id)
  } else if (item.type === 'scenic') {
  scenicFavorites.value = scenicFavorites.value.filter(x => x.id !== item.id)
+ } else if (item.type === 'travel_guide') {
+ guideFavorites.value = guideFavorites.value.filter(x => x.id !== item.id)
  }
  uni.showToast({ title: t('favorites.removed'), icon: 'success' })
  } catch {
@@ -101,6 +108,8 @@ function goToDetail(type, id) {
  uni.navigateTo({ url: `/pages/interpreter/detail?id=${id}` })
  } else if (type === 'scenic') {
  uni.navigateTo({ url: `/pages/scenic/detail?id=${id}` })
+ } else if (type === 'travel_guide') {
+ uni.navigateTo({ url: `/pages/guide/detail?id=${id}` })
  }
 }
 
@@ -149,7 +158,7 @@ onMounted(() => {
  <!-- 餐厅卡片 -->
  <view
  v-for="item in (filterType === 'all' || filterType === 'restaurant') ? restaurantFavorites : []"
- :key="item.id"
+ :key="'restaurant-' + item.id"
  class="favorite-card restaurant-card"
  @tap="goToDetail('restaurant', item.id)"
  >
@@ -174,7 +183,7 @@ onMounted(() => {
  <!-- 译员卡片 -->
  <view
  v-for="item in (filterType === 'all' || filterType === 'interpreter') ? interpreterFavorites : []"
- :key="item.id"
+ :key="'interpreter-' + item.id"
  class="favorite-card interpreter-card"
  @tap="goToDetail('interpreter', item.id)"
  >
@@ -199,7 +208,7 @@ onMounted(() => {
  <!-- 景点卡片 -->
  <view
  v-for="item in (filterType === 'all' || filterType === 'scenic') ? scenicFavorites : []"
- :key="item.id"
+ :key="'scenic-' + item.id"
  class="favorite-card scenic-card"
  @tap="goToDetail('scenic', item.id)"
  >
@@ -217,6 +226,31 @@ onMounted(() => {
  </view>
  </view>
  <view class="favorite-card__actions" @tap.stop="handleUnfavorite({ type: 'scenic', id: item.id })">
+ <text class="favorite-card__star">★</text>
+ </view>
+ </view>
+
+ <!-- 攻略卡片 -->
+ <view
+ v-for="item in (filterType === 'all' || filterType === 'travel_guide') ? guideFavorites : []"
+ :key="'guide-' + item.id"
+ class="favorite-card guide-card"
+ @tap="goToDetail('travel_guide', item.id)"
+ >
+ <SafeImage
+ class="favorite-card__cover"
+ :src="item.coverImg"
+ mode="aspectFill"
+ />
+ <view class="favorite-card__info">
+ <text class="favorite-card__name">{{ item.displayTitle || item.title }}</text>
+ <text class="favorite-card__category">{{ item.summary || '旅行攻略' }}</text>
+ <view class="favorite-card__meta">
+ <text class="favorite-card__rating">♥ {{ item.likeCount || 0 }}</text>
+ <text class="favorite-card__price">💬 {{ item.commentCount || 0 }}</text>
+ </view>
+ </view>
+ <view class="favorite-card__actions" @tap.stop="handleUnfavorite({ type: 'travel_guide', id: item.id })">
  <text class="favorite-card__star">★</text>
  </view>
  </view>

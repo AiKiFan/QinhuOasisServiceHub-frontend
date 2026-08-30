@@ -267,7 +267,7 @@ onMounted(() => {
 
         <!-- 操作按钮 -->
         <view class="actions">
-          <button class="action-btn action-btn--edit" @tap="goToEdit(item.id)">
+          <button v-if="item.status === 1" class="action-btn action-btn--edit" @tap="goToEdit(item.id)">
             {{ t('admin.review.editBtn') }}
           </button>
           <button v-if="item.status === 0" class="action-btn action-btn--reject" @tap="openRejectModal(item.id)">

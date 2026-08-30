@@ -13,7 +13,7 @@ export function getAllFavorites() {
 
 /**
  * 获取指定类型的收藏列表
- * @param {string} type - restaurant/interpreter/scenic
+ * @param {string} type - restaurant/interpreter/scenic/travel_guide
  * @param {number} page - 页码
  * @param {number} size - 每页数量
  */
@@ -23,7 +23,7 @@ export function getFavoritesByType(type, page = 1, size = 20) {
 
 /**
  * 添加收藏
- * @param {string} targetType - restaurant/interpreter/scenic
+ * @param {string} targetType - restaurant/interpreter/scenic/travel_guide
  * @param {number} targetId - 目标ID
  * @param {number} [folderId] - 收藏夹ID（可选）
  */
@@ -35,7 +35,7 @@ export function addFavorite(targetType, targetId, folderId = null) {
 
 /**
  * 删除收藏
- * @param {string} targetType - restaurant/interpreter/scenic
+ * @param {string} targetType - restaurant/interpreter/scenic/travel_guide
  * @param {number} targetId - 目标ID
  */
 export function removeFavorite(targetType, targetId) {
@@ -44,7 +44,7 @@ export function removeFavorite(targetType, targetId) {
 
 /**
  * 检查是否已收藏
- * @param {string} targetType - restaurant/interpreter/scenic
+ * @param {string} targetType - restaurant/interpreter/scenic/travel_guide
  * @param {number} targetId - 目标ID
  */
 export function checkFavorite(targetType, targetId) {
@@ -56,4 +56,5 @@ export const FAVORITE_TYPE = {
   RESTAURANT: 'restaurant',
   INTERPRETER: 'interpreter',
   SCENIC: 'scenic',
+  TRAVEL_GUIDE: 'travel_guide',
 }

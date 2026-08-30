@@ -284,6 +284,52 @@
         "navigationBarTextStyle": "white",
         "backgroundColor": "#FFF8F0"
       }
+    },
+    {
+      "path": "pages/guide/list",
+      "style": {
+        "navigationBarTitleText": "攻略",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/guide/detail",
+      "style": {
+        "navigationBarTitleText": "攻略详情",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/guide/publish",
+      "style": {
+        "navigationBarTitleText": "发布攻略",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/guide/my",
+      "style": {
+        "navigationBarTitleText": "我的攻略",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
+    },
+    {
+      "path": "pages/admin/guide-moderation",
+      "style": {
+        "navigationBarTitleText": "攻略管理",
+        "navigationBarBackgroundColor": "#E8956D",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#FFF8F0"
+      }
     }
   ],
   "globalStyle": {

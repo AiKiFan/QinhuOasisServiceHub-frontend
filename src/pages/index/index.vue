@@ -13,6 +13,7 @@ import WeatherCard from '@/components/WeatherCard/index.vue'
 /** 快捷入口配置 */
 const QUICK_LINKS = computed(() => [
   { icon: '🏆', label: t('home.rankings'), path: '/pages/rank/index', color: '#E8956D' },
+  { icon: '🗺️', label: '旅行攻略', path: '/pages/guide/list', color: '#E8956D' },
   { icon: '🍽️', label: t('home.restaurantList'), path: '/pages/restaurant/list', color: '#FF7043' },
   { icon: '🌍', label: t('home.interpreters'), path: '/pages/interpreter/list', color: '#5C6BC0' },
   { icon: '🏔️', label: t('home.scenicSpots'), path: '/pages/scenic/list', color: '#66BB6A' },
