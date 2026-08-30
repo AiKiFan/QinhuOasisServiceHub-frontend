@@ -1,32 +1,60 @@
-<!--
-  底部自定义 TabBar 组件
-  用法：<TabBar active="rank" /> 或 <TabBar active="profile" />
-  @author AiKiFan
--->
-<script setup>
+﻿<script setup>
 import { computed } from 'vue'
 import { t } from '@/utils/i18n'
 
-/** 当前激活的 tab key */
-defineProps({
+const props = defineProps({
   active: {
     type: String,
     required: true,
   },
+  lang: {
+    type: String,
+    default: '',
+  },
 })
 
-/** Tab 配置列表（key 不变，label 使用翻译） */
-const TABS = computed(() => [
-  { key: 'home', label: t('tab.home'), icon: '🏠', path: '/pages/index/index' },
-  { key: 'search', label: t('tab.search'), icon: '🔍', path: '/pages/search/index' },
-  { key: 'favorites', label: t('tab.favorites'), icon: '⭐', path: '/pages/favorites/index' },
-  { key: 'profile', label: t('tab.profile'), icon: '👤', path: '/pages/profile/index' },
-])
+const TABS = computed(() => {
+  props.lang
+  return [
+    {
+      key: 'home',
+      label: t('tab.home'),
+      icon: {
+        active: '/static/icons/tabbar/home-active.svg',
+        inactive: '/static/icons/tabbar/home-inactive.svg',
+      },
+      path: '/pages/index/index',
+    },
+    {
+      key: 'search',
+      label: t('tab.search'),
+      icon: {
+        active: '/static/icons/tabbar/search-active.svg',
+        inactive: '/static/icons/tabbar/search-inactive.svg',
+      },
+      path: '/pages/search/index',
+    },
+    {
+      key: 'favorites',
+      label: t('tab.favorites'),
+      icon: {
+        active: '/static/icons/tabbar/favorite-active.svg',
+        inactive: '/static/icons/tabbar/favorite-inactive.svg',
+      },
+      path: '/pages/favorites/index',
+    },
+    {
+      key: 'profile',
+      label: t('tab.profile'),
+      icon: {
+        active: '/static/icons/tabbar/profile-active.svg',
+        inactive: '/static/icons/tabbar/profile-inactive.svg',
+      },
+      path: '/pages/profile/index',
+    },
+  ]
+})
 
-/**
- * 切换 Tab（使用 reLaunch 避免页面栈堆积）
- * @param {{ key:string, path:string }} tab
- */
 function switchTab(tab) {
   uni.reLaunch({ url: tab.path })
 }
@@ -41,7 +69,11 @@ function switchTab(tab) {
       :class="{ 'tab-bar__item--active': active === tab.key }"
       @tap="switchTab(tab)"
     >
-      <text class="tab-bar__icon">{{ tab.icon }}</text>
+      <image
+        class="tab-bar__icon"
+        :src="active === tab.key ? tab.icon.active : tab.icon.inactive"
+        mode="aspectFit"
+      />
       <text class="tab-bar__label">{{ tab.label }}</text>
     </view>
   </view>
@@ -71,18 +103,13 @@ function switchTab(tab) {
   }
 
   &__icon {
-    font-size: 36rpx;
-    line-height: 1;
-    filter: grayscale(60%);
+    width: 40rpx;
+    height: 40rpx;
   }
 
   &__label {
     font-size: 20rpx;
     color: $color-text-hint;
-  }
-
-  &__item--active &__icon {
-    filter: none;
   }
 
   &__item--active &__label {

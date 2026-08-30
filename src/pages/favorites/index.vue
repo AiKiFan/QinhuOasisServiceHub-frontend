@@ -40,7 +40,7 @@ const filterLabels = computed(() => [
  { key: 'restaurant', label: t('favorites.filter.restaurant') },
  { key: 'interpreter', label: t('favorites.filter.interpreter') },
  { key: 'scenic', label: t('favorites.filter.scenic') },
- { key: 'travel_guide', label: '攻略' },
+ { key: 'travel_guide', label: t('guide.homeEntry') },
 ])
 
 /** 总收藏数（用于判断空状态） */
@@ -244,7 +244,7 @@ onMounted(() => {
  />
  <view class="favorite-card__info">
  <text class="favorite-card__name">{{ item.displayTitle || item.title }}</text>
- <text class="favorite-card__category">{{ item.summary || '旅行攻略' }}</text>
+ <text class="favorite-card__category">{{ item.summary || t('guide.list.summaryFallback') }}</text>
  <view class="favorite-card__meta">
  <text class="favorite-card__rating">♥ {{ item.likeCount || 0 }}</text>
  <text class="favorite-card__price">💬 {{ item.commentCount || 0 }}</text>
@@ -531,3 +531,4 @@ onMounted(() => {
  }
 }
 </style>
+

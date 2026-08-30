@@ -8,39 +8,43 @@ import TabBar from '@/components/TabBar/index.vue'
 import { isLoggedIn, getUser, saveUser, logout, isAdmin as checkIsAdmin } from '@/utils/auth'
 import { getMyProfile } from '@/api/user'
 import { getMyProfile as getInterpreterProfile } from '@/api/interpreter'
+import { onShow } from '@dcloudio/uni-app'
 import { getLanguage, toggleLanguage as toggleLang, t } from '@/utils/i18n'
 import SafeImage from '@/components/SafeImage/index.vue'
 
-/** 是否已登录 */
+const currentLang = ref(getLanguage())
 const loggedIn = ref(false)
-/** 用户信息 */
 const userInfo = ref(null)
-/** 当前语言 */
-const currentLang = ref('zh-CN')
-/** 是否管理员 */
 const isAdmin = ref(false)
-/** 是否显示退出确认弹窗 */
 const showLogoutConfirm = ref(false)
 
-/** 角色名称映射（支持国际化） */
-const getRoleLabels = () => ({
-  0: t('profile.role.guest'),
-  1: t('profile.role.interpreter'),
-  2: t('profile.role.admin'),
-})
-
-/** 角色标签背景色映射 */
 const ROLE_COLORS = {
-  0: '#9BA3AF',
-  1: '#E8956D',
-  2: '#FFB22C',
+  0: '#E8956D',
+  1: '#5C6BC0',
+  2: '#D65C4C',
+}
+
+function getRoleLabels() {
+  return {
+    0: t('profile.role.guest'),
+    1: t('profile.role.interpreter'),
+    2: t('profile.role.admin'),
+  }
 }
 
 /**
- * 初始化：读缓存 → 已登录则静默刷新远端数据
+ * ???????????
+ */
+function refreshLanguage() {
+  currentLang.value = getLanguage()
+  uni.setNavigationBarTitle({ title: t('page.profile.title') })
+}
+
+/**
+ * ???????????
  */
 async function init() {
-  currentLang.value = getLanguage()
+  refreshLanguage()
   loggedIn.value = isLoggedIn()
   if (!loggedIn.value) return
   userInfo.value = getUser()
@@ -89,9 +93,9 @@ function confirmLogout() {
 /** 切换语言 */
 function handleToggleLanguage() {
   const next = toggleLang()
-  currentLang.value = next
+  refreshLanguage()
   uni.showToast({
-    title: next === 'en-US' ? 'English mode enabled' : '已切换为中文',
+    title: next === 'en-US' ? t('profile.langEnglishEnabled') : t('profile.langChineseEnabled'),
     icon: 'success',
   })
 }
@@ -203,13 +207,17 @@ function goEditProfile() {
 }
 
 onMounted(() => {
-  uni.setNavigationBarTitle({ title: t('page.profile.title') })
+  refreshLanguage()
+  init()
+})
+
+onShow(() => {
   init()
 })
 </script>
 
 <template>
-  <view class="profile-page">
+  <view class="profile-page" :data-lang="currentLang">
     <!-- ── 未登录视图 ── -->
     <view v-if="!loggedIn" class="profile-guest">
       <text class="profile-guest__icon">👤</text>
@@ -288,7 +296,7 @@ onMounted(() => {
         <!-- 我的攻略 -->
         <view class="menu-item" @tap="goMyGuides">
           <text class="menu-item__icon">🗺️</text>
-          <text class="menu-item__text">我的攻略</text>
+          <text class="menu-item__text">{{ t('profile.myGuides') }}</text>
           <text class="menu-item__arrow">›</text>
         </view>
 
@@ -327,7 +335,7 @@ onMounted(() => {
             {{ currentLang === 'zh-CN' ? t('profile.switchLang') : t('profile.switchLangBack') }}
           </text>
           <view class="language-badge">
-            <text class="language-badge__text">{{ currentLang === 'zh-CN' ? 'EN' : '中' }}</text>
+            <text class="language-badge__text">{{ currentLang === 'zh-CN' ? 'EN' : 'CN' }}</text>
           </view>
         </view>
       </view>
@@ -344,7 +352,7 @@ onMounted(() => {
 
         <view class="menu-item" @tap="goAdminGuides">
           <text class="menu-item__icon">🗺️</text>
-          <text class="menu-item__text">攻略管理</text>
+          <text class="menu-item__text">{{ t('profile.adminGuides') }}</text>
           <text class="menu-item__arrow">›</text>
         </view>
 
@@ -405,7 +413,7 @@ onMounted(() => {
     </view>
 
     <!-- 底部 TabBar -->
-    <TabBar active="profile" />
+    <TabBar active="profile" :lang="currentLang" />
   </view>
 </template>
 

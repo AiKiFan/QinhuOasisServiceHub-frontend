@@ -5,27 +5,30 @@
 -->
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { t } from '@/utils/i18n'
+import { onShow } from '@dcloudio/uni-app'
+import { getLanguage, t } from '@/utils/i18n'
 import TabBar from '@/components/TabBar/index.vue'
 import HomeSwiper from '@/components/HomeSwiper/index.vue'
 import WeatherCard from '@/components/WeatherCard/index.vue'
 
+const currentLang = ref(getLanguage())
+
 /** 快捷入口配置 */
-const QUICK_LINKS = computed(() => [
-  { icon: '🏆', label: t('home.rankings'), path: '/pages/rank/index', color: '#E8956D' },
-  { icon: '🗺️', label: '旅行攻略', path: '/pages/guide/list', color: '#E8956D' },
-  { icon: '🍽️', label: t('home.restaurantList'), path: '/pages/restaurant/list', color: '#FF7043' },
-  { icon: '🌍', label: t('home.interpreters'), path: '/pages/interpreter/list', color: '#5C6BC0' },
-  { icon: '🏔️', label: t('home.scenicSpots'), path: '/pages/scenic/list', color: '#66BB6A' },
-  { icon: '🚗', label: t('home.parking'), path: '/pages/parking/detail', color: '#FFB74D' },
-  { icon: '👤', label: t('home.profile'), path: '/pages/profile/index', color: '#78909C' },
-])
+const QUICK_LINKS = computed(() => {
+  currentLang.value
+  return [
+    { icon: '🏆', label: t('home.rankings'), path: '/pages/rank/index', color: '#E8956D' },
+    { icon: '🗺️', label: t('guide.listTitle'), path: '/pages/guide/list', color: '#E8956D' },
+    { icon: '🍽️', label: t('home.restaurantList'), path: '/pages/restaurant/list', color: '#FF7043' },
+    { icon: '🌍', label: t('home.interpreters'), path: '/pages/interpreter/list', color: '#5C6BC0' },
+    { icon: '🏔️', label: t('home.scenicSpots'), path: '/pages/scenic/list', color: '#66BB6A' },
+    { icon: '🚗', label: t('home.parking'), path: '/pages/parking/detail', color: '#FFB74D' },
+    { icon: '👤', label: t('home.profile'), path: '/pages/profile/index', color: '#78909C' },
+  ]
+})
 
 /** 快捷入口跳转 */
 function goTo(path) {
-  // 项目使用自定义 TabBar 组件（非原生 tabBar），pages.json 中没有 tabBar 配置
-  // 因此不能使用 uni.switchTab()，否则会静默失败
-  // TabBar 页面使用 reLaunch（清空页面栈，防止堆积），与 TabBar 组件内部的 reLaunch 逻辑保持一致
   const tabBarPaths = ['/pages/index/index', '/pages/search/index', '/pages/favorites/index', '/pages/profile/index']
   if (tabBarPaths.includes(path)) {
     uni.reLaunch({ url: path })
@@ -34,21 +37,25 @@ function goTo(path) {
   }
 }
 
-onMounted(() => {
-  // 动态设置导航栏标题
+function refreshLanguage() {
+  currentLang.value = getLanguage()
   uni.setNavigationBarTitle({ title: t('page.index.title') })
+}
+
+onMounted(() => {
+  refreshLanguage()
+})
+
+onShow(() => {
+  refreshLanguage()
 })
 </script>
 
 <template>
-  <view class="home-page">
-    <!-- 轮播图 -->
+  <view class="home-page" :data-lang="currentLang">
     <HomeSwiper />
-
-    <!-- 景区天气 -->
     <WeatherCard />
 
-    <!-- 快捷入口 -->
     <view class="quick-section">
       <text class="section-title">⚡ {{ t('home.quickServices') }}</text>
       <view class="quick-grid">
@@ -69,8 +76,7 @@ onMounted(() => {
       </view>
     </view>
 
-    <!-- 底部 TabBar -->
-    <TabBar active="home" />
+    <TabBar active="home" :lang="currentLang" />
   </view>
 </template>
 
@@ -82,7 +88,6 @@ onMounted(() => {
   background-color: $color-bg-page;
 }
 
-/* ── 区域标题 ── */
 .section-title {
   display: block;
   font-size: 30rpx;
@@ -91,7 +96,6 @@ onMounted(() => {
   margin-bottom: 20rpx;
 }
 
-/* ── 快捷入口 ── */
 .quick-section {
   margin: 32rpx 24rpx 0;
 }
