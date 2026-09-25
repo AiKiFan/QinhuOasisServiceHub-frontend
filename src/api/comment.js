@@ -2,7 +2,7 @@
  * 评论相关接口
  * @author AiKiFan
  */
-import { get, post } from '@/utils/request'
+import { get, post, del } from '@/utils/request'
 
 /** 评论列表默认每页条数 */
 const DEFAULT_PAGE_SIZE = 20
@@ -46,4 +46,8 @@ export function getCommentList(params) {
  */
 export function postComment(data) {
   return post('/comments', data)
+}
+
+export function deleteComment(id) {
+  return del(`/comments/${id}`)
 }

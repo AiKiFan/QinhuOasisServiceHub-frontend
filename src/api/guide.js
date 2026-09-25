@@ -9,6 +9,7 @@ export const getGuideList = (postType, page = 1, size = 10) =>
 
 export const getGuideDetail = id => get(`/posts/${id}`)
 export const toggleGuideLike = id => post(`/posts/${id}/like`)
+export const getGuideLikeStatus = id => get(`/posts/${id}/like-status`)
 export const publishGuide = data => post('/posts', data)
 export const getMyGuides = (page = 1, size = 10) => get('/posts/mine', { page, size })
 export const updateMyGuide = (id, data) => put(`/posts/${id}`, data)
